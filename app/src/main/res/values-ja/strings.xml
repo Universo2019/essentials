@@ -1725,8 +1725,8 @@
     <string name="duo_action_horizontal_slide_title">水平スライド</string>
     <string name="duo_hide_when_screen_off_only_idle_title">アイドル時のみAODで非表示にする</string>
     <string name="duo_hide_when_screen_off_title">画面オフ時に非表示にする</string>
-    <string name="feat_status_glance_title">Glanceステータス</string>
-    <string name="feat_status_glance_desc">ひと目でわかるオーバーレイ</string>
+    <string name="feat_status_glance_title">クイックステータス</string>
+    <string name="feat_status_glance_desc">一目で分かるオーバーレイ</string>
     <string name="status_glance_enable_title">ステータス・グランスを有効にする</string>
     <string name="status_glance_enable_desc">ステータスをひと目で確認</string>
     <string name="status_glance_auto_detect_button_title">カメラ位置を検出する</string>
