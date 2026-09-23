@@ -32,7 +32,7 @@
     <string name="setting_use_usage_access_desc">Erişilebilirlik yerine (Dondur, Uygulama Kilidi, Dinamik Gece Işığı)</string>
     <!-- Button Remap -->
     <string name="button_remap_enable_title">Düğme Yeniden Eşlemesini Etkinleştir</string>
-    <string name="button_remap_use_shizuku_title">Shizuku veya Root kullan</string>
+    <string name="button_remap_use_shizuku_title">Shizuku kullan</string>
     <string name="button_remap_use_shizuku_desc">Ekran kapalıyken çalışır (Önerilen)</string>
     <string name="shizuku_not_running_toast">Shizuku çalışmıyor</string>
     <string name="shizuku_detected_prefix">%1$s algılanan</string>
@@ -723,7 +723,11 @@
     <string name="about_desc_caffeinate">Kafein, ekranınızın otomatik olarak kapanmasını engeller.\n\nEkranınızı belirli bir süre veya süresiz olarak uyanık tutun. Uzun makaleleri okurken veya bir tarife atıfta bulunurken kullanışlıdır.</string>
     <string name="about_desc_maps_power_saving">Pixel 10 serisine özel Google Haritalar Güç Tasarrufu modunu, herhangi bir Android cihazınızda kilit ekranınızın üzerinde görüntülenecek minimal, simsiyah bir arka planla edinin. Bir navigasyon oturumu başlatın, ekranı kapatın ve tekrar açın. </string>
     <string name="about_desc_flashlight_pulse">Bir bildirim aldığınızda el fenerini çalıştırın.\n\nCihazların el feneri karartması için donanım desteği varsa, darbe sorunsuz bir şekilde canlandırılacaktır.</string>
-    <string name="about_desc_snooze_notifications">Varsayılan olarak değiştirilemeyen can sıkıcı kalıcı sistem bildirimlerini erteleyin. \n\nLütfen bildirim gelene kadar bekleyin ve ardından bu özelliğe gidin.\'bildirim kanalı listelenecektir. Bir sonraki sefere ertelemek için bunu seçin.\n\nErtelenen herhangi bir bildirime Android\'deki bildirim geçmişinizden hâlâ erişebilirsiniz.</string>
+    <string name="about_desc_snooze_notifications">Varsayılan olarak değiştirilemeyen can sıkıcı kalıcı sistem bildirimlerini erteleyin. 
+
+Lütfen bildirim gelene kadar bekleyin ve ardından bu özelliğe gidin, bildirim kanalı listelenecektir. Bir sonraki sefere ertelemek için bunu seçin.
+
+Ertelenen herhangi bir bildirime Android\'deki bildirim geçmişinizden hâlâ erişebilirsiniz.</string>
     <string name="about_desc_quick_settings_tiles">Hızlı Ayarlar panelinize özel döşemeler ekleyin.\n\nNe yaptıklarını öğrenmek için bunlardan herhangi birine uzun basın.</string>
     <string name="about_desc_button_remap">Farklı eylemler ve kısayollar gerçekleştirmek için donanım düğmelerinizi yeniden eşleyin.\n\nSes düğmelerine belirli koşullar altında uzun bastığınızda ne olacağını özelleştirin. \n\nEkran kapatma tetikleyicisi veya el feneri kontrolleri gibi bazı davranışlar, bunların OEM uygulamasına bağlı olabilir ve beklendiği gibi tüm cihazlarda çalışmayabilir. Bazı senaryolar Shizuku izinleri kullanılarak çözülebilir ancak uygulamalar nedeniyle aynı deneyimi vermeyebilir.</string>
     <string name="about_desc_dynamic_night_light">Ön plandaki uygulamaya göre ekranınızın mavi ışık filtresini otomatik olarak değiştirin.</string>
@@ -1675,4 +1679,9 @@ Devam et düğmesi birkaç saniyeliğine devre dışı kalır; böylece karar ve
 Bu özellik yalnızca hareketsiz duvar kağıtlarıyla çalışır. Canlı duvar kağıtları ve video duvar kağıtları desteklenmez.
 
 Katmanı görüntüleyebilmek için erişilebilirlik izni, mevcut duvar kağıdınızı okuyabilmek içinse depolama erişimi gereklidir. Bildirim erişimi izni ise yalnızca albüm kapağı özelliğini açtığınızda gereklidir.</string>
+    <string name="app_colors_card_title">Özel renk ayarla</string>
+    <string name="app_colors_card_desc">Her uygulama için seçilen rengi değiştirin</string>
+    <string name="sound_mode_use_shizuku_desc">Rahatsız Etme modunu etkinleştirmeden zil sesi modunu ayarlamak için Shizuku\'yu kullanın</string>
+    <string name="feat_aod_wallpaper_keep_on_media">Medya oynatılırken açık tut</string>
+    <string name="feat_aod_wallpaper_media_apps">Medya uygulamalarını atla</string>
 </resources>
