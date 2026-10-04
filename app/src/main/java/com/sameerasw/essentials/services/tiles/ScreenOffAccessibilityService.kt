@@ -466,9 +466,9 @@ class ScreenOffAccessibilityService :
                     AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
             }
         updateOmniOverlay()
-        duoOverlayHandler.updateState()
-        statusGlanceHandler.updateState()
-        islandOverlayHandler.updateState()
+        duoOverlayHandler.restart()
+        statusGlanceHandler.restart()
+        islandOverlayHandler.restart()
     }
 
     private fun updateOmniOverlay() {
