@@ -688,6 +688,7 @@ class StatusGlanceHandler(
     }
 
     private fun registerTorchCallback() {
+        if (com.sameerasw.essentials.utils.DeviceUtils.isTorchAccessRestricted()) return
         if (isTorchCallbackRegistered) return
         try {
             cameraManager.registerTorchCallback(torchCallback, mainHandler)
@@ -940,6 +941,7 @@ class StatusGlanceHandler(
     }
 
     private fun getCameraId(): String? {
+        if (com.sameerasw.essentials.utils.DeviceUtils.isTorchAccessRestricted()) return null
         return try {
             cameraManager.cameraIdList.firstOrNull { id ->
                 val chars = cameraManager.getCameraCharacteristics(id)
