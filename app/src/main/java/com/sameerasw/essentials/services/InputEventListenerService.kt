@@ -99,21 +99,23 @@ class InputEventListenerService : Service() {
                 .build()
         startForegroundSafely(notification)
 
-        val cameraManager =
-            getSystemService(CAMERA_SERVICE) as android.hardware.camera2.CameraManager
-        cameraManager.registerTorchCallback(
-            object :
-                android.hardware.camera2.CameraManager.TorchCallback() {
-                override fun onTorchModeChanged(
-                    cameraId: String,
-                    enabled: Boolean,
-                ) {
-                    super.onTorchModeChanged(cameraId, enabled)
-                    isTorchOn = enabled
-                }
-            },
-            null,
-        )
+        if (!com.sameerasw.essentials.utils.DeviceUtils.isTorchAccessRestricted()) {
+            val cameraManager =
+                getSystemService(CAMERA_SERVICE) as android.hardware.camera2.CameraManager
+            cameraManager.registerTorchCallback(
+                object :
+                    android.hardware.camera2.CameraManager.TorchCallback() {
+                    override fun onTorchModeChanged(
+                        cameraId: String,
+                        enabled: Boolean,
+                    ) {
+                        super.onTorchModeChanged(cameraId, enabled)
+                        isTorchOn = enabled
+                    }
+                },
+                null,
+            )
+        }
 
         Shizuku.addBinderReceivedListener(binderReceivedListener)
         Shizuku.addBinderDeadListener(binderDeadListener)
