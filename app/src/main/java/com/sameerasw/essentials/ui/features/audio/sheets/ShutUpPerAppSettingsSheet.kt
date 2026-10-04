@@ -58,6 +58,7 @@ fun ShutUpPerAppSettingsSheet(
     var showShizukuRestartWarning by remember { mutableStateOf(false) }
 
     val isAttemptShizukuRestart by viewModel.isShutUpAttemptShizukuRestart
+    val hiddenDebugging by viewModel.isHiddenDebuggingSupport
 
     if (showShizukuRestartWarning) {
         AlertDialog(
@@ -108,7 +109,8 @@ fun ShutUpPerAppSettingsSheet(
                 IconToggleItem(
                     iconRes = R.drawable.rounded_settings_24,
                     title = stringResource(R.string.shut_up_disable_dev_options),
-                    isChecked = currentConfig.disableDevOptions,
+                    isChecked = currentConfig.disableDevOptions && !hiddenDebugging,
+                    enabled = !hiddenDebugging,
                     onCheckedChange = {
                         val newConfig = currentConfig.copy(disableDevOptions = it)
                         currentConfig = newConfig
@@ -118,7 +120,8 @@ fun ShutUpPerAppSettingsSheet(
                 IconToggleItem(
                     iconRes = R.drawable.rounded_adb_24,
                     title = stringResource(R.string.shut_up_disable_usb_debugging),
-                    isChecked = currentConfig.disableUsbDebugging,
+                    isChecked = currentConfig.disableUsbDebugging && !hiddenDebugging,
+                    enabled = !hiddenDebugging,
                     onCheckedChange = {
                         val newConfig = currentConfig.copy(disableUsbDebugging = it)
                         currentConfig = newConfig

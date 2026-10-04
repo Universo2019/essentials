@@ -350,6 +350,7 @@ fun SettingsContent(
     val grantScope = rememberCoroutineScope()
     var showInstructionsSheet by remember { mutableStateOf(false) }
     var showShizukuHelpBottomSheet by remember { mutableStateOf(false) }
+    var showHiddenDebuggingHelpSheet by remember { mutableStateOf(false) }
     var showUnsupportedFeaturesSheet by remember { mutableStateOf(false) }
     var showPreReleaseConfirmSheet by remember { mutableStateOf(false) }
     var pendingPreReleaseState by remember { mutableStateOf(false) }
@@ -509,6 +510,12 @@ fun SettingsContent(
             onConfirmMerge = {
                 onImportConfig(true)
             },
+        )
+    }
+
+    if (showHiddenDebuggingHelpSheet) {
+        com.sameerasw.essentials.ui.core.sheets.HiddenDebuggingHelpBottomSheet(
+            onDismissRequest = { showHiddenDebuggingHelpSheet = false },
         )
     }
 
@@ -962,6 +969,23 @@ fun SettingsContent(
                     )
                 }
             }
+
+            IconToggleItem(
+                iconRes = R.drawable.rounded_adb_24,
+                title = stringResource(R.string.setting_hidden_debugging_title),
+                isChecked = viewModel.isHiddenDebuggingSupport.value,
+                onCheckedChange = { checked ->
+                    viewModel.setHiddenDebuggingSupport(checked)
+                    if (checked && !com.sameerasw.essentials.utils.ShellUtils.hasPermission(context)) {
+                        if (com.sameerasw.essentials.utils.ShizukuUtils.isShizukuAvailable()) {
+                            com.sameerasw.essentials.utils.ShizukuUtils.requestPermission()
+                        } else {
+                            Toast.makeText(context, R.string.shizuku_not_running_desc, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                },
+                onInfoClick = { showHiddenDebuggingHelpSheet = true },
+            )
 
             IconToggleItem(
                 iconRes = R.drawable.rounded_data_usage_24,

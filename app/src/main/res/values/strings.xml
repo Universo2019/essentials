@@ -137,6 +137,11 @@
     <string name="app_lock_description">Secure your apps with biometric authentication. Locked apps will require authentication when launching, Stays unlocked until the screen turns off.</string>
     <string name="app_lock_warning">Beware that this is not a robust solution as this is only a 3rd party application. If you need strong security, consider using Private Space or other such features.</string>
     <string name="app_lock_biometric_note">Another note, the biometric authentication prompt only lets you use STRONG secure class methods. Face unlock security methods in WEAK class in devices such as Pixel 7 will only be able to utilize the available other STRONG auth methods such as fingerprint or pin.</string>
+    <string name="setting_hidden_debugging_title">Hidden debugging support</string>
+    <string name="setting_hidden_debugging_help_1">In Android 17 QPR1 Google introduced a change where developer options and USB debugging options status is hidden for 3rd party apps and always reports 0.</string>
+    <string name="setting_hidden_debugging_help_2">This helps to counter the garbage banking and other apps with BS security measures which we also counter with the "Shut Up" feature.</string>
+    <string name="setting_hidden_debugging_help_3">But this also breaks the detection for Essentials. In this case, enable this option to use Shizuku shell to detect the status which is still possible. Keep in mind that wireless debugging is not concealed.</string>
+    <string name="action_got_it">Got it</string>
     <string name="setting_use_usage_access_title">Use usage access</string>
     <string name="setting_use_usage_access_desc">Instead of accessibility (Freeze, App Lock, Dynamic Night Light)</string>
 
