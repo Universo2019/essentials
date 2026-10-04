@@ -76,6 +76,7 @@ fun IconToggleItem(
     settingsIconRes: Int = R.drawable.rounded_settings_24,
     trailingContent: (@Composable () -> Unit)? = null,
     infoText: String? = null,
+    onInfoClick: (() -> Unit)? = null,
     dragHandle: (@Composable () -> Unit)? = null,
 ) {
     val view = LocalView.current
@@ -189,11 +190,15 @@ fun IconToggleItem(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
                         ) {
-                            if (infoText != null) {
+                            if (infoText != null || onInfoClick != null) {
                                 IconButton(
                                     onClick = {
                                         HapticUtil.performVirtualKeyHaptic(view)
-                                        Toast.makeText(context, infoText, Toast.LENGTH_LONG).show()
+                                        if (onInfoClick != null) {
+                                            onInfoClick()
+                                        } else {
+                                            Toast.makeText(context, infoText, Toast.LENGTH_LONG).show()
+                                        }
                                     },
                                     modifier = Modifier.size(36.dp),
                                 ) {
@@ -297,11 +302,15 @@ fun IconToggleItem(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            if (infoText != null) {
+                            if (infoText != null || onInfoClick != null) {
                                 IconButton(
                                     onClick = {
                                         HapticUtil.performVirtualKeyHaptic(view)
-                                        Toast.makeText(context, infoText, Toast.LENGTH_LONG).show()
+                                        if (onInfoClick != null) {
+                                            onInfoClick()
+                                        } else {
+                                            Toast.makeText(context, infoText, Toast.LENGTH_LONG).show()
+                                        }
                                     },
                                     modifier = Modifier.size(36.dp),
                                 ) {

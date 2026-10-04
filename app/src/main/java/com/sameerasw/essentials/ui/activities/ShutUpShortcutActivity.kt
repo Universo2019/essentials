@@ -109,9 +109,16 @@ class ShutUpShortcutActivity : ComponentActivity() {
     }
 
     private suspend fun applyShutUpSettings(
-        config: ShutUpAppConfig,
+        requestedConfig: ShutUpAppConfig,
         repository: SettingsRepository,
     ) {
+        val hiddenDebugging = repository.getBoolean(SettingsRepository.KEY_HIDDEN_DEBUGGING_SUPPORT, false)
+        val config =
+            if (hiddenDebugging) {
+                requestedConfig.copy(disableDevOptions = false, disableUsbDebugging = false)
+            } else {
+                requestedConfig
+            }
         withContext(Dispatchers.IO) {
             val originalSettings = mutableMapOf<String, String>()
 

@@ -448,6 +448,7 @@ class MainViewModel : ViewModel() {
     val consciousGateTitle = mutableStateOf("")
     val consciousGateMessage = mutableStateOf("")
     val isUseUsageAccess = mutableStateOf(false)
+    val isHiddenDebuggingSupport = mutableStateOf(false)
     val isFreezeWhenLockedEnabled = mutableStateOf(false)
     val freezeLockDelayIndex = mutableIntStateOf(1) // Default: 1 minute
     val freezePickedApps = mutableStateOf<List<NotificationApp>>(emptyList())
@@ -2068,6 +2069,8 @@ class MainViewModel : ViewModel() {
         notificationLightingColorMode.value = settingsRepository.getNotificationLightingColorMode()
         isUseUsageAccess.value =
             settingsRepository.getBoolean(SettingsRepository.KEY_USE_USAGE_ACCESS)
+        isHiddenDebuggingSupport.value =
+            settingsRepository.getBoolean(SettingsRepository.KEY_HIDDEN_DEBUGGING_SUPPORT)
         isOnboardingCompleted.value =
             settingsRepository.getBoolean(SettingsRepository.KEY_ONBOARDING_COMPLETED, false)
 
@@ -6048,6 +6051,11 @@ class MainViewModel : ViewModel() {
      * @param enabled [Boolean] Target enabled.
      * @param context [Context] Target context.
      */
+    fun setHiddenDebuggingSupport(enabled: Boolean) {
+        isHiddenDebuggingSupport.value = enabled
+        settingsRepository.putBoolean(SettingsRepository.KEY_HIDDEN_DEBUGGING_SUPPORT, enabled)
+    }
+
     fun setUseUsageAccess(
         enabled: Boolean,
         context: Context,
