@@ -358,8 +358,16 @@ fun IslandRoot(
     if (catchUp != null) lastCatchUp = catchUp
     val hasCompactCells = state.arrangement.before.isNotEmpty() || state.arrangement.after.isNotEmpty()
     val catchUpAnim = remember { Animatable(0f) }
-    LaunchedEffect(catchUpShown, compactSettled) {
-        catchUpAnim.animateTo(if (catchUpShown && compactSettled) 1f else 0f, IslandMotion.compactFloat())
+    LaunchedEffect(catchUpShown) {
+        if (catchUpShown) {
+            withTimeoutOrNull(IslandMotion.COLLAPSE_MS * 2L) {
+                snapshotFlow { surfaceSize.width to compactSize.width }
+                    .first { (live, target) -> target > 0 && abs(live - target) <= 6 }
+            }
+            catchUpAnim.animateTo(1f, IslandMotion.compactFloat())
+        } else {
+            catchUpAnim.animateTo(0f, IslandMotion.compactFloat())
+        }
     }
     val bubbleSizePx = with(density) { spec.compactHeight.roundToPx() }
     val bubbleGapPx = with(density) { spec.cameraGap.roundToPx() }

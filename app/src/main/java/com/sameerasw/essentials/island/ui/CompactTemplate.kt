@@ -89,7 +89,7 @@ fun CompactTemplate(
                             slideOutHorizontally(IslandMotion.compactOffset, towardCamera) +
                             scaleOut(IslandMotion.compactFloat(), targetScale = 0.6f),
                         modifier = Modifier
-                            .animatePlacement()
+                            .animatePlacement(fromEnd = spec.growDirection == 0 && !entry.before)
                             .pointerInput(entry.itemKey) {
                                 detectTapGestures(
                                     onTap = { onCellTap(entry.itemKey) },
