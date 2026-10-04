@@ -1760,7 +1760,4 @@ Gizlendiğinde, bildirimler ekranınızın üzerinde belirmek yerine bildirim pa
     <string name="diy_set_keyboard_title">Klavyeyi Ayarla</string>
     <string name="screen_locked_disable_notification_interactions_desc">Kilitliyken bildirim panelinin ve Hızlı Ayarlar\'ın aşağı çekilmesini engelleyin</string>
     <string name="screen_locked_disable_notification_interactions_title">Bildirim etkileşimlerini devre dışı bırak</string>
-    <string name="feat_weather_title">Hava durumu</string>
-    <string name="feat_weather_desc">Sağlayıcıları ve ayarları yapılandırın</string>
-    <string name="about_desc_weather">Bir hava durumu tahmini kaynağı seçin; konumunuzu, birimleri ve yenileme aralığını ayarlayın; ayrıca tam hava durumu ekranının uygulama listenizde görünüp görünmeyeceğine karar verin. Ada ve Özet özellikleri bu ayarları kullanır.</string>
 </resources>
