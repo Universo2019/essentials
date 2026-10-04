@@ -1364,7 +1364,18 @@ class NotificationListener : NotificationListenerService() {
         super.onNotificationRemoved(sbn, rankingMap, reason)
     }
 
+    fun feedSnoozedPosted(sbn: StatusBarNotification) {
+        if (ChronometerRepository.isCandidate(sbn)) ChronometerRepository.onPosted(applicationContext, sbn)
+        scheduleProgressRefresh()
+    }
+
+    fun feedSnoozedRemoved(sbn: StatusBarNotification) {
+        ChronometerRepository.onRemoved(sbn.key)
+        scheduleProgressRefresh()
+    }
+
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
+        if (LiveUpdateSnoozer.isSnoozedByUs(sbn.key)) return
         NotificationRepostFilter.forget(sbn.key)
         CallStateRepository.onCallNotificationRemoved(sbn.key)
         ChronometerRepository.onRemoved(sbn.key)
@@ -1832,8 +1843,10 @@ class NotificationListener : NotificationListenerService() {
             null
         }
 
+    fun refreshProgressNow() = scheduleProgressRefresh()
+
     fun extractLatestProgressNotification(): ProgressNotificationData? {
-        val active = safeActiveNotifications() ?: return null
+        val active = (safeActiveNotifications() ?: return null).toList() + LiveUpdateSnoozer.snoozedNotifications()
         val progressNotifs = active.mapNotNull { sbn ->
             if (sbn.packageName == packageName || isMediaNotification(sbn)) return@mapNotNull null
             extractProgressNotification(sbn)
