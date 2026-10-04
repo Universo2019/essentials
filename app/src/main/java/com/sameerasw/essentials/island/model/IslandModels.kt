@@ -85,6 +85,12 @@ class StackIcon(
     val content: @Composable (size: Dp) -> Unit,
 )
 
+class CatchUpBubble(
+    val icons: List<StackIcon>,
+    val onOpen: () -> Unit,
+    val onDismiss: () -> Unit,
+)
+
 class QueueInfo(
     val next: IslandItem,
     val onAdvance: () -> Unit,
@@ -111,6 +117,7 @@ class IslandItem(
     
     val compactVisible: Boolean = true,
     val needsCompanyAtCenter: Boolean = false,
+    val catchUp: CatchUpBubble? = null,
     val companionOnly: Boolean = false,
     val bypassLauncherOnly: Boolean = false,
     

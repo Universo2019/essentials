@@ -95,6 +95,8 @@ import com.sameerasw.essentials.island.gestures.IslandSlideFeedback
 import com.sameerasw.essentials.island.gestures.SlideFeedback
 import com.sameerasw.essentials.island.ui.components.SlideFeedbackCompact
 import com.sameerasw.essentials.island.model.IslandItem
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import com.sameerasw.essentials.island.model.CatchUpBubble
 import com.sameerasw.essentials.island.model.StackIcon
 import com.sameerasw.essentials.island.model.IslandStage
 import com.sameerasw.essentials.island.state.IslandUiState
@@ -350,15 +352,26 @@ fun IslandRoot(
 
     fun edgeCorrection(layerStage: IslandStage): Float =
         edgeShift.floatValue - if (layerStage == IslandStage.Expanded) outsetPx else 0f
+    val catchUp = state.items.values.firstNotNullOfOrNull { it.catchUp }
+    val catchUpShown = catchUp != null && stage == IslandStage.Compact
+    var lastCatchUp by remember { mutableStateOf<CatchUpBubble?>(null) }
+    if (catchUp != null) lastCatchUp = catchUp
+    val hasCompactCells = state.arrangement.before.isNotEmpty() || state.arrangement.after.isNotEmpty()
+    val catchUpAnim = remember { Animatable(0f) }
+    LaunchedEffect(catchUpShown, compactSettled) {
+        catchUpAnim.animateTo(if (catchUpShown && compactSettled) 1f else 0f, IslandMotion.compactFloat())
+    }
+    val bubbleSizePx = with(density) { spec.compactHeight.roundToPx() }
+    val bubbleGapPx = with(density) { spec.cameraGap.roundToPx() }
+    fun catchShiftPx(): Float =
+        if (spec.growDirection == 0 && hasCompactCells) catchUpAnim.value.coerceAtLeast(0f) * (bubbleSizePx + bubbleGapPx) / 2f else 0f
     val lineShift = remember { Animatable(0f) }
     val liveSurfaceHeight = remember { mutableIntStateOf(0) }
-    fun surfaceLeft(width: Int): Int = windowWidth / 2 + lineShift.value.roundToInt() - when {
+    fun surfaceLeft(width: Int): Int = windowWidth / 2 + lineShift.value.roundToInt() + catchShiftPx().roundToInt() - when {
         spec.growDirection > 0 -> cameraSlotPx / 2
         spec.growDirection < 0 -> width - cameraSlotPx / 2
         else -> width / 2
     }
-    val bubbleSizePx = with(density) { spec.compactHeight.roundToPx() }
-    val bubbleGapPx = with(density) { spec.cameraGap.roundToPx() }
     fun bubbleX(width: Int): Int =
         if (spec.growDirection > 0) surfaceLeft(width) + width + bubbleGapPx else surfaceLeft(width) - bubbleGapPx - bubbleSizePx
     val focusedItem = state.focused
@@ -403,10 +416,10 @@ fun IslandRoot(
         }
     }
 
-    LaunchedEffect(target, windowWidth, stage, queueShown, pillSize, lineInsetActive) {
+    LaunchedEffect(target, windowWidth, stage, queueShown, pillSize, lineInsetActive, catchUpShown, hasCompactCells) {
         if (target == IntSize.Zero || windowWidth == 0) return@LaunchedEffect
         val g = if (stage == IslandStage.Expanded) outsetPx.roundToInt() else 0
-        val shift = if (lineInsetActive && spec.growDirection == 0) (bubbleSizePx + bubbleGapPx) / 2 else 0
+        val shift = if ((lineInsetActive || (catchUpShown && hasCompactCells)) && spec.growDirection == 0) (bubbleSizePx + bubbleGapPx) / 2 else 0
         val left = windowWidth / 2 + shift - when {
             spec.growDirection > 0 -> cameraSlotPx / 2
             spec.growDirection < 0 -> target.width - cameraSlotPx / 2
@@ -415,6 +428,10 @@ fun IslandRoot(
         val top = (surfaceTopPx - g).coerceAtLeast(0)
         var bounds = IntRect(left, top, left + target.width, surfaceTopPx - g + target.height)
         if (queueShown && stage == IslandStage.Line) {
+            val bx = if (spec.growDirection > 0) left + target.width + bubbleGapPx else left - bubbleGapPx - bubbleSizePx
+            bounds = IntRect(minOf(bounds.left, bx), bounds.top, maxOf(bounds.right, bx + bubbleSizePx), maxOf(bounds.bottom, surfaceTopPx + bubbleSizePx))
+        }
+        if (catchUpShown) {
             val bx = if (spec.growDirection > 0) left + target.width + bubbleGapPx else left - bubbleGapPx - bubbleSizePx
             bounds = IntRect(minOf(bounds.left, bx), bounds.top, maxOf(bounds.right, bx + bubbleSizePx), maxOf(bounds.bottom, surfaceTopPx + bubbleSizePx))
         }
@@ -497,13 +514,66 @@ fun IslandRoot(
                 )
             }
         }
+        val bubbleData = lastCatchUp
+        if (bubbleData != null && catchUpAnim.value > 0.001f) {
+            val dragX = remember { Animatable(0f) }
+            val towardCamera = if (spec.growDirection > 0) -1f else 1f
+            val maxDrag = with(density) { 56.dp.toPx() }
+            val threshold = with(density) { 28.dp.toPx() }
+            Box(Modifier.fillMaxSize()) {
+                IslandStackBubble(
+                    icons = bubbleData.icons,
+                    size = spec.compactHeight,
+                    modifier = Modifier
+                        .offset {
+                            val w = surfaceSize.width
+                            val endX = bubbleX(w)
+                            val startX = if (spec.growDirection > 0) surfaceLeft(w) + w - bubbleSizePx else surfaceLeft(w)
+                            val v = catchUpAnim.value
+                            IntOffset((startX + (endX - startX) * v + dragX.value).roundToInt(), surfaceTopPx)
+                        }
+                        .graphicsLayer {
+                            alpha = 1f - (abs(dragX.value) / maxDrag).coerceIn(0f, 0.8f)
+                        }
+                        .pointerInput(Unit) {
+                            detectTapGestures {
+                                IslandHaptics.tap(context)
+                                bubbleData.onOpen()
+                            }
+                        }
+                        .pointerInput(Unit) {
+                            detectHorizontalDragGestures(
+                                onHorizontalDrag = { change, amount ->
+                                    change.consume()
+                                    val next = dragX.value + amount
+                                    val lo = if (towardCamera > 0f) -with(density) { 8.dp.toPx() } else -maxDrag
+                                    val hi = if (towardCamera > 0f) maxDrag else with(density) { 8.dp.toPx() }
+                                    scope.launch { dragX.snapTo(next.coerceIn(lo, hi)) }
+                                },
+                                onDragEnd = {
+                                    scope.launch {
+                                        if (dragX.value * towardCamera > threshold) {
+                                            IslandHaptics.tap(context)
+                                            dragX.animateTo(towardCamera * maxDrag, tween(100))
+                                            bubbleData.onDismiss()
+                                        } else {
+                                            dragX.animateTo(0f, IslandMotion.float())
+                                        }
+                                    }
+                                },
+                                onDragCancel = { scope.launch { dragX.animateTo(0f, IslandMotion.float()) } },
+                            )
+                        },
+                )
+            }
+        }
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = spec.surfaceTop)
                 .layout { measurable, constraints ->
                     val p = measurable.measure(constraints)
-                    val dx = spec.growDirection * (p.width - cameraSlotPx) / 2 + lineShift.value.roundToInt()
+                    val dx = spec.growDirection * (p.width - cameraSlotPx) / 2 + lineShift.value.roundToInt() + catchShiftPx().roundToInt()
                     layout(p.width, p.height) { p.place(dx, 0) }
                 }
                 .offset { IntOffset(0, (squashPx / 2f * squash.value - edgeShift.floatValue).roundToInt()) }
@@ -896,6 +966,7 @@ fun IslandRoot(
                             layerKey.stage, layerItem, state, spec, actions, interactive = current,
                             onCellTap = ::handleTap,
                             onCellLongPress = ::handleLongPress,
+                            leftBias = { (catchShiftPx() * 2f).roundToInt() },
                         )
                     }
                 }
@@ -923,7 +994,7 @@ fun IslandRoot(
                         },
                     contentAlignment = layerAlign,
                 ) {
-                    CompactTemplate(state = state, spec = spec, onCellTap = {}, onCellLongPress = {})
+                    CompactTemplate(state = state, spec = spec, onCellTap = {}, onCellLongPress = {}, leftBias = { (catchShiftPx() * 2f).roundToInt() })
                 }
             }
             }
@@ -1005,6 +1076,7 @@ private fun StageContent(
     interactive: Boolean,
     onCellTap: (String) -> Unit = {},
     onCellLongPress: (String) -> Unit = {},
+    leftBias: () -> Int = { 0 },
 ) {
     val a = if (interactive) actions else NoActions
     when (stage) {
@@ -1020,6 +1092,7 @@ private fun StageContent(
                     spec = spec,
                     onCellTap = { if (interactive) onCellTap(it) },
                     onCellLongPress = { if (interactive) onCellLongPress(it) },
+                    leftBias = leftBias,
                 )
             }
         }

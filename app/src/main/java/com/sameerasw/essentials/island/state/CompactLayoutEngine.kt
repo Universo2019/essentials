@@ -29,6 +29,7 @@ object CompactLayoutEngine {
         entries: List<CompactEntry>,
         anchor: CameraAnchor = CameraAnchor.Center,
         maxCells: Int = MAX_CELLS,
+        leftExtra: Int = 0,
     ): CompactArrangement {
         val base = entries.filterNot { it.companionOnly }
         val companions = entries.filter { it.companionOnly }
@@ -62,11 +63,11 @@ object CompactLayoutEngine {
             after += twoCell[0].cellKeys.reversed()
             pinned.forEach { before += it.cellKeys }
             twoCell.drop(1).forEach { before += it.cellKeys.reversed() }
-            oneCell.forEach { if (before.size <= after.size) before += it.cellKeys else after += it.cellKeys }
+            oneCell.forEach { if (before.size + leftExtra <= after.size) before += it.cellKeys else after += it.cellKeys }
         } else {
             pinned.getOrNull(0)?.let { before += it.cellKeys }
             pinned.getOrNull(1)?.let { after += it.cellKeys }
-            oneCell.forEach { if (after.size <= before.size) after += it.cellKeys else before += it.cellKeys }
+            oneCell.forEach { if (after.size <= before.size + leftExtra) after += it.cellKeys else before += it.cellKeys }
         }
 
         val solo = selected.singleOrNull()

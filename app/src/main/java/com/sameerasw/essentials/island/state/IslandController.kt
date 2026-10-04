@@ -262,13 +262,14 @@ class IslandController(
                 )
             },
             anchorProvider(),
+            leftExtra = if (items.values.any { it.catchUp != null }) 1 else 0,
         )
         val focusedKey = expandedKey ?: peekKey
         val stage = when {
             items.isEmpty() -> IslandStage.Hidden
             expandedKey != null -> IslandStage.Expanded
             peekKey != null -> IslandStage.Line
-            arrangement.visibleItems.isEmpty() -> IslandStage.Hidden
+            arrangement.visibleItems.isEmpty() && items.values.none { it.catchUp != null } -> IslandStage.Hidden
             else -> IslandStage.Compact
         }
         val previous = _state.value.stage
