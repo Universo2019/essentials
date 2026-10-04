@@ -1,5 +1,20 @@
 package com.sameerasw.essentials.ui.core.sheets
 
+import android.widget.Toast
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import com.sameerasw.essentials.utils.HiddenDebuggingUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.sameerasw.essentials.utils.ShellUtils
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +33,14 @@ import com.sameerasw.essentials.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HiddenDebuggingHelpBottomSheet(onDismissRequest: () -> Unit) {
+fun HiddenDebuggingHelpBottomSheet(
+    onDismissRequest: () -> Unit,
+    onAutoDetected: () -> Unit,
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var detecting by remember { mutableStateOf(false) }
+    val shizukuReady = remember(detecting) { ShellUtils.isAvailable(context) && ShellUtils.hasPermission(context) }
     EssentialsBottomSheet(onDismissRequest = onDismissRequest) {
         Column(
             modifier =
@@ -49,6 +71,53 @@ fun HiddenDebuggingHelpBottomSheet(onDismissRequest: () -> Unit) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceBright, RoundedCornerShape(24.dp))
+                        .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.setting_hidden_debugging_auto_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = stringResource(R.string.setting_hidden_debugging_auto_help),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                OutlinedButton(
+                    onClick = {
+                        detecting = true
+                        scope.launch {
+                            val result = withContext(Dispatchers.IO) { HiddenDebuggingUtils.autoDetect(context) }
+                            detecting = false
+                            val message =
+                                when (result) {
+                                    HiddenDebuggingUtils.DetectResult.HIDDEN -> {
+                                        onAutoDetected()
+                                        R.string.setting_hidden_debugging_detected
+                                    }
+                                    HiddenDebuggingUtils.DetectResult.NOT_HIDDEN -> R.string.setting_hidden_debugging_not_hidden
+                                    HiddenDebuggingUtils.DetectResult.INCONCLUSIVE -> R.string.setting_hidden_debugging_inconclusive
+                                    HiddenDebuggingUtils.DetectResult.SHELL_UNAVAILABLE -> R.string.setting_hidden_debugging_needs_shizuku
+                                }
+                            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                        }
+                    },
+                    enabled = shizukuReady && !detecting,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        stringResource(
+                            if (shizukuReady) R.string.setting_hidden_debugging_auto_title else R.string.setting_hidden_debugging_shizuku_required,
+                        ),
+                    )
+                }
+            }
             Button(
                 onClick = onDismissRequest,
                 modifier = Modifier.fillMaxWidth(),

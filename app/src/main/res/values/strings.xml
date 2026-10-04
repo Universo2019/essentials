@@ -141,6 +141,13 @@
     <string name="setting_hidden_debugging_help_1">In Android 17 QPR1 Google introduced a change where developer options and USB debugging options status is hidden for 3rd party apps and always reports 0.</string>
     <string name="setting_hidden_debugging_help_2">This helps to counter the garbage banking and other apps with BS security measures which we also counter with the "Shut Up" feature.</string>
     <string name="setting_hidden_debugging_help_3">But this also breaks the detection for Essentials. In this case, enable this option to use Shizuku shell to detect the status which is still possible. Keep in mind that wireless debugging is not concealed.</string>
+    <string name="setting_hidden_debugging_auto_title">Auto detect</string>
+    <string name="setting_hidden_debugging_auto_help">Make sure developer options and USB debugging is enabled</string>
+    <string name="setting_hidden_debugging_shizuku_required">Shizuku required</string>
+    <string name="setting_hidden_debugging_detected">Hidden status detected. Support enabled.</string>
+    <string name="setting_hidden_debugging_not_hidden">Status is not hidden on this device.</string>
+    <string name="setting_hidden_debugging_inconclusive">Could not tell. Turn on developer options or USB debugging and try again.</string>
+    <string name="setting_hidden_debugging_needs_shizuku">Start Shizuku and grant permission first.</string>
     <string name="action_got_it">Got it</string>
     <string name="setting_use_usage_access_title">Use usage access</string>
     <string name="setting_use_usage_access_desc">Instead of accessibility (Freeze, App Lock, Dynamic Night Light)</string>

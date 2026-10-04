@@ -5,6 +5,27 @@ import android.provider.Settings
 import com.sameerasw.essentials.data.repository.SettingsRepository
 
 object HiddenDebuggingUtils {
+    enum class DetectResult { HIDDEN, NOT_HIDDEN, INCONCLUSIVE, SHELL_UNAVAILABLE }
+
+    fun autoDetect(context: Context): DetectResult {
+        if (!ShellUtils.isAvailable(context) || !ShellUtils.hasPermission(context)) return DetectResult.SHELL_UNAVAILABLE
+        var anyEnabled = false
+        for (key in listOf(Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, Settings.Global.ADB_ENABLED)) {
+            val shell = ShellUtils.runCommandWithOutput(context, "settings get global $key", notifyOnError = false)?.trim()
+            val normal =
+                try {
+                    Settings.Global.getInt(context.contentResolver, key, 0)
+                } catch (_: Exception) {
+                    0
+                }
+            if (shell == "1") {
+                anyEnabled = true
+                if (normal == 0) return DetectResult.HIDDEN
+            }
+        }
+        return if (anyEnabled) DetectResult.NOT_HIDDEN else DetectResult.INCONCLUSIVE
+    }
+
     fun isSupportEnabled(context: Context): Boolean =
         SettingsRepository(context).getBoolean(SettingsRepository.KEY_HIDDEN_DEBUGGING_SUPPORT, false)
 
