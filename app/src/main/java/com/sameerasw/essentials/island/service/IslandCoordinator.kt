@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.sameerasw.essentials.data.repository.SettingsRepository
 import com.sameerasw.essentials.island.gestures.CompactGestureController
 import com.sameerasw.essentials.island.gestures.CompactGestures
+import com.sameerasw.essentials.island.state.IslandUiState
 import com.sameerasw.essentials.island.model.IslandPlugin
 import com.sameerasw.essentials.island.model.IslandPriorityEntries
 import com.sameerasw.essentials.island.model.IslandPluginContext
@@ -221,7 +222,7 @@ class IslandCoordinator(
         controller.onStageChanged = { stage ->
             if (stage != IslandStage.Expanded) windowHost.setTextInput(false)
             windowHost.onStageChanged(stage)
-            syncStatusBar(stage)
+            syncStatusBar()
             reportVisibility(stage != IslandStage.Hidden)
         }
         settings.setIslandPreviewRingEnabled(false)
@@ -435,6 +436,12 @@ class IslandCoordinator(
         }
         newScope.launch {
             controller.state
+                .map { it.stage to complicationCount(it) }
+                .distinctUntilChanged()
+                .collect { syncStatusBar() }
+        }
+        newScope.launch {
+            controller.state
                 .map { it.stage to it.focusedKey }
                 .distinctUntilChanged()
                 .collect { (stage, key) -> plugins.forEach { it.onFocusChanged(stage, key) } }
@@ -585,13 +592,21 @@ class IslandCoordinator(
         controller.setSuppressed(isContentSuppressed || revealing || hiding)
     }
 
-    private fun syncStatusBar(stage: IslandStage) {
-        val enabled = settings.getBoolean(SettingsRepository.KEY_ISLAND_DYNAMIC_HIDE_STATUS_BAR, false)
-        if (!enabled || !ShellUtils.hasPermission(service)) {
+    private fun complicationCount(state: IslandUiState): Int =
+        state.arrangement.visibleItems.count { state.items[it]?.placement == CompactPlacement.Dynamic } +
+            if (state.sideBubble != null) 1 else 0
+
+    private fun syncStatusBar() {
+        val dynamic = settings.getBoolean(SettingsRepository.KEY_ISLAND_DYNAMIC_HIDE_STATUS_BAR, false)
+        val compact = settings.getBoolean(SettingsRepository.KEY_ISLAND_COMPACT_HIDE_STATUS_BAR, false)
+        if ((!dynamic && !compact) || !ShellUtils.hasPermission(service)) {
             IslandStatusBarHider.restore(service)
             return
         }
-        IslandStatusBarHider.apply(service, stage == IslandStage.Line || stage == IslandStage.Expanded)
+        val state = controller.state.value
+        val peekOrExpanded = dynamic && (state.stage == IslandStage.Line || state.stage == IslandStage.Expanded)
+        val crowdedCompact = compact && state.stage == IslandStage.Compact && complicationCount(state) >= 2
+        IslandStatusBarHider.apply(service, peekOrExpanded || crowdedCompact)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
@@ -599,7 +614,7 @@ class IslandCoordinator(
         when (key) {
             SettingsRepository.KEY_ISLAND_ENABLED -> updateState()
             SettingsRepository.KEY_ISLAND_PRIORITY_ORDER -> if (running) reloadPriorities()
-            SettingsRepository.KEY_ISLAND_DYNAMIC_HIDE_STATUS_BAR -> syncStatusBar(controller.state.value.stage)
+            SettingsRepository.KEY_ISLAND_DYNAMIC_HIDE_STATUS_BAR, SettingsRepository.KEY_ISLAND_COMPACT_HIDE_STATUS_BAR -> syncStatusBar()
             SettingsRepository.KEY_ISLAND_HIDE_WHEN_SCREEN_OFF, SettingsRepository.KEY_ISLAND_SHOW_WHEN -> applySuppression()
             SettingsRepository.KEY_ISLAND_HIDE_IN_OWNER_APP -> applyOwnerAppHiding()
             in LAUNCHER_ONLY_KEYS.values -> applyLauncherOnly()

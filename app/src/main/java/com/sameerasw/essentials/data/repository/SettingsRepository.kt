@@ -461,6 +461,7 @@ class SettingsRepository(
         const val KEY_ISLAND_CUTOUT_GAP = "island_cutout_gap"
         const val KEY_ISLAND_SUPPRESS_SYSTEM_HEADS_UP = "island_suppress_system_heads_up"
         const val KEY_ISLAND_DYNAMIC_HIDE_STATUS_BAR = "island_dynamic_hide_status_bar"
+        const val KEY_ISLAND_COMPACT_HIDE_STATUS_BAR = "island_compact_hide_status_bar"
         const val KEY_ISLAND_HIDE_WHEN_SCREEN_OFF = "island_hide_when_screen_off"
         const val KEY_ISLAND_SHOW_WHEN = "island_show_when"
         const val ISLAND_SHOW_WHEN_UNLOCKED = "unlocked"

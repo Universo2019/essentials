@@ -221,6 +221,7 @@ class MainViewModel : ViewModel() {
     val islandExpandedTimeoutMs = mutableLongStateOf(0L)
     val isIslandSuppressSystemHeadsUp = mutableStateOf(false)
     val isIslandDynamicHideStatusBar = mutableStateOf(false)
+    val isIslandCompactHideStatusBar = mutableStateOf(false)
     val isIslandHideWhenScreenOff = mutableStateOf(true)
     val islandTimeoutMs = mutableLongStateOf(4500L)
     val isIslandLineStageEnabled = mutableStateOf(true)
@@ -2283,6 +2284,11 @@ class MainViewModel : ViewModel() {
         isIslandDynamicHideStatusBar.value =
             settingsRepository.getBoolean(
                 SettingsRepository.KEY_ISLAND_DYNAMIC_HIDE_STATUS_BAR,
+                false,
+            )
+        isIslandCompactHideStatusBar.value =
+            settingsRepository.getBoolean(
+                SettingsRepository.KEY_ISLAND_COMPACT_HIDE_STATUS_BAR,
                 false,
             )
         isIslandHideWhenScreenOff.value = settingsRepository.isIslandHideWhenScreenOffEnabled()
@@ -5439,6 +5445,11 @@ class MainViewModel : ViewModel() {
     fun setIslandSuppressSystemHeadsUp(enabled: Boolean) {
         isIslandSuppressSystemHeadsUp.value = enabled
         settingsRepository.setIslandSuppressSystemHeadsUpEnabled(enabled)
+    }
+
+    fun setIslandCompactHideStatusBar(enabled: Boolean) {
+        isIslandCompactHideStatusBar.value = enabled
+        settingsRepository.putBoolean(SettingsRepository.KEY_ISLAND_COMPACT_HIDE_STATUS_BAR, enabled)
     }
 
     fun setIslandDynamicHideStatusBar(
