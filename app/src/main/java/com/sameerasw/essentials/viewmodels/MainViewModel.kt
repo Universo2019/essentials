@@ -201,7 +201,9 @@ class MainViewModel : ViewModel() {
     val isIslandShowTimers = mutableStateOf(true)
     val isIslandShowWeather = mutableStateOf(false)
     val isIslandTimersShowScreenRecorder = mutableStateOf(true)
+    val isIslandTimersFilterApps = mutableStateOf(false)
     val isIslandShowNetwork = mutableStateOf(true)
+    val isIslandShowSignal = mutableStateOf(false)
     val isIslandShowSoundMode = mutableStateOf(true)
     val isIslandSoundModeKeepIcon = mutableStateOf(true)
     val isIslandShowAlarm = mutableStateOf(false)
@@ -2251,7 +2253,9 @@ class MainViewModel : ViewModel() {
         isIslandShowTimers.value = settingsRepository.isIslandShowTimersEnabled()
         isIslandShowWeather.value = settingsRepository.isIslandShowWeatherEnabled()
         isIslandTimersShowScreenRecorder.value = settingsRepository.isIslandTimersShowScreenRecorderEnabled()
+        isIslandTimersFilterApps.value = settingsRepository.isIslandTimersFilterAppsEnabled()
         isIslandShowNetwork.value = settingsRepository.isIslandShowNetworkEnabled()
+        isIslandShowSignal.value = settingsRepository.isIslandShowSignalEnabled()
         isIslandShowSoundMode.value = settingsRepository.isIslandShowSoundModeEnabled()
         isIslandSoundModeKeepIcon.value = settingsRepository.isIslandSoundModeKeepIconEnabled()
         isIslandShowAlarm.value = settingsRepository.isIslandShowAlarmEnabled()
@@ -5311,6 +5315,11 @@ class MainViewModel : ViewModel() {
         settingsRepository.setIslandSoundModeKeepIconEnabled(enabled)
     }
 
+    fun setIslandShowSignal(enabled: Boolean) {
+        isIslandShowSignal.value = enabled
+        settingsRepository.setIslandShowSignalEnabled(enabled)
+    }
+
     fun setIslandShowNetwork(enabled: Boolean) {
         isIslandShowNetwork.value = enabled
         settingsRepository.setIslandShowNetworkEnabled(enabled)
@@ -5338,6 +5347,21 @@ class MainViewModel : ViewModel() {
     fun setIslandTimersShowScreenRecorder(enabled: Boolean) {
         isIslandTimersShowScreenRecorder.value = enabled
         settingsRepository.setIslandTimersShowScreenRecorderEnabled(enabled)
+    }
+
+    fun setIslandTimersFilterApps(enabled: Boolean) {
+        isIslandTimersFilterApps.value = enabled
+        settingsRepository.setIslandTimersFilterAppsEnabled(enabled)
+    }
+
+    fun loadIslandTimersSelectedApps(context: Context): List<AppSelection> = settingsRepository.loadIslandTimersSelectedApps()
+
+    fun saveIslandTimersSelectedApps(context: Context, apps: List<AppSelection>) {
+        settingsRepository.saveIslandTimersSelectedApps(apps)
+    }
+
+    fun updateIslandTimersAppEnabled(context: Context, packageName: String, enabled: Boolean) {
+        settingsRepository.updateIslandTimersAppSelection(packageName, enabled)
     }
 
     fun setIslandShowCalls(enabled: Boolean) {
