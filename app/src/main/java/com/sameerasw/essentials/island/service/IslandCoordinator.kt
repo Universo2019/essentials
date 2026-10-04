@@ -32,6 +32,7 @@ import com.sameerasw.essentials.data.repository.SettingsRepository
 import com.sameerasw.essentials.island.gestures.CompactGestureController
 import com.sameerasw.essentials.island.gestures.CompactGestures
 import com.sameerasw.essentials.island.model.IslandPlugin
+import com.sameerasw.essentials.island.model.IslandPriorityEntries
 import com.sameerasw.essentials.island.model.IslandPluginContext
 import com.sameerasw.essentials.island.model.IslandStage
 import com.sameerasw.essentials.island.plugins.calendar.CalendarPlugin
@@ -100,6 +101,21 @@ class IslandCoordinator(
         },
         anchorProvider = { geometry?.anchor ?: CameraAnchor.Center },
     )
+
+    private val latestItems = HashMap<String, List<IslandItem>>()
+    private var userPriorities: Map<String, Int> = emptyMap()
+
+    private fun publishItems(pluginId: String, items: List<IslandItem>) {
+        latestItems[pluginId] = items
+        val priority = userPriorities[pluginId]
+        items.forEach { it.userPriority = priority }
+        controller.setItems(pluginId, items)
+    }
+
+    private fun reloadPriorities() {
+        userPriorities = IslandPriorityEntries.resolve(settings.getIslandPriorityOrder())
+        latestItems.toMap().forEach { (id, items) -> publishItems(id, items) }
+    }
 
     private val plugins: List<IslandPlugin> = listOf(
         CallPlugin(),
@@ -404,9 +420,11 @@ class IslandCoordinator(
             currentStage = { controller.state.value.stage },
             focusedKey = { controller.state.value.focusedKey },
         )
+        latestItems.clear()
+        userPriorities = IslandPriorityEntries.resolve(settings.getIslandPriorityOrder())
         plugins.forEach { plugin ->
             plugin.start(context)
-            newScope.launch { plugin.items.collect { controller.setItems(plugin.id, it) } }
+            newScope.launch { plugin.items.collect { publishItems(plugin.id, it) } }
         }
         newScope.launch {
             controller.state
@@ -573,6 +591,7 @@ class IslandCoordinator(
         key ?: return
         when (key) {
             SettingsRepository.KEY_ISLAND_ENABLED -> updateState()
+            SettingsRepository.KEY_ISLAND_PRIORITY_ORDER -> if (running) reloadPriorities()
             SettingsRepository.KEY_ISLAND_DYNAMIC_HIDE_STATUS_BAR -> syncStatusBar(controller.state.value.stage)
             SettingsRepository.KEY_ISLAND_HIDE_WHEN_SCREEN_OFF, SettingsRepository.KEY_ISLAND_SHOW_WHEN -> applySuppression()
             SettingsRepository.KEY_ISLAND_HIDE_IN_OWNER_APP -> applyOwnerAppHiding()

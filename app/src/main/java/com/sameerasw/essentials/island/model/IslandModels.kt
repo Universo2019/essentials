@@ -114,7 +114,9 @@ class IslandItem(
     
     val stack: List<StackIcon> = emptyList(),
 ) {
-    val effectivePriority: Int get() = priorityOverride ?: priority
+    var userPriority: Int? = null
+
+    val effectivePriority: Int get() = priorityOverride ?: userPriority ?: priority
 
     init {
         require(compact.size in 1..2) { "IslandItem $key must have 1..2 compact cells" }
