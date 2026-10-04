@@ -12,6 +12,7 @@ import com.sameerasw.essentials.R
 import com.sameerasw.essentials.data.repository.SettingsRepository
 import com.sameerasw.essentials.domain.model.ActiveNotificationAlert
 import com.sameerasw.essentials.domain.model.NotificationActionItem
+import com.sameerasw.essentials.island.model.CatchUpBubble
 import com.sameerasw.essentials.island.model.CompactCell
 import com.sameerasw.essentials.island.model.CompactPlacement
 import com.sameerasw.essentials.island.model.ExpandedContent
@@ -49,6 +50,7 @@ class NotificationsPlugin : BaseIslandPlugin() {
     private var manualPick = false
     
     private var pendingPopUp = false
+    private var catchingUp = false
 
     private fun busyElsewhere(): Boolean {
         val c = ctx ?: return false
@@ -56,7 +58,22 @@ class NotificationsPlugin : BaseIslandPlugin() {
         return c.focusedKey() != ITEM_KEY && (stage == IslandStage.Line || stage == IslandStage.Expanded)
     }
 
+    private var wasHere = false
+
     override fun onFocusChanged(stage: IslandStage, focusedKey: String?) {
+        val here = focusedKey == ITEM_KEY && (stage == IslandStage.Line || stage == IslandStage.Expanded)
+        val left = wasHere && !here
+        wasHere = here
+        if (left && !pendingPopUp && alerts.isNotEmpty() && settings.isIslandCatchUpEnabled()) {
+            val c = ctx
+            if (c != null) {
+                c.mainHandler.removeCallbacks(timeoutRunnable)
+                c.mainHandler.removeCallbacks(catchUpRunnable)
+                if (!settings.isIslandCatchUpInfinite()) c.mainHandler.postDelayed(catchUpRunnable, settings.getIslandCatchUpTimeoutMs())
+            }
+            catchingUp = true
+        }
+        if (catchingUp) render()
         if (!pendingPopUp || alerts.isEmpty()) return
         if (stage == IslandStage.Line || stage == IslandStage.Expanded) return
         pendingPopUp = false
@@ -76,6 +93,7 @@ class NotificationsPlugin : BaseIslandPlugin() {
         val c = ctx ?: return
         val index = alerts.indexOfFirst { it.key == key }
         if (index < 0) return
+        catchingUp = false
         val here = showingHere()
         if (here && index == currentIndex) return
         currentIndex = index
@@ -149,6 +167,7 @@ class NotificationsPlugin : BaseIslandPlugin() {
             return
         }
         c.mainHandler.removeCallbacks(catchUpRunnable)
+        catchingUp = false
         if (queueEnabled() && showingHere()) {
             alerts.addLast(alert)
             while (alerts.size > MAX_QUEUE) {
@@ -226,6 +245,8 @@ class NotificationsPlugin : BaseIslandPlugin() {
         }
         if (settings.isIslandCatchUpEnabled() && alerts.isNotEmpty()) {
             if (!settings.isIslandCatchUpInfinite()) c.mainHandler.postDelayed(catchUpRunnable, settings.getIslandCatchUpTimeoutMs())
+            catchingUp = true
+            render()
             return
         }
         clearAll()
@@ -243,6 +264,7 @@ class NotificationsPlugin : BaseIslandPlugin() {
     }
 
     private fun clearAll() {
+        catchingUp = false
         cancelTimers()
         alerts.clear()
         currentIndex = 0
@@ -252,6 +274,7 @@ class NotificationsPlugin : BaseIslandPlugin() {
     }
 
     private fun popCurrent(reExpand: Boolean) {
+        catchingUp = false
         removeCurrent()
         if (alerts.isEmpty()) {
             clearAll()
@@ -271,9 +294,19 @@ class NotificationsPlugin : BaseIslandPlugin() {
         val index = alerts.indexOf(alert)
         val next = if (queueEnabled()) alerts.getOrNull(index + 1) ?: alerts.getOrNull(index - 1) else null
         val stack = alerts.map { stackIconFor(it, current = it === alert) }
+        val bubble = if (settings.isIslandCatchUpEnabled()) {
+            CatchUpBubble(
+                icons = alerts.map { stackIconFor(it, current = false) },
+                onOpen = { select(alert.key) },
+                onDismiss = { clearAll() },
+            )
+        } else {
+            null
+        }
         publish(
             itemFor(alert).let { current ->
                 current.withStack(
+                    catchUp = bubble,
                     queue = next?.let {
                         QueueInfo(
                             next = itemFor(it).withStack(null, alerts.map { a -> stackIconFor(a, current = a === it) }),
@@ -389,7 +422,7 @@ class NotificationsPlugin : BaseIslandPlugin() {
         }
     }
 
-    private fun IslandItem.withStack(queue: QueueInfo?, stack: List<StackIcon>) = IslandItem(
+    private fun IslandItem.withStack(queue: QueueInfo?, stack: List<StackIcon>, catchUp: CatchUpBubble? = null) = IslandItem(
         key = key,
         priority = priority,
         placement = placement,
@@ -404,6 +437,8 @@ class NotificationsPlugin : BaseIslandPlugin() {
         queue = queue,
         sourcePackage = sourcePackage,
         stack = stack,
+        compactVisible = catchUp == null,
+        catchUp = catchUp,
     )
 
     private fun sendReply(alert: ActiveNotificationAlert, action: NotificationActionItem, text: String) {
