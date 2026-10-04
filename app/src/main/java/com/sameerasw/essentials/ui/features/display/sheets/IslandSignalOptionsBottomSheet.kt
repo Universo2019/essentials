@@ -41,6 +41,8 @@ fun IslandSignalOptionsBottomSheet(onDismissRequest: () -> Unit) {
     var showPermissionSheet by remember { mutableStateOf(false) }
     var activity by remember { mutableStateOf(settings.isIslandNetworkActivityEnabled()) }
     var enabled by remember { mutableStateOf(settings.isIslandShowSignalEnabled()) }
+    var lowOnly by remember { mutableStateOf(settings.isIslandSignalLowOnlyEnabled()) }
+    var wifi by remember { mutableStateOf(settings.isIslandSignalWifiEnabled()) }
     var showMode by remember { mutableStateOf(settings.isIslandSignalShowModeEnabled()) }
     var types by remember { mutableStateOf(settings.getIslandSignalNetworkTypes()) }
 
@@ -82,6 +84,28 @@ fun IslandSignalOptionsBottomSheet(onDismissRequest: () -> Unit) {
                         if (it && !granted) showPermissionSheet = true
                     },
                 )
+                IconToggleItem(
+                    iconRes = R.drawable.rounded_android_wifi_3_bar_24,
+                    title = stringResource(R.string.island_signal_wifi_title),
+                    isChecked = wifi,
+                    onCheckedChange = {
+                        HapticUtil.performVirtualKeyHaptic(view)
+                        wifi = it
+                        settings.setIslandSignalWifiEnabled(it)
+                    },
+                )
+                if (enabled || wifi) {
+                    IconToggleItem(
+                        iconRes = R.drawable.rounded_android_cell_dual_5_bar_alert_24,
+                        title = stringResource(R.string.island_signal_low_only_title),
+                        isChecked = lowOnly,
+                        onCheckedChange = {
+                            HapticUtil.performVirtualKeyHaptic(view)
+                            lowOnly = it
+                            settings.setIslandSignalLowOnlyEnabled(it)
+                        },
+                    )
+                }
             }
 
             if (enabled) {

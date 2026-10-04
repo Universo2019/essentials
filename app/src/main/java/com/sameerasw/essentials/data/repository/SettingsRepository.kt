@@ -537,6 +537,8 @@ class SettingsRepository(
         const val KEY_ISLAND_SHOW_NETWORK = "island_show_network"
         const val KEY_ISLAND_SHOW_SIGNAL = "island_show_signal"
         const val KEY_ISLAND_NETWORK_ACTIVITY = "island_network_activity"
+        const val KEY_ISLAND_SIGNAL_WIFI = "island_signal_wifi"
+        const val KEY_ISLAND_SIGNAL_LOW_ONLY = "island_signal_low_only"
         const val KEY_ISLAND_SIGNAL_NETWORK_TYPES = "island_signal_network_modes"
         const val KEY_ISLAND_SIGNAL_SHOW_MODE = "island_signal_show_mode"
         const val KEY_ISLAND_SHOW_SOUND_MODE = "island_show_sound_mode"
@@ -3771,6 +3773,10 @@ class SettingsRepository(
     fun setIslandShowNetworkEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_SHOW_NETWORK, enabled)
     fun isIslandNetworkActivityEnabled(): Boolean = getBoolean(KEY_ISLAND_NETWORK_ACTIVITY, true)
     fun setIslandNetworkActivityEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_NETWORK_ACTIVITY, enabled)
+    fun isIslandSignalLowOnlyEnabled(): Boolean = getBoolean(KEY_ISLAND_SIGNAL_LOW_ONLY, false)
+    fun setIslandSignalLowOnlyEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_SIGNAL_LOW_ONLY, enabled)
+    fun isIslandSignalWifiEnabled(): Boolean = getBoolean(KEY_ISLAND_SIGNAL_WIFI, false)
+    fun setIslandSignalWifiEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_SIGNAL_WIFI, enabled)
     fun isIslandShowSignalEnabled(): Boolean = getBoolean(KEY_ISLAND_SHOW_SIGNAL, false)
     fun setIslandShowSignalEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_SHOW_SIGNAL, enabled)
     fun isIslandSignalShowModeEnabled(): Boolean = getBoolean(KEY_ISLAND_SIGNAL_SHOW_MODE, false)
