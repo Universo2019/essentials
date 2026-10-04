@@ -354,6 +354,13 @@ class IslandCoordinator(
         }
     }
 
+    fun restart() {
+        mainHandler.post {
+            stop()
+            updateState()
+        }
+    }
+
     fun onDestroy() {
         mainHandler.removeCallbacks(applyForegroundPackage)
         mainHandler.removeCallbacks(applyFullscreen)

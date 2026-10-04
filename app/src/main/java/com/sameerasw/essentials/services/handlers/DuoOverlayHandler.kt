@@ -1367,6 +1367,11 @@ class DuoOverlayHandler(
         }
     }
 
+    fun restart() {
+        removeOverlay(animate = false)
+        updateState()
+    }
+
     fun destroy() {
         removeOverlay(animate = false)
         overlayView = null

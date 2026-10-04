@@ -1023,6 +1023,11 @@ class StatusGlanceHandler(
         removeTouchAnchor()
     }
 
+    fun restart() {
+        removeOverlay(animate = false)
+        updateState()
+    }
+
     fun destroy() {
         removeOverlay(animate = false)
         touchAnchorView = null
