@@ -102,7 +102,8 @@ class NotificationsPlugin : BaseIslandPlugin() {
         scheduleTimeout()
         render()
         if (!here) {
-            if (c.currentStage() == IslandStage.Expanded) c.request(PluginRequest.Expand(ITEM_KEY)) else popUp()
+            autoExpanded = false
+            c.request(PluginRequest.Expand(ITEM_KEY))
         }
     }
     private var registered = false
