@@ -72,6 +72,7 @@ import com.sameerasw.essentials.ui.features.display.sheets.IslandNotificationOpt
 import com.sameerasw.essentials.ui.features.display.sheets.IslandPulseShadowOptionsBottomSheet
 import com.sameerasw.essentials.ui.features.display.sheets.IslandSoundModeOptionsBottomSheet
 import com.sameerasw.essentials.ui.features.display.sheets.IslandTimeBatteryOptionsBottomSheet
+import com.sameerasw.essentials.ui.features.display.sheets.IslandSignalOptionsBottomSheet
 import com.sameerasw.essentials.ui.features.display.sheets.IslandTimerOptionsBottomSheet
 import com.sameerasw.essentials.ui.features.display.sheets.IslandWeatherOptionsBottomSheet
 import com.sameerasw.essentials.ui.features.display.sheets.StatusGlanceCalendarOptionsBottomSheet
@@ -116,6 +117,7 @@ fun IslandSettingsUI(
     var showTimeBatteryOptionsSheet by remember { mutableStateOf(false) }
     var showTimerOptionsSheet by remember { mutableStateOf(false) }
     var showCallOptionsSheet by remember { mutableStateOf(false) }
+    var showSignalOptionsSheet by remember { mutableStateOf(false) }
     var showAlarmOptionsSheet by remember { mutableStateOf(false) }
     var showBriefOptionsSheet by remember { mutableStateOf(highlightSetting == "island_brief_show_alarm") }
     var showNotificationOptionsSheet by remember {
@@ -374,6 +376,18 @@ fun IslandSettingsUI(
             )
 
             IconToggleItem(
+                iconRes = R.drawable.rounded_android_wifi_3_bar_24,
+                title = stringResource(R.string.island_show_network_title),
+                isChecked = viewModel.isIslandShowNetwork.value,
+                onCheckedChange = { checked ->
+                    HapticUtil.performVirtualKeyHaptic(view)
+                    viewModel.setIslandShowNetwork(checked)
+                },
+                onSettingsClick = { showSignalOptionsSheet = true },
+                modifier = Modifier.highlight(highlightSetting == "island_show_network"),
+            )
+
+            IconToggleItem(
                 iconRes = R.drawable.rounded_alarm_24,
                 title = stringResource(R.string.island_show_alarm_title),
                 isChecked = viewModel.isIslandShowAlarm.value,
@@ -383,17 +397,6 @@ fun IslandSettingsUI(
                 },
                 onSettingsClick = { showAlarmOptionsSheet = true },
                 modifier = Modifier.highlight(highlightSetting == "island_show_alarm"),
-            )
-
-            IconToggleItem(
-                iconRes = R.drawable.rounded_android_wifi_3_bar_24,
-                title = stringResource(R.string.island_show_network_title),
-                isChecked = viewModel.isIslandShowNetwork.value,
-                onCheckedChange = { checked ->
-                    HapticUtil.performVirtualKeyHaptic(view)
-                    viewModel.setIslandShowNetwork(checked)
-                },
-                modifier = Modifier.highlight(highlightSetting == "island_show_network"),
             )
 
             IconToggleItem(
@@ -663,6 +666,10 @@ fun IslandSettingsUI(
             viewModel = viewModel,
             onDismissRequest = { showAlarmOptionsSheet = false },
         )
+    }
+
+    if (showSignalOptionsSheet) {
+        IslandSignalOptionsBottomSheet(onDismissRequest = { showSignalOptionsSheet = false })
     }
 
     if (showCallOptionsSheet) {

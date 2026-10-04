@@ -9,6 +9,7 @@
 
 package com.sameerasw.essentials.data.repository
 
+import com.sameerasw.essentials.ui.core.pickers.NetworkType
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
@@ -531,7 +532,13 @@ class SettingsRepository(
         const val WEATHER_UNITS_FAHRENHEIT = "fahrenheit"
         const val KEY_ISLAND_CALENDAR_EMOJIS = "island_calendar_emojis"
         const val KEY_ISLAND_TIMERS_SHOW_SCREEN_RECORDER = "island_timers_show_screen_recorder"
+        const val KEY_ISLAND_TIMERS_FILTER_APPS = "island_timers_filter_apps"
+        const val KEY_ISLAND_TIMERS_SELECTED_APPS = "island_timers_selected_apps"
         const val KEY_ISLAND_SHOW_NETWORK = "island_show_network"
+        const val KEY_ISLAND_SHOW_SIGNAL = "island_show_signal"
+        const val KEY_ISLAND_NETWORK_ACTIVITY = "island_network_activity"
+        const val KEY_ISLAND_SIGNAL_NETWORK_TYPES = "island_signal_network_modes"
+        const val KEY_ISLAND_SIGNAL_SHOW_MODE = "island_signal_show_mode"
         const val KEY_ISLAND_SHOW_SOUND_MODE = "island_show_sound_mode"
         const val KEY_ISLAND_SOUND_MODE_KEEP_ICON = "island_sound_mode_keep_icon"
         const val KEY_ISLAND_SHOW_ALARM = "island_show_alarm"
@@ -3754,9 +3761,26 @@ class SettingsRepository(
 
     fun isIslandTimersShowScreenRecorderEnabled(): Boolean = getBoolean(KEY_ISLAND_TIMERS_SHOW_SCREEN_RECORDER, true)
     fun setIslandTimersShowScreenRecorderEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_TIMERS_SHOW_SCREEN_RECORDER, enabled)
+    fun isIslandTimersFilterAppsEnabled(): Boolean = getBoolean(KEY_ISLAND_TIMERS_FILTER_APPS, false)
+    fun setIslandTimersFilterAppsEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_TIMERS_FILTER_APPS, enabled)
+    fun loadIslandTimersSelectedApps() = loadAppSelection(KEY_ISLAND_TIMERS_SELECTED_APPS)
+    fun saveIslandTimersSelectedApps(apps: List<AppSelection>) = saveAppSelection(KEY_ISLAND_TIMERS_SELECTED_APPS, apps)
+    fun updateIslandTimersAppSelection(packageName: String, enabled: Boolean) = updateAppSelection(KEY_ISLAND_TIMERS_SELECTED_APPS, packageName, enabled)
 
     fun isIslandShowNetworkEnabled(): Boolean = getBoolean(KEY_ISLAND_SHOW_NETWORK, true)
     fun setIslandShowNetworkEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_SHOW_NETWORK, enabled)
+    fun isIslandNetworkActivityEnabled(): Boolean = getBoolean(KEY_ISLAND_NETWORK_ACTIVITY, true)
+    fun setIslandNetworkActivityEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_NETWORK_ACTIVITY, enabled)
+    fun isIslandShowSignalEnabled(): Boolean = getBoolean(KEY_ISLAND_SHOW_SIGNAL, false)
+    fun setIslandShowSignalEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_SHOW_SIGNAL, enabled)
+    fun isIslandSignalShowModeEnabled(): Boolean = getBoolean(KEY_ISLAND_SIGNAL_SHOW_MODE, false)
+    fun setIslandSignalShowModeEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_SIGNAL_SHOW_MODE, enabled)
+    fun getIslandSignalNetworkTypes(): Set<NetworkType> =
+        (getString(KEY_ISLAND_SIGNAL_NETWORK_TYPES, "NETWORK_5G,NETWORK_4G,NETWORK_3G,NETWORK_OTHER") ?: "")
+            .split(",")
+            .mapNotNull { name -> NetworkType.entries.firstOrNull { it.name == name } }
+            .toSet()
+    fun setIslandSignalNetworkTypes(types: Set<NetworkType>) = putString(KEY_ISLAND_SIGNAL_NETWORK_TYPES, types.joinToString(",") { it.name })
 
     fun isIslandShowSoundModeEnabled(): Boolean = getBoolean(KEY_ISLAND_SHOW_SOUND_MODE, true)
     fun setIslandShowSoundModeEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_SHOW_SOUND_MODE, enabled)

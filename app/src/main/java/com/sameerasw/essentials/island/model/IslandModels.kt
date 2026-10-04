@@ -30,6 +30,7 @@ object IslandPriority {
     const val WEATHER_ALERT = 48
     const val CALENDAR = 50
     const val SOUND_MODE = 55
+    const val SIGNAL = 57
     const val WEATHER = 58
     const val NETWORK = 60
     const val DEVICES = 62
