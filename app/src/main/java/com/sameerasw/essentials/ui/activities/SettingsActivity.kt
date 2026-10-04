@@ -516,6 +516,7 @@ fun SettingsContent(
     if (showHiddenDebuggingHelpSheet) {
         com.sameerasw.essentials.ui.core.sheets.HiddenDebuggingHelpBottomSheet(
             onDismissRequest = { showHiddenDebuggingHelpSheet = false },
+            onAutoDetected = { viewModel.setHiddenDebuggingSupport(true) },
         )
     }
 
