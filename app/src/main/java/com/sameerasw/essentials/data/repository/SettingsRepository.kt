@@ -495,6 +495,7 @@ class SettingsRepository(
         const val KEY_ISLAND_LIKE_WHILE_PLAYING = "island_like_while_playing"
         const val KEY_ISLAND_SLIDE_INVERT_DIRECTION = "island_slide_invert_direction"
         const val KEY_ISLAND_BATTERY_PERCENTAGE_CONDITIONAL = "island_battery_percentage_conditional"
+        const val KEY_ISLAND_BATTERY_ICON_CONDITIONAL = "island_battery_icon_conditional"
         const val KEY_ISLAND_BATTERY_ONLY_LOW = "island_battery_only_low"
         const val KEY_ISLAND_DEVICES_BATTERY_ONLY_LOW = "island_devices_battery_only_low"
         const val ISLAND_BATTERY_LOW_LEVEL = 20
@@ -3717,6 +3718,8 @@ class SettingsRepository(
     fun isIslandSlideInvertDirectionEnabled(): Boolean = getBoolean(KEY_ISLAND_SLIDE_INVERT_DIRECTION, true)
     fun setIslandSlideInvertDirection(enabled: Boolean) = putBoolean(KEY_ISLAND_SLIDE_INVERT_DIRECTION, enabled)
 
+    fun isIslandBatteryIconConditional(): Boolean = getBoolean(KEY_ISLAND_BATTERY_ICON_CONDITIONAL, false)
+    fun setIslandBatteryIconConditional(enabled: Boolean) = putBoolean(KEY_ISLAND_BATTERY_ICON_CONDITIONAL, enabled)
     fun isIslandBatteryPercentageConditional(): Boolean = getBoolean(KEY_ISLAND_BATTERY_PERCENTAGE_CONDITIONAL, false)
 
     fun isIslandBatteryOnlyLowEnabled(): Boolean = getBoolean(KEY_ISLAND_BATTERY_ONLY_LOW, false)

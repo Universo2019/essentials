@@ -2856,7 +2856,8 @@
     <string name="island_like_while_playing_title">Like music while playing</string>
     <string name="island_gesture_visuals_hint">Turn on Time &amp; battery to see volume, brightness and sound mode changes on the island.</string>
     <string name="island_battery_percentage_title">Show percentage</string>
-    <string name="island_battery_percentage_conditional_title">Only for below conditions</string>
+    <string name="island_battery_percentage_conditional_title">% only for below conditions</string>
+    <string name="island_battery_icon_conditional_title">Icon only for below conditions</string>
     <string name="island_tap_action_desc">Choose what tap and long press do</string>
     <string name="island_tap_action_open">Open</string>
     <string name="island_tap_action_expand">Expand</string>

@@ -252,6 +252,7 @@ class MainViewModel : ViewModel() {
     val islandBatteryStyle = mutableStateOf(SettingsRepository.ISLAND_BATTERY_STYLE_RING)
     val isIslandBatteryPercentageEnabled = mutableStateOf(false)
     val isIslandBatteryPercentageConditional = mutableStateOf(false)
+    val isIslandBatteryIconConditional = mutableStateOf(false)
     val isIslandBatteryOnlyLow = mutableStateOf(false)
     val isIslandDevicesBatteryOnlyLow = mutableStateOf(false)
     val islandLongPressAction = mutableStateOf<Action?>(null)
@@ -2314,6 +2315,7 @@ class MainViewModel : ViewModel() {
         islandBatteryStyle.value = settingsRepository.getIslandBatteryStyle()
         isIslandBatteryPercentageEnabled.value = settingsRepository.isIslandBatteryPercentageEnabled()
         isIslandBatteryPercentageConditional.value = settingsRepository.isIslandBatteryPercentageConditional()
+        isIslandBatteryIconConditional.value = settingsRepository.isIslandBatteryIconConditional()
         isIslandBatteryOnlyLow.value = settingsRepository.isIslandBatteryOnlyLowEnabled()
         isIslandDevicesBatteryOnlyLow.value = settingsRepository.isIslandDevicesBatteryOnlyLowEnabled()
         islandLongPressAction.value = settingsRepository.getIslandLongPressAction()
@@ -5625,6 +5627,11 @@ class MainViewModel : ViewModel() {
     fun setIslandBatteryOnlyLow(enabled: Boolean) {
         isIslandBatteryOnlyLow.value = enabled
         settingsRepository.setIslandBatteryOnlyLowEnabled(enabled)
+    }
+
+    fun setIslandBatteryIconConditional(enabled: Boolean) {
+        isIslandBatteryIconConditional.value = enabled
+        settingsRepository.setIslandBatteryIconConditional(enabled)
     }
 
     fun setIslandBatteryPercentageConditional(enabled: Boolean) {
