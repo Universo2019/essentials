@@ -195,6 +195,7 @@ class MainViewModel : ViewModel() {
     val isIslandHideInOwnerApp = mutableStateOf(false)
     val isIslandHideOnShade = mutableStateOf(false)
     val isIslandDismissOnOutside = mutableStateOf(false)
+    val isIslandHideLiveUpdates = mutableStateOf(false)
     val islandExpandedScale = mutableFloatStateOf(1f)
     val islandCameraPosition = mutableStateOf(SettingsRepository.ISLAND_CAMERA_POSITION_CENTER)
     val isIslandShowCalls = mutableStateOf(true)
@@ -2251,6 +2252,7 @@ class MainViewModel : ViewModel() {
         isIslandHideInOwnerApp.value = settingsRepository.isIslandHideInOwnerAppEnabled()
         isIslandHideOnShade.value = settingsRepository.isIslandHideOnShadeEnabled()
         isIslandDismissOnOutside.value = settingsRepository.isIslandDismissOnOutsideEnabled()
+        isIslandHideLiveUpdates.value = settingsRepository.isIslandHideLiveUpdatesEnabled()
         islandExpandedScale.floatValue = settingsRepository.getIslandExpandedScale()
         islandCameraPosition.value = settingsRepository.getIslandCameraPosition()
         isIslandShowCalls.value = settingsRepository.isIslandShowCallsEnabled()
@@ -5382,6 +5384,11 @@ class MainViewModel : ViewModel() {
     fun setIslandExpandedScale(value: Float) {
         islandExpandedScale.floatValue = value
         settingsRepository.setIslandExpandedScale(value)
+    }
+
+    fun setIslandHideLiveUpdates(enabled: Boolean) {
+        isIslandHideLiveUpdates.value = enabled
+        settingsRepository.setIslandHideLiveUpdatesEnabled(enabled)
     }
 
     fun setIslandDismissOnOutside(enabled: Boolean) {

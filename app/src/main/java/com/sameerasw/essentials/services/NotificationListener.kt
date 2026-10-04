@@ -984,6 +984,7 @@ class NotificationListener : NotificationListenerService() {
         }
         if (!hasReadableExtras(sbn)) return
 
+        LiveUpdateSnoozer.onPosted(this, sbn)
         val isRepost = NotificationRepostFilter.isUnchangedRepost(sbn)
         if (CallNotificationParser.isCall(sbn)) CallStateRepository.onCallNotificationPosted(applicationContext, sbn)
         if (ChronometerRepository.isCandidate(sbn)) ChronometerRepository.onPosted(applicationContext, sbn)
@@ -1352,6 +1353,15 @@ class NotificationListener : NotificationListenerService() {
         } catch (e: Exception) {
             Log.e("NotificationListener", "Error in handleCallVibrations", e)
         }
+    }
+
+    override fun onNotificationRemoved(
+        sbn: StatusBarNotification,
+        rankingMap: RankingMap,
+        reason: Int,
+    ) {
+        LiveUpdateSnoozer.onRemoved(sbn.key, reason)
+        super.onNotificationRemoved(sbn, rankingMap, reason)
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {

@@ -609,6 +609,17 @@ fun IslandBehaviorSettingsUI(
             )
 
             IconToggleItem(
+                iconRes = R.drawable.rounded_notifications_off_24,
+                title = stringResource(R.string.island_hide_live_updates_title),
+                isChecked = viewModel.isIslandHideLiveUpdates.value,
+                onCheckedChange = { checked ->
+                    HapticUtil.performVirtualKeyHaptic(view)
+                    viewModel.setIslandHideLiveUpdates(checked)
+                },
+                modifier = Modifier.highlight(highlightSetting == "island_hide_live_updates"),
+            )
+
+            IconToggleItem(
                 iconRes = R.drawable.rounded_visibility_off_24,
                 title = stringResource(R.string.island_dynamic_hide_status_bar_title),
                 isChecked = viewModel.isIslandDynamicHideStatusBar.value && hasShellPermission,
