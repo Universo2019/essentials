@@ -980,6 +980,7 @@ class NotificationListener : NotificationListenerService() {
     ) {
         // Skip our own app's notifications early to avoid flooding logs and redundant processing
         if (sbn.packageName == packageName) {
+            if (hasReadableExtras(sbn)) LiveUpdateSnoozer.onPosted(this, sbn)
             return
         }
         if (!hasReadableExtras(sbn)) return
@@ -1365,11 +1366,13 @@ class NotificationListener : NotificationListenerService() {
     }
 
     fun feedSnoozedPosted(sbn: StatusBarNotification) {
+        if (sbn.packageName == packageName) return
         if (ChronometerRepository.isCandidate(sbn)) ChronometerRepository.onPosted(applicationContext, sbn)
         scheduleProgressRefresh()
     }
 
     fun feedSnoozedRemoved(sbn: StatusBarNotification) {
+        if (sbn.packageName == packageName) return
         ChronometerRepository.onRemoved(sbn.key)
         scheduleProgressRefresh()
     }
