@@ -37,10 +37,6 @@ fun HiddenDebuggingHelpBottomSheet(
     onDismissRequest: () -> Unit,
     onAutoDetected: () -> Unit,
 ) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var detecting by remember { mutableStateOf(false) }
-    val shizukuReady = remember(detecting) { ShellUtils.isAvailable(context) && ShellUtils.hasPermission(context) }
     EssentialsBottomSheet(onDismissRequest = onDismissRequest) {
         Column(
             modifier =
@@ -71,59 +67,71 @@ fun HiddenDebuggingHelpBottomSheet(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceBright, RoundedCornerShape(24.dp))
-                        .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.setting_hidden_debugging_auto_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    text = stringResource(R.string.setting_hidden_debugging_auto_help),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                OutlinedButton(
-                    onClick = {
-                        detecting = true
-                        scope.launch {
-                            val result = withContext(Dispatchers.IO) { HiddenDebuggingUtils.autoDetect(context) }
-                            detecting = false
-                            val message =
-                                when (result) {
-                                    HiddenDebuggingUtils.DetectResult.HIDDEN -> {
-                                        onAutoDetected()
-                                        R.string.setting_hidden_debugging_detected
-                                    }
-                                    HiddenDebuggingUtils.DetectResult.NOT_HIDDEN -> R.string.setting_hidden_debugging_not_hidden
-                                    HiddenDebuggingUtils.DetectResult.INCONCLUSIVE -> R.string.setting_hidden_debugging_inconclusive
-                                    HiddenDebuggingUtils.DetectResult.SHELL_UNAVAILABLE -> R.string.setting_hidden_debugging_needs_shizuku
-                                }
-                            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                        }
-                    },
-                    enabled = shizukuReady && !detecting,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(
-                        stringResource(
-                            if (shizukuReady) R.string.setting_hidden_debugging_auto_title else R.string.setting_hidden_debugging_shizuku_required,
-                        ),
-                    )
-                }
-            }
+            HiddenDebuggingAutoDetectCard(onAutoDetected = onAutoDetected)
             Button(
                 onClick = onDismissRequest,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(stringResource(R.string.action_got_it))
             }
+        }
+    }
+}
+
+@Composable
+fun HiddenDebuggingAutoDetectCard(
+    onAutoDetected: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var detecting by remember { mutableStateOf(false) }
+    val shizukuReady = remember(detecting) { ShellUtils.isAvailable(context) && ShellUtils.hasPermission(context) }
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceBright, RoundedCornerShape(24.dp))
+                .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.setting_hidden_debugging_auto_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = stringResource(R.string.setting_hidden_debugging_auto_help),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OutlinedButton(
+            onClick = {
+                detecting = true
+                scope.launch {
+                    val result = withContext(Dispatchers.IO) { HiddenDebuggingUtils.autoDetect(context) }
+                    detecting = false
+                    val message =
+                        when (result) {
+                            HiddenDebuggingUtils.DetectResult.HIDDEN -> {
+                                onAutoDetected()
+                                R.string.setting_hidden_debugging_detected
+                            }
+                            HiddenDebuggingUtils.DetectResult.NOT_HIDDEN -> R.string.setting_hidden_debugging_not_hidden
+                            HiddenDebuggingUtils.DetectResult.INCONCLUSIVE -> R.string.setting_hidden_debugging_inconclusive
+                            HiddenDebuggingUtils.DetectResult.SHELL_UNAVAILABLE -> R.string.setting_hidden_debugging_needs_shizuku
+                        }
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                }
+            },
+            enabled = shizukuReady && !detecting,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                stringResource(
+                    if (shizukuReady) R.string.setting_hidden_debugging_auto_title else R.string.setting_hidden_debugging_shizuku_required,
+                ),
+            )
         }
     }
 }
