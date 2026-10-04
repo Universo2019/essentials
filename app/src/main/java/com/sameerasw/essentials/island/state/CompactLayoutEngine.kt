@@ -7,6 +7,8 @@ data class CompactEntry(
     // [icon, value] — icon always ends up on the outer edge.
     val cellKeys: List<String>,
     val soloCellKeys: List<String> = emptyList(),
+    val needsCompany: Boolean = false,
+    val companionOnly: Boolean = false,
 )
 
 // `before` / `after` are camera-relative and ordered inner (next to camera) → outer.
@@ -28,7 +30,14 @@ object CompactLayoutEngine {
         anchor: CameraAnchor = CameraAnchor.Center,
         maxCells: Int = MAX_CELLS,
     ): CompactArrangement {
-        val selected = select(entries, maxCells)
+        val base = entries.filterNot { it.companionOnly }
+        val companions = entries.filter { it.companionOnly }
+        var effective = base
+        if (anchor == CameraAnchor.Center && companions.isNotEmpty()) {
+            val alone = select(base, maxCells)
+            if (alone.isNotEmpty() && alone.all { it.needsCompany }) effective = base + companions
+        }
+        val selected = select(effective, maxCells)
         if (selected.isEmpty()) return CompactArrangement.Empty
 
         val pinned = selected.filter { it.pinned }

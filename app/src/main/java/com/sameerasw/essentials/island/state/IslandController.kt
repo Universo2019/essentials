@@ -257,6 +257,8 @@ class IslandController(
                     item.placement == CompactPlacement.Pinned,
                     item.compact.filterNot { it.soloOnly }.map { it.key },
                     item.compact.filter { it.soloOnly }.map { it.key },
+                    item.needsCompanyAtCenter,
+                    item.companionOnly,
                 )
             },
             anchorProvider(),

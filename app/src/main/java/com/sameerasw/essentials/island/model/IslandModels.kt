@@ -110,6 +110,8 @@ class IslandItem(
     val priorityOverride: Int? = null,
     
     val compactVisible: Boolean = true,
+    val needsCompanyAtCenter: Boolean = false,
+    val companionOnly: Boolean = false,
     val bypassLauncherOnly: Boolean = false,
     
     val stack: List<StackIcon> = emptyList(),
