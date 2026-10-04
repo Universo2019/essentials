@@ -360,7 +360,7 @@ class ScreenOffAccessibilityService :
                         }
 
                         Intent.ACTION_USER_PRESENT -> {
-                            aodWallpaperOverlayHandler.onScreenOn()
+                            aodWallpaperOverlayHandler.onUserPresent()
                             statusGlanceHandler.onUserPresent()
                             duoOverlayHandler.onUserPresent()
                             islandOverlayHandler.updateState()
