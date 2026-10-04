@@ -96,7 +96,7 @@ import com.sameerasw.essentials.island.gestures.SlideFeedback
 import com.sameerasw.essentials.island.ui.components.SlideFeedbackCompact
 import com.sameerasw.essentials.island.model.IslandItem
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import com.sameerasw.essentials.island.model.CatchUpBubble
+import com.sameerasw.essentials.island.model.SideBubble
 import com.sameerasw.essentials.island.model.StackIcon
 import com.sameerasw.essentials.island.model.IslandStage
 import com.sameerasw.essentials.island.state.IslandUiState
@@ -352,10 +352,15 @@ fun IslandRoot(
 
     fun edgeCorrection(layerStage: IslandStage): Float =
         edgeShift.floatValue - if (layerStage == IslandStage.Expanded) outsetPx else 0f
-    val catchUp = state.items.values.firstNotNullOfOrNull { it.catchUp }
-    val catchUpShown = catchUp != null && stage == IslandStage.Compact
-    var lastCatchUp by remember { mutableStateOf<CatchUpBubble?>(null) }
-    if (catchUp != null) lastCatchUp = catchUp
+    val sideBubble = state.sideBubble
+    val catchUpShown = sideBubble != null && stage == IslandStage.Compact
+    val knownBubbles = remember { HashMap<String, SideBubble>() }
+    var lastBubbleKey by remember { mutableStateOf<String?>(null) }
+    if (sideBubble != null && state.sideBubbleKey != null) {
+        knownBubbles[state.sideBubbleKey] = sideBubble
+        lastBubbleKey = state.sideBubbleKey
+    }
+    val lastCatchUp = lastBubbleKey?.let { knownBubbles[it] }
     val hasCompactCells = state.arrangement.before.isNotEmpty() || state.arrangement.after.isNotEmpty()
     val catchUpAnim = remember { Animatable(0f) }
     LaunchedEffect(catchUpShown) {
@@ -529,8 +534,9 @@ fun IslandRoot(
             val maxDrag = with(density) { 56.dp.toPx() }
             val threshold = with(density) { 28.dp.toPx() }
             Box(Modifier.fillMaxSize()) {
-                IslandStackBubble(
-                    icons = bubbleData.icons,
+                IslandSideBubble(
+                    ownerKey = lastBubbleKey,
+                    bubbleFor = { knownBubbles[it] },
                     size = spec.compactHeight,
                     modifier = Modifier
                         .offset {
@@ -552,6 +558,7 @@ fun IslandRoot(
                         .pointerInput(Unit) {
                             detectHorizontalDragGestures(
                                 onHorizontalDrag = { change, amount ->
+                                    if (bubbleData.onDismiss == null) return@detectHorizontalDragGestures
                                     change.consume()
                                     val next = dragX.value + amount
                                     val lo = if (towardCamera > 0f) -with(density) { 8.dp.toPx() } else -maxDrag
@@ -563,7 +570,7 @@ fun IslandRoot(
                                         if (dragX.value * towardCamera > threshold) {
                                             IslandHaptics.tap(context)
                                             dragX.animateTo(towardCamera * maxDrag, tween(100))
-                                            bubbleData.onDismiss()
+                                            bubbleData.onDismiss?.invoke()
                                         } else {
                                             dragX.animateTo(0f, IslandMotion.float())
                                         }

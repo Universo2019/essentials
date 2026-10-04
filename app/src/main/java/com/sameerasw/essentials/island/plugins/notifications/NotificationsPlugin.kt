@@ -12,7 +12,8 @@ import com.sameerasw.essentials.R
 import com.sameerasw.essentials.data.repository.SettingsRepository
 import com.sameerasw.essentials.domain.model.ActiveNotificationAlert
 import com.sameerasw.essentials.domain.model.NotificationActionItem
-import com.sameerasw.essentials.island.model.CatchUpBubble
+import com.sameerasw.essentials.island.model.SideBubble
+import com.sameerasw.essentials.island.model.SideBubblePriority
 import com.sameerasw.essentials.island.model.CompactCell
 import com.sameerasw.essentials.island.model.CompactPlacement
 import com.sameerasw.essentials.island.model.ExpandedContent
@@ -296,7 +297,8 @@ class NotificationsPlugin : BaseIslandPlugin() {
         val next = if (queueEnabled()) alerts.getOrNull(index + 1) ?: alerts.getOrNull(index - 1) else null
         val stack = alerts.map { stackIconFor(it, current = it === alert) }
         val bubble = if (settings.isIslandCatchUpEnabled()) {
-            CatchUpBubble(
+            SideBubble(
+                priority = SideBubblePriority.NOTIFICATION,
                 icons = alerts.map { stackIconFor(it, current = false) },
                 onOpen = { select(alert.key) },
                 onDismiss = { clearAll() },
@@ -307,7 +309,7 @@ class NotificationsPlugin : BaseIslandPlugin() {
         publish(
             itemFor(alert).let { current ->
                 current.withStack(
-                    catchUp = bubble,
+                    sideBubble = bubble,
                     queue = next?.let {
                         QueueInfo(
                             next = itemFor(it).withStack(null, alerts.map { a -> stackIconFor(a, current = a === it) }),
@@ -423,7 +425,7 @@ class NotificationsPlugin : BaseIslandPlugin() {
         }
     }
 
-    private fun IslandItem.withStack(queue: QueueInfo?, stack: List<StackIcon>, catchUp: CatchUpBubble? = null) = IslandItem(
+    private fun IslandItem.withStack(queue: QueueInfo?, stack: List<StackIcon>, sideBubble: SideBubble? = null) = IslandItem(
         key = key,
         priority = priority,
         placement = placement,
@@ -438,8 +440,8 @@ class NotificationsPlugin : BaseIslandPlugin() {
         queue = queue,
         sourcePackage = sourcePackage,
         stack = stack,
-        compactVisible = catchUp == null,
-        catchUp = catchUp,
+        compactVisible = sideBubble == null,
+        sideBubble = sideBubble,
     )
 
     private fun sendReply(alert: ActiveNotificationAlert, action: NotificationActionItem, text: String) {
