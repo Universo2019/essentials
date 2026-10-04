@@ -7,6 +7,8 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.wifi.WifiInfo
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.provider.Settings
 import android.telephony.PhoneStateListener
@@ -33,6 +35,8 @@ class SignalPlugin : BaseIslandPlugin() {
         SettingsRepository.KEY_ISLAND_SHOW_SIGNAL,
         SettingsRepository.KEY_ISLAND_SIGNAL_NETWORK_TYPES,
         SettingsRepository.KEY_ISLAND_SIGNAL_SHOW_MODE,
+        SettingsRepository.KEY_ISLAND_SIGNAL_WIFI,
+        SettingsRepository.KEY_ISLAND_SIGNAL_LOW_ONLY,
     )
 
     private val connectivity by lazy { context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
@@ -184,7 +188,7 @@ class SignalPlugin : BaseIslandPlugin() {
     }
 
     private fun render() {
-        if (ctx == null || !settings.isIslandShowNetworkEnabled() || !settings.isIslandShowSignalEnabled()) {
+        if (ctx == null || !settings.isIslandShowNetworkEnabled() || !(settings.isIslandShowSignalEnabled() || settings.isIslandSignalWifiEnabled())) {
             publish(null)
             return
         }
@@ -207,12 +211,22 @@ class SignalPlugin : BaseIslandPlugin() {
             )
             return
         }
+        val caps = connectivity.getNetworkCapabilities(connectivity.activeNetwork)
+        val wifiLevel = if (settings.isIslandSignalWifiEnabled() && caps?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true) {
+            readWifiLevel(caps)
+        } else {
+            null
+        }
         val label = modeLabel(rawDataType())
-        if (category(label) !in settings.getIslandSignalNetworkTypes()) {
+        if (wifiLevel == null && (!settings.isIslandShowSignalEnabled() || category(label) !in settings.getIslandSignalNetworkTypes())) {
             publish(null)
             return
         }
         val bars = readLevel()
+        if (settings.isIslandSignalLowOnlyEnabled() && (wifiLevel ?: bars) > LOW_LEVEL) {
+            publish(null)
+            return
+        }
         val shownLabel = if (settings.isIslandSignalShowModeEnabled()) label else null
         publish(
             IslandItem(
@@ -221,14 +235,32 @@ class SignalPlugin : BaseIslandPlugin() {
                 placement = CompactPlacement.Dynamic,
                 compact = listOf(
                     CompactCell("signal.bars") {
-                        SignalBars(bars, MaterialTheme.colorScheme.primary, shownLabel)
+                        SignalIndicator(wifiLevel, bars, MaterialTheme.colorScheme.primary, shownLabel)
                     },
                 ),
             ),
         )
     }
 
+    private fun readWifiLevel(caps: NetworkCapabilities): Int {
+        val wifi = context.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+        var rssi: Int? = null
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) rssi = (caps.transportInfo as? WifiInfo)?.rssi
+        if (rssi == null) {
+            @Suppress("DEPRECATION")
+            rssi = wifi?.connectionInfo?.rssi
+        }
+        if (rssi == null || rssi <= -127) return 0
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && wifi != null) {
+            wifi.calculateSignalLevel(rssi).coerceIn(0, 4)
+        } else {
+            @Suppress("DEPRECATION")
+            WifiManager.calculateSignalLevel(rssi, 5).coerceIn(0, 4)
+        }
+    }
+
     companion object {
         const val KEY = "signal"
+        private const val LOW_LEVEL = 1
     }
 }
