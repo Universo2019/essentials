@@ -35,6 +35,7 @@ class IslandController(
     private val _state = MutableStateFlow(IslandUiState())
     val state: StateFlow<IslandUiState> = _state.asStateFlow()
 
+    var maxCells: Int = CompactLayoutEngine.MAX_CELLS
     var lineStageEnabled: Boolean = true
     var expandedTimeoutMs: Long = 0L
     var holdFocus: Boolean = false
@@ -277,6 +278,7 @@ class IslandController(
                 )
             },
             anchorProvider(),
+            maxCells = maxCells,
             leftExtra = if (bubbleOwner != null) 1 else 0,
         )
         val focusedKey = expandedKey ?: peekKey

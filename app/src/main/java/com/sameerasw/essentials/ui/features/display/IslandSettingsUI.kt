@@ -221,6 +221,37 @@ fun IslandSettingsUI(
             spacing = 2.dp,
             cornerRadius = 24.dp,
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceBright, MaterialTheme.shapes.extraSmall)
+                    .padding(top = 12.dp)
+                    .highlight(highlightSetting == "island_max_items"),
+            ) {
+                Text(
+                    text = stringResource(R.string.island_max_items_title),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+                SegmentedPicker(
+                    items = listOf(1, 2, 3, 4),
+                    selectedItem = viewModel.islandMaxItems.value,
+                    onItemSelected = {
+                        HapticUtil.performVirtualKeyHaptic(view)
+                        viewModel.setIslandMaxItems(it)
+                    },
+                    labelProvider = { it.toString() },
+                    title = R.string.island_max_items_title,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
+
+        RoundedCardContainer(
+            spacing = 2.dp,
+            cornerRadius = 24.dp,
+        ) {
             val renderEntry: @Composable (String, (@Composable () -> Unit)?) -> Unit = { entryId, handle ->
                 when (entryId) {
                     "calls" -> IconToggleItem(
