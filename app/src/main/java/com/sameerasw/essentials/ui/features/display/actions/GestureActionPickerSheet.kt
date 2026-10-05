@@ -108,6 +108,8 @@ fun GestureActionPickerSheet(
                 "WRITE_SETTINGS" -> !viewModel.isWriteSettingsEnabled.value
                 "NOTIFICATION_POLICY" -> !viewModel.isNotificationPolicyAccessGranted.value
                 "WRITE_SECURE_SETTINGS" -> !viewModel.isWriteSecureSettingsEnabled.value
+                "DRAW_OVERLAYS" -> !viewModel.isOverlayPermissionGranted.value
+                "ACCESSIBILITY" -> !viewModel.isAccessibilityEnabled.value
                 else -> false
             }
         }
