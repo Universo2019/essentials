@@ -25,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -152,7 +153,7 @@ class IslandCoordinator(
     private var foregroundPackage: String? = null
     private var textInputActive = false
 
-    private val isWindowSuppressed get() = isLandscape || isFullscreenApp
+    private val isWindowSuppressed get() = (isLandscape && !settings.isIslandKeepOnLandscapeEnabled()) || isFullscreenApp
     private val isContentSuppressed: Boolean
         get() = isWindowSuppressed ||
             when (settings.getIslandShowWhen()) {
@@ -565,6 +566,8 @@ class IslandCoordinator(
             fontScale = settings.getIslandFontScale().coerceIn(0.8f, 1.3f),
             expandedOutset = (expandedWidth * (scale - 1f) / 2f).dp,
             cameraAnchor = geo.anchor,
+            cameraPresence = if (geo.hasCamera) 1f else 0f,
+            maxExpandedHeight = if (isLandscape) ((geo.screenHeight - geo.surfaceTop) / density - 12f).dp else Dp.Unspecified,
             outlineColor = if (settings.isIslandBorderOutlineEnabled()) {
                 runCatching { Color(AndroidColor.parseColor(settings.getIslandBorderOutlineColor())) }
                     .getOrElse { Color(AndroidColor.parseColor(SettingsRepository.ISLAND_BORDER_OUTLINE_DEFAULT_COLOR)) }
@@ -612,7 +615,7 @@ class IslandCoordinator(
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         key ?: return
         when (key) {
-            SettingsRepository.KEY_ISLAND_ENABLED -> updateState()
+            SettingsRepository.KEY_ISLAND_ENABLED, SettingsRepository.KEY_ISLAND_KEEP_ON_LANDSCAPE -> updateState()
             SettingsRepository.KEY_ISLAND_PRIORITY_ORDER -> if (running) reloadPriorities()
             SettingsRepository.KEY_ISLAND_DYNAMIC_HIDE_STATUS_BAR, SettingsRepository.KEY_ISLAND_COMPACT_HIDE_STATUS_BAR -> syncStatusBar()
             SettingsRepository.KEY_ISLAND_HIDE_WHEN_SCREEN_OFF, SettingsRepository.KEY_ISLAND_SHOW_WHEN -> applySuppression()
@@ -667,6 +670,7 @@ class IslandCoordinator(
             SettingsRepository.KEY_ISLAND_EXPANDED_SCALE,
             SettingsRepository.KEY_ISLAND_FONT_SCALE,
             SettingsRepository.KEY_ISLAND_CAMERA_POSITION,
+            SettingsRepository.KEY_ISLAND_LANDSCAPE_TOP_SPACING,
         )
     }
 }
