@@ -516,6 +516,19 @@ object CombinedActionExecutor {
                 is Action.TurnOffHotspot -> setHotspotEnabled(context, false)
                 is Action.ToggleHotspot -> setHotspotEnabled(context, !isHotspotEnabled(context))
 
+                is Action.OverlayControl -> {
+                    val settings = SettingsRepository(context)
+                    fun resolve(mode: Action.OverlayMode, current: Boolean): Boolean? =
+                        when (mode) {
+                            Action.OverlayMode.SKIP -> null
+                            Action.OverlayMode.OFF -> false
+                            Action.OverlayMode.ON -> true
+                            Action.OverlayMode.TOGGLE -> !current
+                        }
+                    resolve(action.duo, settings.isDuoEnabled())?.let(settings::setDuoEnabled)
+                    resolve(action.island, settings.isIslandEnabled())?.let(settings::setIslandEnabled)
+                    resolve(action.statusGlance, settings.isStatusGlanceEnabled())?.let(settings::setStatusGlanceEnabled)
+                }
                 is Action.TurnOnDuo -> SettingsRepository(context).setDuoEnabled(true)
                 is Action.TurnOffDuo -> SettingsRepository(context).setDuoEnabled(false)
                 is Action.ToggleDuo -> SettingsRepository(context).let { it.setDuoEnabled(!it.isDuoEnabled()) }

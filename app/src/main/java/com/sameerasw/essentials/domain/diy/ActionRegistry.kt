@@ -99,15 +99,7 @@ object ActionRegistry {
             listOf(
                 Action.SometimesEssentials(),
                 Action.TriggerNotificationLighting(),
-                Action.TurnOnDuo,
-                Action.TurnOffDuo,
-                Action.ToggleDuo,
-                Action.TurnOnIsland,
-                Action.TurnOffIsland,
-                Action.ToggleIsland,
-                Action.TurnOnStatusGlance,
-                Action.TurnOffStatusGlance,
-                Action.ToggleStatusGlance,
+                Action.OverlayControl(),
                 Action.EssentialSearch,
             )
 

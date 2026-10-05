@@ -1292,6 +1292,11 @@
     <string name="diy_action_island_turnon">Turn On Island</string>
     <string name="diy_action_island_turnoff">Turn Off Island</string>
     <string name="diy_action_island_toggle">Toggle Island</string>
+    <string name="diy_action_overlay_control">Overlays</string>
+    <string name="overlay_mode_skip">Skip</string>
+    <string name="overlay_mode_off">Off</string>
+    <string name="overlay_mode_on">On</string>
+    <string name="overlay_mode_toggle">Toggle</string>
     <string name="diy_action_statusglance_turnon">Turn On Status Glance</string>
     <string name="diy_action_statusglance_turnoff">Turn Off Status Glance</string>
     <string name="diy_action_statusglance_toggle">Toggle Status Glance</string>

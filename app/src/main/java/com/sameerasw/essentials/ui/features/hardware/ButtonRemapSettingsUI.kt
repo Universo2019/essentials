@@ -67,6 +67,7 @@ import com.sameerasw.essentials.ui.core.sheets.ScreenOffSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.SingleAppSelectionSheet
 import com.sameerasw.essentials.ui.core.sheets.ChargingModeSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.NotificationLightingActionSheet
+import com.sameerasw.essentials.ui.core.sheets.OverlayControlSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.SoundModeSettingsSheet
 import com.sameerasw.essentials.ui.features.apps.sheets.KeyboardSelectionSheet
 import com.sameerasw.essentials.ui.features.audio.sheets.SetVolumeSettingsSheet
@@ -95,6 +96,7 @@ fun ButtonRemapSettingsUI(
     var showSoundModeSettings by remember { mutableStateOf(false) }
     var showChargingModeSettings by remember { mutableStateOf(false) }
     var showNotificationLightingSettings by remember { mutableStateOf(false) }
+    var showOverlayControlSettings by remember { mutableStateOf(false) }
     var showSometimesEssentialsSettings by remember { mutableStateOf(false) }
     var showFreezeTagSettings by remember { mutableStateOf(false) }
     var showOpenAppSettings by remember { mutableStateOf(false) }
@@ -496,6 +498,7 @@ fun ButtonRemapSettingsUI(
                                         is Action.SoundMode -> showSoundModeSettings = true
                                         is Action.SetChargingMode -> showChargingModeSettings = true
                                         is Action.TriggerNotificationLighting -> showNotificationLightingSettings = true
+                                        is Action.OverlayControl -> showOverlayControlSettings = true
                                         is Action.SometimesEssentials -> showSometimesEssentialsSettings = true
                                         is Action.FreezeTag -> showFreezeTagSettings = true
                                         is Action.OpenApp -> showOpenAppSettings = true
@@ -667,6 +670,18 @@ fun ButtonRemapSettingsUI(
             onDismiss = { showNotificationLightingSettings = false },
             onSave = { newAction ->
                 showNotificationLightingSettings = false
+                onActionSelected(newAction)
+                configAction = null
+            },
+        )
+    }
+
+    if (showOverlayControlSettings && configAction is Action.OverlayControl) {
+        OverlayControlSettingsSheet(
+            initialAction = configAction as Action.OverlayControl,
+            onDismiss = { showOverlayControlSettings = false },
+            onSave = { newAction ->
+                showOverlayControlSettings = false
                 onActionSelected(newAction)
                 configAction = null
             },
