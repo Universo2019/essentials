@@ -1062,6 +1062,7 @@
     <string name="label_app_settings">App Settings</string>
     <string name="label_app_language">Language</string>
     <string name="label_haptic_feedback">Haptic Feedback</string>
+    <string name="label_haptics_title">Haptics</string>
     <string name="haptic_mode_disabled">Disabled</string>
     <string name="haptic_mode_enabled">Enabled</string>
     <string name="haptic_mode_stronger">Stronger</string>
