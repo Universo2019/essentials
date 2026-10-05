@@ -48,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -224,11 +225,17 @@ fun ConsciousGatePauseScreen(
 }
 
 @Composable
-private fun HoldToContinueButton(
+internal fun HoldToContinueButton(
     waitTimeProgress: Float,
     onContinue: () -> Unit,
     onHoldingChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    holdDurationMillis: Long = HoldDurationMillis,
+    waitLabel: String? = null,
+    holdLabel: String? = null,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    progressColor: Color = MaterialTheme.colorScheme.secondary,
+    contentColor: Color? = null,
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -263,7 +270,7 @@ private fun HoldToContinueButton(
                 .offset { IntOffset(wiggleOffsetX.value.roundToInt(), 0) }
                 .height(58.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .background(containerColor)
                 .pointerInput(isWaitTimeFinished) {
                     detectTapGestures(
                         onTap = {
@@ -279,14 +286,14 @@ private fun HoldToContinueButton(
                             var completed = false
 
                             onHoldingChange(true)
-                            HapticUtil.startRampingHoldHaptic(context, HoldDurationMillis)
+                            HapticUtil.startRampingHoldHaptic(context, holdDurationMillis)
 
                             val animJob =
                                 scope.launch {
                                     withContext(UnscaledMotion) {
                                         holdProgress.animateTo(
                                             targetValue = 1f,
-                                            animationSpec = tween(durationMillis = HoldDurationMillis.toInt(), easing = androidx.compose.animation.core.LinearEasing),
+                                            animationSpec = tween(durationMillis = holdDurationMillis.toInt(), easing = androidx.compose.animation.core.LinearEasing),
                                         )
                                     }
                                     if (holdProgress.value >= 1f) {
@@ -328,7 +335,7 @@ private fun HoldToContinueButton(
                     Modifier
                         .fillMaxHeight()
                         .fillMaxWidth(waitTimeProgress.coerceIn(0f, 1f))
-                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f)),
+                        .background(progressColor.copy(alpha = 0.35f)),
             )
         }
 
@@ -339,7 +346,7 @@ private fun HoldToContinueButton(
                     Modifier
                         .fillMaxHeight()
                         .fillMaxWidth(holdProgress.value.coerceIn(0f, 1f))
-                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.55f)),
+                        .background(progressColor.copy(alpha = 0.55f)),
             )
         }
 
@@ -351,14 +358,14 @@ private fun HoldToContinueButton(
             Text(
                 text =
                     if (isWaitTimeFinished) {
-                        stringResource(R.string.conscious_gate_hold_to_continue)
+                        holdLabel ?: stringResource(R.string.conscious_gate_hold_to_continue)
                     } else {
-                        stringResource(R.string.conscious_gate_please_wait)
+                        waitLabel ?: stringResource(R.string.conscious_gate_please_wait)
                     },
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold,
                 color =
-                    if (isWaitTimeFinished) {
+                    contentColor ?: if (isWaitTimeFinished) {
                         MaterialTheme.colorScheme.onSurface
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
