@@ -9,6 +9,7 @@
 
 package com.sameerasw.essentials.domain.diy
 
+import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.Keep
 import androidx.annotation.StringRes
@@ -16,6 +17,9 @@ import com.google.gson.annotations.SerializedName
 import com.sameerasw.essentials.R
 import com.sameerasw.essentials.domain.HapticFeedbackType
 import com.sameerasw.essentials.domain.ScreenOffMethod
+import com.sameerasw.essentials.domain.model.NotificationLightingColorMode
+import com.sameerasw.essentials.domain.model.NotificationLightingSide
+import com.sameerasw.essentials.domain.model.NotificationLightingStyle
 import com.sameerasw.essentials.utils.battery.ChargingMode
 
 @Keep
@@ -317,6 +321,31 @@ sealed interface Action {
                 }
                 return perms
             }
+    }
+
+    @Keep
+    data class TriggerNotificationLighting(
+        @SerializedName("style") val style: NotificationLightingStyle = NotificationLightingStyle.STROKE,
+        @SerializedName("colorMode") val colorMode: NotificationLightingColorMode = NotificationLightingColorMode.SYSTEM,
+        @SerializedName("customColor") val customColor: Int = 0xFF6200EE.toInt(),
+        @SerializedName("pulseCount") val pulseCount: Int = 1,
+        @SerializedName("pulseDuration") val pulseDuration: Long = 3000L,
+        @SerializedName("glowSides") val glowSides: Set<NotificationLightingSide> =
+            setOf(NotificationLightingSide.LEFT, NotificationLightingSide.RIGHT),
+        @SerializedName("systemMode") val systemMode: Int = 0,
+    ) : Action {
+        override val title: Int get() = R.string.diy_action_notification_lighting
+        override val icon: Int get() = R.drawable.rounded_magnify_fullscreen_24
+        override val isConfigurable: Boolean = true
+        override val permissions: List<String>
+            get() =
+                if (style == NotificationLightingStyle.SYSTEM) {
+                    listOf("SHIZUKU", "ROOT")
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    listOf("DRAW_OVERLAYS", "ACCESSIBILITY")
+                } else {
+                    listOf("DRAW_OVERLAYS")
+                }
     }
 
     @Keep
