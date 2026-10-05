@@ -187,6 +187,7 @@ object QSTileRegistry {
                 emptyList(),
                 R.string.about_desc_flashlight_tile,
                 R.string.cat_utils,
+                isSupported = { _ -> !DeviceUtils.isTorchRestrictedDevice() },
             ),
             QSTileInfo(
                 R.string.tile_app_freezing,
@@ -211,6 +212,7 @@ object QSTileRegistry {
                 listOf("NOTIFICATION_LISTENER"),
                 R.string.about_desc_flashlight_pulse,
                 R.string.cat_utils,
+                isSupported = { _ -> !DeviceUtils.isTorchRestrictedDevice() },
             ),
             QSTileInfo(
                 R.string.tile_stay_awake,
