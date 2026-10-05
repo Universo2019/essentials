@@ -62,6 +62,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -144,6 +147,18 @@ fun IslandRoot(
     val stage = state.stage
     val key = ContentKey(stage, state.focusedKey)
     val currentState by rememberUpdatedState(state)
+
+    val bondCandidate = spec.bondEdge && stage == IslandStage.Compact && state.sideBubble == null
+    var bonded by remember { mutableStateOf(false) }
+    LaunchedEffect(bondCandidate) {
+        if (bondCandidate) {
+            delay(BOND_DELAY_MS)
+            bonded = true
+        } else {
+            bonded = false
+        }
+    }
+    val bond by animateFloatAsState(if (bonded) 1f else 0f, tween(450, easing = FastOutSlowInEasing), label = "islandBond")
 
     val lastItems = remember { HashMap<String, IslandItem>() }
     state.items.forEach { (k, v) -> lastItems[k] = v }
@@ -593,8 +608,28 @@ fun IslandRoot(
                     val dx = spec.growDirection * (p.width - cameraSlotPx) / 2 + lineShift.value.roundToInt() + catchShiftPx().roundToInt()
                     layout(p.width, p.height) { p.place(dx, 0) }
                 }
-                .offset { IntOffset(0, (squashPx / 2f * squash.value - edgeShift.floatValue).roundToInt()) }
+                .offset { IntOffset(0, (squashPx / 2f * squash.value - edgeShift.floatValue - surfaceTopPx * bond).roundToInt()) }
                 .compactJelly(jelly, jellyRangePx)
+                .drawBehind {
+                    if (bond <= 0f) return@drawBehind
+                    val f = compactHeightPx * 0.4f * bond
+                    val left = Path().apply {
+                        moveTo(-f, 0f)
+                        lineTo(0f, 0f)
+                        lineTo(0f, f)
+                        arcTo(Rect(Offset(-f, f), f), 0f, -90f, false)
+                        close()
+                    }
+                    val right = Path().apply {
+                        moveTo(size.width + f, 0f)
+                        lineTo(size.width, 0f)
+                        lineTo(size.width, f)
+                        arcTo(Rect(Offset(size.width + f, f), f), 180f, 90f, false)
+                        close()
+                    }
+                    drawPath(left, Color.Black)
+                    drawPath(right, Color.Black)
+                }
                 .drawBehind {
                     val p = pulse.value
                     if (pulseAccent == null || p <= 0f || !visible) return@drawBehind
@@ -619,13 +654,13 @@ fun IslandRoot(
                 .graphicsLayer {
                     alpha = if (visible) 1f else 0f
                     // Corner follows the live height so it can never outrun the size animation.
-                    shape = surfaceShape
+                    shape = if (bond > 0f) bondedShape(bond, compactHeightPx, expandedCornerPx) else surfaceShape
                     clip = true
                 }
                 .background(Color.Black)
                 .then(
                     animatedOutlineColor?.takeIf { outlineAlpha > 0f }
-                        ?.let { Modifier.border(spec.outlineThickness, it.copy(alpha = it.alpha * outlineAlpha), surfaceShape) }
+                        ?.let { Modifier.border(spec.outlineThickness, it.copy(alpha = it.alpha * outlineAlpha * (1f - bond)), surfaceShape) }
                         ?: Modifier,
                 )
                 // Finger-driven shrink sits inside the clip/background so the pill itself follows the drag.
@@ -1029,6 +1064,18 @@ fun IslandRoot(
                 )
             }
         }
+    }
+}
+
+private const val BOND_DELAY_MS = 3000L
+
+private fun bondedShape(progress: Float, compactHeightPx: Float, expandedCornerPx: Float): Shape = object : Shape {
+    override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
+        val t = ((size.height - compactHeightPx) / compactHeightPx).coerceIn(0f, 1f)
+        val r = (compactHeightPx / 2f + (expandedCornerPx - compactHeightPx / 2f) * t).coerceAtMost(size.height / 2f)
+        val top = CornerRadius(r * (1f - progress))
+        val bottom = CornerRadius(r)
+        return Outline.Rounded(RoundRect(size.toRect(), top, top, bottom, bottom))
     }
 }
 
