@@ -90,8 +90,9 @@ class TimerPlugin : BaseIslandPlugin() {
     }
 
     private fun visible(all: List<ChronometerEntry>): List<ChronometerEntry> {
+        val live = all.filterNot(::isExpired)
         val byRecorder =
-            if (settings.isIslandTimersShowScreenRecorderEnabled()) all else all.filterNot { isScreenRecorder(it.packageName) }
+            if (settings.isIslandTimersShowScreenRecorderEnabled()) live else live.filterNot { isScreenRecorder(it.packageName) }
         if (!settings.isIslandTimersFilterAppsEnabled()) return byRecorder
         val allowed = settings.loadIslandTimersSelectedApps().filter { it.isEnabled }.map { it.packageName }.toSet()
         return byRecorder.filter { it.packageName in allowed }
@@ -128,7 +129,11 @@ class TimerPlugin : BaseIslandPlugin() {
     private fun isUrgent(entry: ChronometerEntry): Boolean =
         entry.running && entry.countDown && entry.displayMillis() <= URGENT_MS
 
+    private fun isExpired(entry: ChronometerEntry): Boolean =
+        entry.running && entry.countDown && System.currentTimeMillis() - entry.base > EXPIRED_GRACE_MS
+
     private fun render() {
+        if (entries.any(::isExpired)) entries = entries.filterNot(::isExpired)
         val entry = primary()
         if (ctx == null || entry == null || !settings.isIslandShowTimersEnabled()) {
             publish(null)
@@ -211,5 +216,6 @@ class TimerPlugin : BaseIslandPlugin() {
     companion object {
         const val ITEM_KEY = "timer"
         private const val URGENT_MS = 60_000L
+        private const val EXPIRED_GRACE_MS = 10_000L
     }
 }
