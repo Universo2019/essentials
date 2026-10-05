@@ -986,7 +986,7 @@ fun IslandRoot(
                             translationX = dismissOffset.value + wiggle.value
                             val m = contentMotion.value - if (previewing) collapse.value.coerceIn(0f, 1f) else 0f
                             // Only shrink (growing entry, drag preview); rising in from below keeps its size.
-                            val scale = 1f + contentScaleFor(key.stage) * m.coerceAtMost(0f)
+                            val scale = 1f + contentScaleFor(key.stage, spec.bondEdge) * m.coerceAtMost(0f)
                             scaleX = scale
                             scaleY = scale
                             translationY = contentShiftPx * m + edgeCorrection(key.stage)
@@ -1010,7 +1010,7 @@ fun IslandRoot(
                         .graphicsLayer {
                             val m = if (pending) 0f else outgoingMotion.value
                             alpha = if (pending) 1f else outgoingAlpha.value
-                            val scale = 1f + contentScaleFor(layerKey.stage) * m
+                            val scale = 1f + contentScaleFor(layerKey.stage, spec.bondEdge) * m
                             scaleX = scale
                             scaleY = scale
                             translationY = contentShiftPx * m + edgeCorrection(layerKey.stage)
@@ -1122,10 +1122,10 @@ private val IslandStage.rank: Int
         IslandStage.Expanded -> 3
     }
 
-private fun contentScaleFor(stage: IslandStage): Float = when (stage) {
+private fun contentScaleFor(stage: IslandStage, flat: Boolean = false): Float = when (stage) {
     IslandStage.Hidden, IslandStage.Compact -> 0.25f
     IslandStage.Line -> 0.1f
-    IslandStage.Expanded -> IslandMotion.CONTENT_SCALE
+    IslandStage.Expanded -> if (flat) 0f else IslandMotion.CONTENT_SCALE
 }
 
 private val NoActions = object : IslandActions {

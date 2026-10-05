@@ -548,7 +548,8 @@ class IslandCoordinator(
             CameraAnchor.Start -> screenWidthDp - (geo.centerX / density - slotDp / 2f) - 8f
             CameraAnchor.End -> geo.centerX / density + slotDp / 2f - 8f
         }.coerceAtLeast(slotDp * 3f)
-        val scale = settings.getIslandExpandedScale().coerceIn(1f, 1.3f)
+        val flatExpanded = !geo.hasCamera && settings.isIslandBondEdgeEnabled()
+        val scale = if (flatExpanded) 1f else settings.getIslandExpandedScale().coerceIn(1f, 1.3f)
         val lineWidth = minOf(settings.getIslandMaxWidth(), available)
         val expandedWidth = minOf(settings.getIslandExpandedWidth(), available / scale)
         spec.value = IslandLayoutSpec(
@@ -562,7 +563,7 @@ class IslandCoordinator(
             expandedPadding = settings.getIslandExpandedPadding().dp,
             expandedTopPadding = settings.getIslandExpandedTopPadding().dp,
             expandedBottomPadding = settings.getIslandExpandedBottomPadding().dp,
-            expandedScale = settings.getIslandExpandedScale().coerceIn(1f, 1.3f),
+            expandedScale = scale,
             fontScale = settings.getIslandFontScale().coerceIn(0.8f, 1.3f),
             expandedOutset = (expandedWidth * (scale - 1f) / 2f).dp,
             cameraAnchor = geo.anchor,
@@ -584,7 +585,7 @@ class IslandCoordinator(
             pulseSpread = settings.getIslandPulseShadowSpread().coerceIn(1f, 4f),
             pulseDurationMs = settings.getIslandPulseShadowDurationMs().coerceIn(300f, 4000f).toInt(),
         )
-        windowHost.maxWidthPx = (maxOf(lineWidth, expandedWidth * settings.getIslandExpandedScale().coerceIn(1f, 1.3f)) * density).toInt()
+        windowHost.maxWidthPx = (maxOf(lineWidth, expandedWidth * scale) * density).toInt()
         windowHost.updateGeometry(geo)
         controller.lineStageEnabled = settings.isIslandLineStageEnabled()
         controller.relayout()
