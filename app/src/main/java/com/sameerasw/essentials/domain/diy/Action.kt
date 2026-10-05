@@ -426,6 +426,32 @@ sealed interface Action {
     }
 
     @Keep
+    enum class OverlayMode {
+        @SerializedName("SKIP")
+        SKIP,
+
+        @SerializedName("OFF")
+        OFF,
+
+        @SerializedName("ON")
+        ON,
+
+        @SerializedName("TOGGLE")
+        TOGGLE,
+    }
+
+    @Keep
+    data class OverlayControl(
+        @SerializedName("duo") val duo: OverlayMode = OverlayMode.SKIP,
+        @SerializedName("island") val island: OverlayMode = OverlayMode.SKIP,
+        @SerializedName("statusGlance") val statusGlance: OverlayMode = OverlayMode.SKIP,
+    ) : Action {
+        override val title: Int get() = R.string.diy_action_overlay_control
+        override val icon: Int get() = R.drawable.rounded_upcoming_24
+        override val isConfigurable: Boolean = true
+    }
+
+    @Keep
     data object ToggleHotspot : Action {
         override val title: Int = R.string.diy_action_hotspot_toggle
         override val icon: Int = R.drawable.rounded_wifi_tethering_24
