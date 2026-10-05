@@ -195,6 +195,7 @@ class MainViewModel : ViewModel() {
     val isIslandHideInOwnerApp = mutableStateOf(false)
     val isIslandHideOnShade = mutableStateOf(false)
     val isIslandKeepOnLandscape = mutableStateOf(false)
+    val isIslandBondEdge = mutableStateOf(false)
     val islandLandscapeTopSpacing = mutableFloatStateOf(0f)
     val isIslandDismissOnOutside = mutableStateOf(false)
     val isIslandHideLiveUpdates = mutableStateOf(false)
@@ -2255,6 +2256,7 @@ class MainViewModel : ViewModel() {
         isIslandHideInOwnerApp.value = settingsRepository.isIslandHideInOwnerAppEnabled()
         isIslandHideOnShade.value = settingsRepository.isIslandHideOnShadeEnabled()
         isIslandKeepOnLandscape.value = settingsRepository.isIslandKeepOnLandscapeEnabled()
+        isIslandBondEdge.value = settingsRepository.isIslandBondEdgeEnabled()
         islandLandscapeTopSpacing.floatValue = settingsRepository.getIslandLandscapeTopSpacing()
         isIslandDismissOnOutside.value = settingsRepository.isIslandDismissOnOutsideEnabled()
         isIslandHideLiveUpdates.value = settingsRepository.isIslandHideLiveUpdatesEnabled()
@@ -5414,6 +5416,11 @@ class MainViewModel : ViewModel() {
     fun setIslandLandscapeTopSpacing(value: Float) {
         islandLandscapeTopSpacing.floatValue = value
         settingsRepository.setIslandLandscapeTopSpacing(value)
+    }
+
+    fun setIslandBondEdge(enabled: Boolean) {
+        isIslandBondEdge.value = enabled
+        settingsRepository.setIslandBondEdgeEnabled(enabled)
     }
 
     fun setIslandKeepOnLandscape(enabled: Boolean) {

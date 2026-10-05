@@ -23,6 +23,7 @@ data class IslandLayoutSpec(
     val expandedOutset: Dp = 0.dp,
     val maxExpandedHeight: Dp = Dp.Unspecified,
     val cameraPresence: Float = 1f,
+    val bondEdge: Boolean = false,
     val cameraAnchor: CameraAnchor = CameraAnchor.Center,
     val outlineColor: Color? = null,
     val outlineDynamic: Boolean = false,

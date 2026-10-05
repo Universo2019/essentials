@@ -283,6 +283,17 @@ fun IslandPlacementSettingsUI(
                     valueFormatter = { "%.1f dp".format(it) },
                     modifier = Modifier.highlight(highlightSetting == "island_landscape_top_spacing"),
                 )
+
+                IconToggleItem(
+                    iconRes = R.drawable.rounded_vertical_align_top_24,
+                    title = stringResource(R.string.island_bond_edge_title),
+                    isChecked = viewModel.isIslandBondEdge.value,
+                    onCheckedChange = { checked ->
+                        HapticUtil.performVirtualKeyHaptic(view)
+                        viewModel.setIslandBondEdge(checked)
+                    },
+                    modifier = Modifier.highlight(highlightSetting == "island_bond_edge"),
+                )
             }
         }
     }
