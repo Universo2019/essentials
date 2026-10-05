@@ -139,8 +139,6 @@ fun IslandRoot(
     registerCollapseAnimator: (((() -> Unit) -> Unit)?) -> Unit = {},
     showCameraRing: Boolean = false,
 ) {
-    val presence by animateFloatAsState(targetSpec.cameraPresence, tween(300), label = "cameraPresence")
-    val spec = if (presence == 1f) targetSpec else targetSpec.copy(cameraPresence = presence)
     val view = LocalView.current
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
@@ -148,7 +146,7 @@ fun IslandRoot(
     val key = ContentKey(stage, state.focusedKey)
     val currentState by rememberUpdatedState(state)
 
-    val bondCandidate = spec.bondEdge && stage == IslandStage.Compact && state.sideBubble == null
+    val bondCandidate = targetSpec.bondEdge && stage == IslandStage.Compact && state.sideBubble == null
     var bonded by remember { mutableStateOf(false) }
     LaunchedEffect(bondCandidate) {
         if (bondCandidate) {
@@ -159,6 +157,17 @@ fun IslandRoot(
         }
     }
     val bond by animateFloatAsState(if (bonded) 1f else 0f, tween(450, easing = FastOutSlowInEasing), label = "islandBond")
+    val presence by animateFloatAsState(targetSpec.cameraPresence, tween(300), label = "cameraPresence")
+    val spec = if (presence == 1f && bond == 0f) {
+        targetSpec
+    } else {
+        targetSpec.copy(
+            cameraPresence = presence,
+            cameraDiameter = targetSpec.cameraDiameter * (1f - 0.3f * bond),
+            verticalGap = targetSpec.verticalGap + (3.5.dp - targetSpec.verticalGap) * bond,
+            cameraGap = targetSpec.cameraGap * (1f - 0.2f * bond),
+        )
+    }
 
     val lastItems = remember { HashMap<String, IslandItem>() }
     state.items.forEach { (k, v) -> lastItems[k] = v }

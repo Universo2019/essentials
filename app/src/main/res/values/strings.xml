@@ -2828,7 +2828,7 @@
     <string name="island_section_placement">Placement</string>
     <string name="island_keep_on_landscape_title">Keep on landscape</string>
     <string name="island_landscape_top_spacing_title">Landscape top spacing</string>
-    <string name="island_bond_edge_title">Bond with edge when inactive</string>
+    <string name="island_bond_edge_title">Bond with notch when inactive</string>
     <string name="island_section_visuals">Visuals</string>
     <string name="island_section_duration">Duration</string>
     <string name="island_section_notifications">Notifications</string>
