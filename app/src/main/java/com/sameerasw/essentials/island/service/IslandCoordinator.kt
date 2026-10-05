@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.sameerasw.essentials.data.repository.SettingsRepository
 import com.sameerasw.essentials.island.gestures.CompactGestureController
+import com.sameerasw.essentials.island.gestures.HiddenGestureDetector
 import com.sameerasw.essentials.island.gestures.CompactGestures
 import com.sameerasw.essentials.island.state.IslandUiState
 import com.sameerasw.essentials.island.model.IslandPlugin
@@ -169,6 +170,16 @@ class IslandCoordinator(
         scope = { scope },
         openBrief = { openBrief() },
     )
+
+    private val hiddenGestures = HiddenGestureDetector(
+        context = service,
+        gestures = { compactGestures },
+        onTap = { if (settings.isIslandBriefEnabled()) openBrief() },
+    )
+
+    private fun syncGestureHitbox() {
+        windowHost.setAlwaysGestures(running && settings.isIslandAlwaysGesturesEnabled() && !isContentSuppressed)
+    }
 
     private val actions = object : IslandActions {
         override val compactGestures: CompactGestures get() = this@IslandCoordinator.compactGestures
@@ -392,6 +403,7 @@ class IslandCoordinator(
         applyConfig()
         val geo = geometry ?: return
         windowHost.onOutsideTouch = ::onOutsideTouch
+        windowHost.hiddenTouch = hiddenGestures::onTouch
         val attached = windowHost.attach(geo) {
             val state by controller.state.collectAsState()
             val layoutSpec by spec.collectAsState()
@@ -597,6 +609,7 @@ class IslandCoordinator(
 
     private fun applySuppression() {
         controller.setSuppressed(isContentSuppressed || revealing || hiding)
+        syncGestureHitbox()
     }
 
     private fun complicationCount(state: IslandUiState): Int =
@@ -620,6 +633,7 @@ class IslandCoordinator(
         key ?: return
         when (key) {
             SettingsRepository.KEY_ISLAND_ENABLED, SettingsRepository.KEY_ISLAND_KEEP_ON_LANDSCAPE -> updateState()
+            SettingsRepository.KEY_ISLAND_ALWAYS_GESTURES -> syncGestureHitbox()
             SettingsRepository.KEY_ISLAND_PRIORITY_ORDER -> if (running) reloadPriorities()
             SettingsRepository.KEY_ISLAND_DYNAMIC_HIDE_STATUS_BAR, SettingsRepository.KEY_ISLAND_COMPACT_HIDE_STATUS_BAR -> syncStatusBar()
             SettingsRepository.KEY_ISLAND_HIDE_WHEN_SCREEN_OFF, SettingsRepository.KEY_ISLAND_SHOW_WHEN -> applySuppression()
