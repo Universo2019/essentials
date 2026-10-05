@@ -130,12 +130,14 @@ private enum class SwipeIntent { Hide, Dismiss }
 @Composable
 fun IslandRoot(
     state: IslandUiState,
-    spec: IslandLayoutSpec,
+    targetSpec: IslandLayoutSpec,
     actions: IslandActions,
     onTargetBoundsChanged: (IntRect) -> Unit,
     registerCollapseAnimator: (((() -> Unit) -> Unit)?) -> Unit = {},
     showCameraRing: Boolean = false,
 ) {
+    val presence by animateFloatAsState(targetSpec.cameraPresence, tween(300), label = "cameraPresence")
+    val spec = if (presence == 1f) targetSpec else targetSpec.copy(cameraPresence = presence)
     val view = LocalView.current
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()

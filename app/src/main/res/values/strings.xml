@@ -2826,6 +2826,8 @@
     <string name="island_enable_desc">Display dynamic island</string>
     <string name="island_section_position">Position and dimensions</string>
     <string name="island_section_placement">Placement</string>
+    <string name="island_keep_on_landscape_title">Keep on landscape</string>
+    <string name="island_landscape_top_spacing_title">Landscape top spacing</string>
     <string name="island_section_visuals">Visuals</string>
     <string name="island_section_duration">Duration</string>
     <string name="island_section_notifications">Notifications</string>

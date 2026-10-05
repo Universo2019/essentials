@@ -253,6 +253,38 @@ fun IslandPlacementSettingsUI(
                 modifier = Modifier.highlight(highlightSetting == "island_cutout_gap"),
             )
         }
+
+        RoundedCardContainer(
+            spacing = 2.dp,
+            cornerRadius = 24.dp,
+        ) {
+            IconToggleItem(
+                iconRes = R.drawable.rounded_mobile_rotate_24,
+                title = stringResource(R.string.island_keep_on_landscape_title),
+                isChecked = viewModel.isIslandKeepOnLandscape.value,
+                onCheckedChange = { checked ->
+                    HapticUtil.performVirtualKeyHaptic(view)
+                    viewModel.setIslandKeepOnLandscape(checked)
+                },
+                modifier = Modifier.highlight(highlightSetting == "island_keep_on_landscape"),
+            )
+
+            if (viewModel.isIslandKeepOnLandscape.value) {
+                ConfigSliderItem(
+                    title = stringResource(R.string.island_landscape_top_spacing_title),
+                    value = viewModel.islandLandscapeTopSpacing.floatValue,
+                    onValueChange = {
+                        HapticUtil.performUIHaptic(view)
+                        viewModel.setIslandLandscapeTopSpacing(it)
+                    },
+                    valueRange = 0f..60f,
+                    increment = 0.5f,
+                    iconRes = R.drawable.rounded_vertical_align_top_24,
+                    valueFormatter = { "%.1f dp".format(it) },
+                    modifier = Modifier.highlight(highlightSetting == "island_landscape_top_spacing"),
+                )
+            }
+        }
     }
 }
 
