@@ -8874,11 +8874,12 @@ class MainViewModel : ViewModel() {
 
             // Filter out non-installed apps
             val pm = context.packageManager
+            val allowSystem = isEnableUnsupportedFeatures.value
             val installedApps =
                 importedApps.filter { app ->
                     try {
                         pm.getPackageInfo(app.packageName, 0)
-                        true
+                        allowSystem || !com.sameerasw.essentials.utils.AppUtil.hasSystemFlag(context, app.packageName)
                     } catch (e: Exception) {
                         false
                     }

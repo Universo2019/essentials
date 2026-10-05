@@ -473,8 +473,26 @@ fun SettingsContent(
         UnsupportedFeaturesConfirmationSheet(
             onDismissRequest = { showUnsupportedFeaturesSheet = false },
             onConfirm = {
-                showUnsupportedFeaturesSheet = false
-                viewModel.setEnableUnsupportedFeatures(true, context)
+                val activity = context as? androidx.fragment.app.FragmentActivity
+                val canAuthenticate =
+                    androidx.biometric.BiometricManager
+                        .from(context)
+                        .canAuthenticate(com.sameerasw.essentials.utils.BiometricHelper.allowedAuthenticators) ==
+                        androidx.biometric.BiometricManager.BIOMETRIC_SUCCESS
+                if (activity == null || !canAuthenticate) {
+                    showUnsupportedFeaturesSheet = false
+                    viewModel.setEnableUnsupportedFeatures(true, context)
+                } else {
+                    com.sameerasw.essentials.utils.BiometricHelper.showBiometricPrompt(
+                        activity = activity,
+                        title = context.getString(R.string.unsupported_auth_title),
+                        subtitle = context.getString(R.string.unsupported_auth_subtitle),
+                        onSuccess = {
+                            showUnsupportedFeaturesSheet = false
+                            viewModel.setEnableUnsupportedFeatures(true, context)
+                        },
+                    )
+                }
             },
             featureTitleResIds = FeatureRegistry.getUnsupportedFeatures(context).map { it.title },
         )

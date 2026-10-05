@@ -833,6 +833,8 @@ fun StatusGlanceSettingsUI(
 
     if (showFreezeAppsSettings && (configAction is Action.FreezeApps || configAction is Action.UnfreezeApps)) {
         AppSelectionSheet(
+            restrictSystemApps = !viewModel.isEnableUnsupportedFeatures.value,
+            showInvertSelection = false,
             onDismissRequest = {
                 val finalAction = when (val action = configAction) {
                     is Action.FreezeApps -> action.copy(packageNames = temporarySelectedAppsForAction)
