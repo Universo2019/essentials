@@ -174,6 +174,16 @@ fun ShutUpPerAppSettingsSheet(
                 cornerRadius = 24.dp,
             ) {
                 IconToggleItem(
+                    iconRes = R.drawable.rounded_keyboard_24,
+                    title = stringResource(R.string.shut_up_restore_keyboard),
+                    isChecked = currentConfig.restoreKeyboard,
+                    onCheckedChange = {
+                        val newConfig = currentConfig.copy(restoreKeyboard = it)
+                        currentConfig = newConfig
+                        onConfigChanged(newConfig)
+                    },
+                )
+                IconToggleItem(
                     iconRes = R.drawable.rounded_snowflake_24,
                     title = stringResource(R.string.shut_up_auto_archive_notif_title),
                     isChecked = currentConfig.autoArchive,
