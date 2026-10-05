@@ -411,6 +411,7 @@ class MainViewModel : ViewModel() {
     val isShutUpAttemptShizukuRestart = mutableStateOf(true)
     val shutUpRestoreDelay = mutableIntStateOf(10)
     val shutUpRestoreMode = mutableStateOf("Auto")
+    val shutUpKeyboard = mutableStateOf("")
     val shizukuAuthToken = mutableStateOf("")
     val edgeLightingSweepSelectedShapes = mutableStateOf<Set<String>>(emptySet())
 
@@ -1382,6 +1383,10 @@ class MainViewModel : ViewModel() {
                             settingsRepository.getShutUpRestoreDelay()
                     }
 
+                    SettingsRepository.KEY_SHUT_UP_KEYBOARD -> {
+                        shutUpKeyboard.value = settingsRepository.getShutUpKeyboard()
+                    }
+
                     SettingsRepository.KEY_SHUT_UP_RESTORE_MODE -> {
                         shutUpRestoreMode.value =
                             settingsRepository.getShutUpRestoreMode()
@@ -1567,6 +1572,11 @@ class MainViewModel : ViewModel() {
      *
      * @param mode [String] Target mode.
      */
+    fun setShutUpKeyboard(ime: String) {
+        shutUpKeyboard.value = ime
+        settingsRepository.setShutUpKeyboard(ime)
+    }
+
     fun setShutUpRestoreMode(mode: String) {
         shutUpRestoreMode.value = mode
         settingsRepository.setShutUpRestoreMode(mode)
@@ -1717,6 +1727,7 @@ class MainViewModel : ViewModel() {
             settingsRepository.isShutUpAttemptShizukuRestartEnabled()
         shutUpRestoreDelay.intValue =
             settingsRepository.getShutUpRestoreDelay()
+        shutUpKeyboard.value = settingsRepository.getShutUpKeyboard()
         shutUpRestoreMode.value =
             settingsRepository.getShutUpRestoreMode()
         shizukuAuthToken.value =

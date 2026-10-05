@@ -216,6 +216,18 @@ class ShutUpShortcutActivity : ComponentActivity() {
                 }
             }
 
+            val targetKeyboard = repository.getShutUpKeyboard()
+            if (config.restoreKeyboard && targetKeyboard.isNotBlank()) {
+                val currentKeyboard =
+                    safeReadSetting(contentResolver, SettingsTable.SECURE, Settings.Secure.DEFAULT_INPUT_METHOD)
+                if (currentKeyboard != targetKeyboard) {
+                    if (!currentKeyboard.isNullOrBlank()) {
+                        originalSettings["secure:${Settings.Secure.DEFAULT_INPUT_METHOD}"] = currentKeyboard
+                    }
+                    Settings.Secure.putString(contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD, targetKeyboard)
+                }
+            }
+
             if (config.disableAccessibility) {
                 val accessibilityKeys =
                     listOf(
