@@ -680,6 +680,8 @@
     <string name="unsupported_cap_freeze_desc">Allows picking system apps for freezing. Freezing the wrong one can break your device.</string>
     <string name="unsupported_cap_duo_title">Duo screen-off controls</string>
     <string name="unsupported_cap_duo_desc">Lets you change when Duo hides on a dark screen. This can misbehave with always-on display on some devices.</string>
+    <string name="unsupported_cap_flashlight_title">Flashlight access</string>
+    <string name="unsupported_cap_flashlight_desc">Flashlight features and tile are turned off on this device because they can lock up the camera. Enabling this lifts that block.</string>
     <string name="unsupported_please_wait">Please wait</string>
     <string name="unsupported_hold_to_enable">Hold to enable</string>
     <string name="unsupported_auth_title">Confirm it\'s you</string>

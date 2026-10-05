@@ -2431,7 +2431,10 @@ class SettingsRepository(
      *
      * @param enabled [Boolean] Target enabled.
      */
-    fun setEnableUnsupportedFeatures(enabled: Boolean) = putBoolean(KEY_ENABLE_UNSUPPORTED_FEATURES, enabled)
+    fun setEnableUnsupportedFeatures(enabled: Boolean) {
+        com.sameerasw.essentials.utils.DeviceUtils.torchRestrictionLifted = enabled
+        putBoolean(KEY_ENABLE_UNSUPPORTED_FEATURES, enabled)
+    }
 
     fun isShowLegacyFeatures(): Boolean = getBoolean(KEY_SHOW_LEGACY_FEATURES, true)
 
