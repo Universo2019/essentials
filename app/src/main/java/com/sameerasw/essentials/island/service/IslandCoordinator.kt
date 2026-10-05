@@ -175,6 +175,7 @@ class IslandCoordinator(
         context = service,
         gestures = { compactGestures },
         onTap = { if (settings.isIslandBriefEnabled()) openBrief() },
+        onFeedback = { controller.setFeedbackActive(it) },
     )
 
     private fun syncGestureHitbox() {

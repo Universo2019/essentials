@@ -36,6 +36,13 @@ class IslandController(
     val state: StateFlow<IslandUiState> = _state.asStateFlow()
 
     var maxCells: Int = CompactLayoutEngine.MAX_CELLS
+    private var feedbackActive = false
+
+    fun setFeedbackActive(active: Boolean) {
+        if (feedbackActive == active) return
+        feedbackActive = active
+        recompute()
+    }
     var lineStageEnabled: Boolean = true
     var expandedTimeoutMs: Long = 0L
     var holdFocus: Boolean = false
@@ -283,6 +290,7 @@ class IslandController(
         )
         val focusedKey = expandedKey ?: peekKey
         val stage = when {
+            feedbackActive && !suppressed && expandedKey == null && peekKey == null -> IslandStage.Compact
             items.isEmpty() -> IslandStage.Hidden
             expandedKey != null -> IslandStage.Expanded
             peekKey != null -> IslandStage.Line
