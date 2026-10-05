@@ -64,7 +64,13 @@ import com.sameerasw.essentials.utils.HapticUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import androidx.compose.ui.MotionDurationScale
 import kotlin.math.roundToInt
+
+val UnscaledMotion = object : MotionDurationScale {
+    override val scaleFactor: Float = 1f
+}
 
 private const val FadeDurationMillis = 400
 private const val HoldDurationMillis = 2000L
@@ -277,10 +283,12 @@ private fun HoldToContinueButton(
 
                             val animJob =
                                 scope.launch {
-                                    holdProgress.animateTo(
-                                        targetValue = 1f,
-                                        animationSpec = tween(durationMillis = HoldDurationMillis.toInt(), easing = androidx.compose.animation.core.LinearEasing),
-                                    )
+                                    withContext(UnscaledMotion) {
+                                        holdProgress.animateTo(
+                                            targetValue = 1f,
+                                            animationSpec = tween(durationMillis = HoldDurationMillis.toInt(), easing = androidx.compose.animation.core.LinearEasing),
+                                        )
+                                    }
                                     if (holdProgress.value >= 1f) {
                                         completed = true
                                     }
