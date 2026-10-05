@@ -300,8 +300,10 @@ class NotificationListener : NotificationListenerService() {
             }
 
             // Calls already in progress when the listener (re)connects.
+            CallStateRepository.clearNotificationCalls()
             safeActiveNotifications()?.filter { CallNotificationParser.isCall(it) && it.packageName != packageName }
                 ?.forEach { CallStateRepository.onCallNotificationPosted(applicationContext, it) }
+            ChronometerRepository.clear()
             safeActiveNotifications()?.filter { it.packageName != packageName && ChronometerRepository.isCandidate(it) }
                 ?.forEach { ChronometerRepository.onPosted(applicationContext, it) }
 
@@ -1367,12 +1369,14 @@ class NotificationListener : NotificationListenerService() {
 
     fun feedSnoozedPosted(sbn: StatusBarNotification) {
         if (sbn.packageName == packageName) return
+        if (CallNotificationParser.isCall(sbn)) CallStateRepository.onCallNotificationPosted(applicationContext, sbn)
         if (ChronometerRepository.isCandidate(sbn)) ChronometerRepository.onPosted(applicationContext, sbn)
         scheduleProgressRefresh()
     }
 
     fun feedSnoozedRemoved(sbn: StatusBarNotification) {
         if (sbn.packageName == packageName) return
+        CallStateRepository.onCallNotificationRemoved(sbn.key)
         ChronometerRepository.onRemoved(sbn.key)
         scheduleProgressRefresh()
     }

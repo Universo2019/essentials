@@ -23,8 +23,8 @@ object LiveUpdateSnoozer {
     private val handler = Handler(Looper.getMainLooper())
     private val poll = object : Runnable {
         override fun run() {
-            val listener = NotificationListener.instance ?: return
-            synchronized(this@LiveUpdateSnoozer) { reconcile(listener) }
+            val listener = NotificationListener.instance
+            if (listener != null) synchronized(this@LiveUpdateSnoozer) { reconcile(listener) }
             synchronized(this@LiveUpdateSnoozer) {
                 if (mine.isNotEmpty()) handler.postDelayed(this, POLL_MS)
             }
@@ -150,6 +150,7 @@ object LiveUpdateSnoozer {
     private fun unsnoozeAll(listener: NotificationListener) {
         handler.removeCallbacks(poll)
         if (mine.isEmpty()) return
+        forgetVanished(listener)
         val keys = mine.keys.toList()
         mine.clear()
         misses.clear()
@@ -160,6 +161,22 @@ object LiveUpdateSnoozer {
             } catch (e: Exception) {
                 Log.e(TAG, "unsnooze failed for $key", e)
             }
+        }
+    }
+
+    private fun forgetVanished(listener: NotificationListener) {
+        val snoozedKeys = try {
+            listener.snoozedNotifications.map { it.key }.toSet()
+        } catch (_: Exception) {
+            return
+        }
+        val activeKeys = try {
+            listener.activeNotifications.orEmpty().map { it.key }.toSet()
+        } catch (_: Exception) {
+            return
+        }
+        mine.toList().forEach { (key, last) ->
+            if (key !in snoozedKeys && key !in activeKeys) listener.feedSnoozedRemoved(last)
         }
     }
 

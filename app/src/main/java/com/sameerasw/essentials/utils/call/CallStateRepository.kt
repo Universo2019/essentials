@@ -72,6 +72,13 @@ object CallStateRepository {
         if (notificationCalls.remove(key) != null) publish()
     }
 
+    @Synchronized
+    fun clearNotificationCalls() {
+        notificationCalls.clear()
+        activeSince.clear()
+        publish()
+    }
+
     private fun publish() {
         val fromNotification = notificationCalls.values
             .sortedWith(compareByDescending<NotificationCall> { it.ringing }.thenByDescending { it.postedAt })
