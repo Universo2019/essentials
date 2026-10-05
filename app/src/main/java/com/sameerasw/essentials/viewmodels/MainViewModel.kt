@@ -197,6 +197,7 @@ class MainViewModel : ViewModel() {
     val isIslandKeepOnLandscape = mutableStateOf(false)
     val isIslandBondEdge = mutableStateOf(false)
     val islandMaxItems = mutableStateOf(2)
+    val isIslandAlwaysGestures = mutableStateOf(false)
     val islandLandscapeTopSpacing = mutableFloatStateOf(0f)
     val isIslandDismissOnOutside = mutableStateOf(false)
     val isIslandHideLiveUpdates = mutableStateOf(false)
@@ -2259,6 +2260,7 @@ class MainViewModel : ViewModel() {
         isIslandKeepOnLandscape.value = settingsRepository.isIslandKeepOnLandscapeEnabled()
         isIslandBondEdge.value = settingsRepository.isIslandBondEdgeEnabled()
         islandMaxItems.value = settingsRepository.getIslandMaxItems()
+        isIslandAlwaysGestures.value = settingsRepository.isIslandAlwaysGesturesEnabled()
         islandLandscapeTopSpacing.floatValue = settingsRepository.getIslandLandscapeTopSpacing()
         isIslandDismissOnOutside.value = settingsRepository.isIslandDismissOnOutsideEnabled()
         isIslandHideLiveUpdates.value = settingsRepository.isIslandHideLiveUpdatesEnabled()
@@ -5418,6 +5420,11 @@ class MainViewModel : ViewModel() {
     fun setIslandLandscapeTopSpacing(value: Float) {
         islandLandscapeTopSpacing.floatValue = value
         settingsRepository.setIslandLandscapeTopSpacing(value)
+    }
+
+    fun setIslandAlwaysGestures(enabled: Boolean) {
+        isIslandAlwaysGestures.value = enabled
+        settingsRepository.setIslandAlwaysGesturesEnabled(enabled)
     }
 
     fun setIslandMaxItems(value: Int) {

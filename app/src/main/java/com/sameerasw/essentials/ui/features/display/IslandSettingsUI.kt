@@ -614,6 +614,23 @@ fun IslandSettingsUI(
             }
         }
 
+        RoundedCardContainer(
+            spacing = 2.dp,
+            cornerRadius = 24.dp,
+        ) {
+            IconToggleItem(
+                iconRes = R.drawable.rounded_touch_app_24,
+                title = stringResource(R.string.island_always_gestures_title),
+                description = stringResource(R.string.island_always_gestures_desc),
+                isChecked = viewModel.isIslandAlwaysGestures.value,
+                onCheckedChange = { checked ->
+                    HapticUtil.performVirtualKeyHaptic(view)
+                    viewModel.setIslandAlwaysGestures(checked)
+                },
+                modifier = Modifier.highlight(highlightSetting == "island_always_gestures"),
+            )
+        }
+
         AnimatedVisibility(
             visible = !viewModel.isIslandShowTimeBattery.value,
             enter = expandVertically() + fadeIn(),
