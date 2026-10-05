@@ -175,7 +175,8 @@ fun IslandPlacementSettingsUI(
                     valueRange = 0f..100f,
                     increment = 1f,
                     iconRes = R.drawable.rounded_border_left_24,
-                    valueFormatter = { "${it.toInt()}%" },
+                    valueFormatter = { "%.1f%%".format(it) },
+                    allowDecimals = true,
                 )
                 ConfigSliderItem(
                     title = stringResource(R.string.island_camera_offset_y_title),
@@ -188,6 +189,7 @@ fun IslandPlacementSettingsUI(
                     increment = 0.5f,
                     iconRes = R.drawable.rounded_border_top_24,
                     valueFormatter = { "%.1f%%".format(it) },
+                    allowDecimals = true,
                 )
             }
 
@@ -202,6 +204,7 @@ fun IslandPlacementSettingsUI(
                 increment = 0.05f,
                 iconRes = R.drawable.rounded_arrows_outward_24,
                 valueFormatter = { "%.2fx".format(it) },
+                allowDecimals = true,
                 modifier = Modifier.highlight(highlightSetting == "island_camera_size"),
             )
 
@@ -215,7 +218,8 @@ fun IslandPlacementSettingsUI(
                 valueRange = 150f..500f,
                 increment = 10f,
                 iconRes = R.drawable.rounded_arrows_outward_24,
-                valueFormatter = { "${it.toInt()} dp" },
+                valueFormatter = { "%.1f dp".format(it) },
+                allowDecimals = true,
                 modifier = Modifier.highlight(highlightSetting == "island_max_width"),
             )
 
@@ -229,7 +233,8 @@ fun IslandPlacementSettingsUI(
                 valueRange = 200f..500f,
                 increment = 10f,
                 iconRes = R.drawable.rounded_arrows_outward_24,
-                valueFormatter = { "${it.toInt()} dp" },
+                valueFormatter = { "%.1f dp".format(it) },
+                allowDecimals = true,
                 modifier = Modifier.highlight(highlightSetting == "island_expanded_width"),
             )
 
@@ -243,7 +248,8 @@ fun IslandPlacementSettingsUI(
                 valueRange = 0f..16f,
                 increment = 1f,
                 iconRes = R.drawable.rounded_arrows_outward_24,
-                valueFormatter = { "${it.toInt()} dp" },
+                valueFormatter = { "%.1f dp".format(it) },
+                allowDecimals = true,
                 modifier = Modifier.highlight(highlightSetting == "island_cutout_gap"),
             )
         }
