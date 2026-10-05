@@ -49,6 +49,7 @@ class IslandWindowHost(
     private var gestureView: View? = null
     private var gestureParams: WindowManager.LayoutParams? = null
     private var gestureAdded = false
+    private var gestureTouching = false
 
     // Fired for touches anywhere outside the island, via FLAG_WATCH_OUTSIDE_TOUCH.
     var onOutsideTouch: (() -> Unit)? = null
@@ -201,7 +202,7 @@ class IslandWindowHost(
     @SuppressLint("ClickableViewAccessibility")
     private fun layoutGestureWindow() {
         val geo = geometry
-        if (geo == null || drawParams == null || !alwaysGestures || stage != IslandStage.Hidden || textInput) {
+        if (geo == null || drawParams == null || !alwaysGestures || (stage != IslandStage.Hidden && !gestureTouching) || textInput) {
             removeGestureWindow()
             return
         }
@@ -212,7 +213,16 @@ class IslandWindowHost(
         lp.x = (geo.centerX - width / 2f).roundToInt()
         lp.y = geo.surfaceTop.roundToInt()
         val view = gestureView ?: View(context).also { v ->
-            v.setOnTouchListener { _, event -> hiddenTouch?.invoke(event) ?: false }
+            v.setOnTouchListener { _, event ->
+                when (event.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> gestureTouching = true
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        gestureTouching = false
+                        v.post { layoutGestureWindow() }
+                    }
+                }
+                hiddenTouch?.invoke(event) ?: false
+            }
             gestureView = v
         }
         try {

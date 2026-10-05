@@ -13,6 +13,7 @@ class HiddenGestureDetector(
     private val context: Context,
     private val gestures: () -> CompactGestures,
     private val onTap: () -> Unit,
+    private val onFeedback: (Boolean) -> Unit,
 ) {
     private val handler = Handler(Looper.getMainLooper())
     private val density = context.resources.displayMetrics.density
@@ -29,6 +30,23 @@ class HiddenGestureDetector(
     private var horizontal: Boolean? = null
     private var longFired = false
     private var lastStepX = 0f
+
+    private val clearFeedback = Runnable {
+        IslandSlideFeedback.publish(null)
+        onFeedback(false)
+    }
+
+    private fun publish(armed: Boolean) {
+        IslandSlideFeedback.publish(
+            when (mode) {
+                SlideMode.Volume -> SlideFeedback.Level(brightness = false, percent = config.levelPercent())
+                SlideMode.Brightness -> SlideFeedback.Level(brightness = true, percent = config.levelPercent())
+                SlideMode.SoundMode -> SlideFeedback.Sound(if (armed) config.soundModeAfter(dx) else config.soundMode())
+                SlideMode.Track -> SlideFeedback.Track(next = config.trackForward(dx), armed = armed)
+                SlideMode.None -> null
+            },
+        )
+    }
 
     private val longPress = Runnable {
         longFired = true
@@ -57,17 +75,29 @@ class HiddenGestureDetector(
                 if (horizontal == null && hypot(dx, dy) > slop) {
                     horizontal = abs(dx) > abs(dy)
                     handler.removeCallbacks(longPress)
-                    if (horizontal == true) config.slideBegin()
+                    if (horizontal == true) {
+                        config.slideBegin()
+                        if (mode != SlideMode.None) {
+                            handler.removeCallbacks(clearFeedback)
+                            onFeedback(true)
+                            publish(armed = false)
+                        }
+                    }
                 }
                 if (horizontal == true && !longFired) {
                     when (mode) {
-                        SlideMode.Brightness -> config.slideTo(dx, brightnessRange)
+                        SlideMode.Brightness -> {
+                            config.slideTo(dx, brightnessRange)
+                            publish(armed = false)
+                        }
                         SlideMode.Volume -> if (abs(dx - lastStepX) >= slideStep) {
                             config.slideStep(forward = dx > lastStepX)
                             lastStepX = dx
                             IslandHaptics.sliderStep(context)
+                            publish(armed = false)
                         }
-                        else -> {}
+                        SlideMode.SoundMode, SlideMode.Track -> publish(armed = abs(dx) >= commitThreshold)
+                        SlideMode.None -> {}
                     }
                 }
             }
@@ -83,11 +113,18 @@ class HiddenGestureDetector(
                         (mode == SlideMode.Track || mode == SlideMode.SoundMode) -> {
                         IslandHaptics.commit(context)
                         config.slideCommit(dx)
+                        publish(armed = mode == SlideMode.Track)
                     }
                 }
+                if (horizontal == true && mode != SlideMode.None) handler.postDelayed(clearFeedback, FEEDBACK_LINGER_MS)
             }
-            MotionEvent.ACTION_CANCEL -> handler.removeCallbacks(longPress)
+            MotionEvent.ACTION_CANCEL -> {
+                handler.removeCallbacks(longPress)
+                if (horizontal == true && mode != SlideMode.None) clearFeedback.run()
+            }
         }
         return true
     }
 }
+
+private const val FEEDBACK_LINGER_MS = 700L

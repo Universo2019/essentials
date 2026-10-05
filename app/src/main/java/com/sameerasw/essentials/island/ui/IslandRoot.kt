@@ -1157,7 +1157,7 @@ private fun StageContent(
         IslandStage.Compact -> {
             val feedback by IslandSlideFeedback.state.collectAsState()
             val takeover = feedback
-            if (takeover is SlideFeedback.Level || takeover is SlideFeedback.Sound) {
+            if (takeover is SlideFeedback.Level || takeover is SlideFeedback.Sound || (takeover != null && state.arrangement.visibleItems.isEmpty())) {
                 SlideFeedbackCompact(takeover, spec)
             } else {
                 CompactTemplate(
