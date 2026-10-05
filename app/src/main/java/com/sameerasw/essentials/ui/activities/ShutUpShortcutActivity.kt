@@ -219,12 +219,16 @@ class ShutUpShortcutActivity : ComponentActivity() {
             if (config.disableAccessibility) {
                 val accessibilityKeys =
                     listOf(
-                        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                         "accessibility_button_target_component",
+                        "accessibility_button_targets",
                         "accessibility_gesture_targets",
                         "accessibility_shortcut_target_service",
+                        "accessibility_qs_targets",
+                        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                     )
 
+                val accessibilityWasEnabled =
+                    safeReadSetting(contentResolver, SettingsTable.SECURE, Settings.Secure.ACCESSIBILITY_ENABLED) == "1"
                 for (key in accessibilityKeys) {
                     val current =
                         safeReadSetting(
@@ -240,6 +244,9 @@ class ShutUpShortcutActivity : ComponentActivity() {
                             "",
                         )
                     }
+                }
+                if (accessibilityWasEnabled) {
+                    originalSettings["secure:${Settings.Secure.ACCESSIBILITY_ENABLED}"] = "1"
                 }
             }
 
