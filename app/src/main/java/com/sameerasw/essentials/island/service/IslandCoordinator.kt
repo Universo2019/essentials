@@ -152,7 +152,8 @@ class IslandCoordinator(
     private var foregroundPackage: String? = null
     private var textInputActive = false
 
-    private val isWindowSuppressed get() = isLandscape || isFullscreenApp
+    private val isWindowSuppressed get() = isFullscreenApp ||
+        if (settings.isFoldableDevice()) settings.isIslandHiddenInCurrentOrientation() else isLandscape
     private val isContentSuppressed: Boolean
         get() = isWindowSuppressed ||
             when (settings.getIslandShowWhen()) {
@@ -611,8 +612,11 @@ class IslandCoordinator(
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         key ?: return
-        when (key) {
+        val baseKey = key.substringBefore('@')
+        when (baseKey) {
             SettingsRepository.KEY_ISLAND_ENABLED -> updateState()
+            SettingsRepository.KEY_ISLAND_HIDE_PORTRAIT,
+            SettingsRepository.KEY_ISLAND_HIDE_LANDSCAPE -> updateState()
             SettingsRepository.KEY_ISLAND_PRIORITY_ORDER -> if (running) reloadPriorities()
             SettingsRepository.KEY_ISLAND_DYNAMIC_HIDE_STATUS_BAR, SettingsRepository.KEY_ISLAND_COMPACT_HIDE_STATUS_BAR -> syncStatusBar()
             SettingsRepository.KEY_ISLAND_HIDE_WHEN_SCREEN_OFF, SettingsRepository.KEY_ISLAND_SHOW_WHEN -> applySuppression()
@@ -667,6 +671,9 @@ class IslandCoordinator(
             SettingsRepository.KEY_ISLAND_EXPANDED_SCALE,
             SettingsRepository.KEY_ISLAND_FONT_SCALE,
             SettingsRepository.KEY_ISLAND_CAMERA_POSITION,
+            SettingsRepository.KEY_ISLAND_ORIENTATION_PROFILES,
+            SettingsRepository.KEY_ISLAND_HIDE_PORTRAIT,
+            SettingsRepository.KEY_ISLAND_HIDE_LANDSCAPE,
         )
     }
 }
@@ -683,4 +690,3 @@ private val IslandTypography = Typography().run {
         titleSmall = titleSmall.copy(fontFamily = IslandFontFamily),
     )
 }
-
