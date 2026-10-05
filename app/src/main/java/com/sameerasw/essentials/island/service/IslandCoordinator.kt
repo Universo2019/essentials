@@ -589,6 +589,7 @@ class IslandCoordinator(
         windowHost.maxWidthPx = (maxOf(lineWidth, expandedWidth * scale) * density).toInt()
         windowHost.updateGeometry(geo)
         controller.lineStageEnabled = settings.isIslandLineStageEnabled()
+        controller.maxCells = settings.getIslandMaxItems() * 2
         controller.relayout()
         controller.expandedTimeoutMs = settings.getIslandExpandedTimeoutMs()
         applyPreviewRing()
@@ -675,6 +676,7 @@ class IslandCoordinator(
             SettingsRepository.KEY_ISLAND_CAMERA_POSITION,
             SettingsRepository.KEY_ISLAND_LANDSCAPE_TOP_SPACING,
             SettingsRepository.KEY_ISLAND_BOND_EDGE,
+            SettingsRepository.KEY_ISLAND_MAX_ITEMS,
         )
     }
 }

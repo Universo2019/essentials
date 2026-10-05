@@ -508,6 +508,7 @@ class SettingsRepository(
         const val KEY_ISLAND_KEEP_ON_LANDSCAPE = "island_keep_on_landscape"
         const val KEY_ISLAND_LANDSCAPE_TOP_SPACING = "island_landscape_top_spacing"
         const val KEY_ISLAND_BOND_EDGE = "island_bond_edge"
+        const val KEY_ISLAND_MAX_ITEMS = "island_max_items"
         const val KEY_ISLAND_DISMISS_ON_OUTSIDE = "island_dismiss_on_outside"
         const val KEY_ISLAND_HIDE_LIVE_UPDATES = "island_hide_live_updates"
         const val KEY_ISLAND_CAMERA_POSITION = "island_camera_position"
@@ -3861,6 +3862,10 @@ class SettingsRepository(
     fun isIslandKeepOnLandscapeEnabled(): Boolean = getBoolean(KEY_ISLAND_KEEP_ON_LANDSCAPE, false)
 
     fun setIslandKeepOnLandscapeEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_KEEP_ON_LANDSCAPE, enabled)
+
+    fun getIslandMaxItems(): Int = getInt(KEY_ISLAND_MAX_ITEMS, 2).coerceIn(1, 4)
+
+    fun setIslandMaxItems(value: Int) = putInt(KEY_ISLAND_MAX_ITEMS, value)
 
     fun isIslandBondEdgeEnabled(): Boolean = getBoolean(KEY_ISLAND_BOND_EDGE, false)
 
