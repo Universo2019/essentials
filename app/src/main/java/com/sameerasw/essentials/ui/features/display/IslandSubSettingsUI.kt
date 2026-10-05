@@ -517,6 +517,18 @@ fun IslandBehaviorSettingsUI(
             spacing = 2.dp,
             cornerRadius = 24.dp,
         ) {
+            IconToggleItem(
+                iconRes = R.drawable.rounded_motion_play_24,
+                title = stringResource(R.string.island_line_peek_title),
+                description = stringResource(R.string.island_line_peek_desc),
+                isChecked = viewModel.isIslandLineStageEnabled.value,
+                onCheckedChange = { checked ->
+                    HapticUtil.performVirtualKeyHaptic(view)
+                    viewModel.setIslandLineStageEnabled(checked)
+                },
+                modifier = Modifier.highlight(highlightSetting == "island_line_stage_enabled"),
+            )
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -553,19 +565,6 @@ fun IslandBehaviorSettingsUI(
                 )
             }
 
-
-            IconToggleItem(
-                iconRes = R.drawable.rounded_motion_play_24,
-                title = stringResource(R.string.island_line_peek_title),
-                description = stringResource(R.string.island_line_peek_desc),
-                isChecked = viewModel.isIslandLineStageEnabled.value,
-                onCheckedChange = { checked ->
-                    HapticUtil.performVirtualKeyHaptic(view)
-                    viewModel.setIslandLineStageEnabled(checked)
-                },
-                modifier = Modifier.highlight(highlightSetting == "island_line_stage_enabled"),
-            )
-
             IconToggleItem(
                 iconRes = R.drawable.rounded_visibility_off_24,
                 title = stringResource(R.string.island_hide_in_owner_app_title),
@@ -587,18 +586,12 @@ fun IslandBehaviorSettingsUI(
                 },
                 modifier = Modifier.highlight(highlightSetting == "island_hide_on_shade"),
             )
+        }
 
-            IconToggleItem(
-                iconRes = R.drawable.rounded_touch_app_24,
-                title = stringResource(R.string.island_dismiss_on_outside_title),
-                isChecked = viewModel.isIslandDismissOnOutside.value,
-                onCheckedChange = { checked ->
-                    HapticUtil.performVirtualKeyHaptic(view)
-                    viewModel.setIslandDismissOnOutside(checked)
-                },
-                modifier = Modifier.highlight(highlightSetting == "island_dismiss_on_outside"),
-            )
-
+        RoundedCardContainer(
+            spacing = 2.dp,
+            cornerRadius = 24.dp,
+        ) {
             IconToggleItem(
                 iconRes = R.drawable.rounded_notifications_off_24,
                 title = stringResource(R.string.island_suppress_system_heads_up_title),
@@ -661,6 +654,22 @@ fun IslandBehaviorSettingsUI(
                     }
                 },
                 modifier = Modifier.highlight(highlightSetting == "island_compact_hide_status_bar"),
+            )
+        }
+
+        RoundedCardContainer(
+            spacing = 2.dp,
+            cornerRadius = 24.dp,
+        ) {
+            IconToggleItem(
+                iconRes = R.drawable.rounded_touch_app_24,
+                title = stringResource(R.string.island_dismiss_on_outside_title),
+                isChecked = viewModel.isIslandDismissOnOutside.value,
+                onCheckedChange = { checked ->
+                    HapticUtil.performVirtualKeyHaptic(view)
+                    viewModel.setIslandDismissOnOutside(checked)
+                },
+                modifier = Modifier.highlight(highlightSetting == "island_dismiss_on_outside"),
             )
         }
     }
