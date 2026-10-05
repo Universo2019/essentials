@@ -18,7 +18,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -126,22 +129,15 @@ fun MediaExpanded(
         if (drawBackground && !SurfaceBackdrop { scope.ArtworkBackdrop(image, Modifier.fillMaxSize()) }) {
             scope.ArtworkBackdrop(image, Modifier.matchParentSize())
         }
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(spec.expandedOutset)
-                .padding(start = 12.dp, end = 12.dp, bottom = spec.expandedBottomPadding),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Spacer(Modifier.height(spec.cameraDiameter + 28.dp + spec.expandedTopPadding))
+        val art: @Composable (Dp) -> Unit = { artSize ->
             AnimatedContent(
                 targetState = image,
                 transitionSpec = { fadeIn(IslandMotion.contentIn()) togetherWith fadeOut(IslandMotion.contentOut()) },
                 label = "playerArt",
-            ) { art ->
+            ) { bitmap ->
                 Box(
                     Modifier
-                        .size(88.dp)
+                        .size(artSize)
                         .clip(RoundedCornerShape(20.dp))
                         .background(Color.White.copy(alpha = 0.1f))
                         .clickable {
@@ -149,26 +145,13 @@ fun MediaExpanded(
                             scope.openApp()
                         },
                 ) {
-                    if (art != null) {
-                        Image(art, null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize())
+                    if (bitmap != null) {
+                        Image(bitmap, null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize())
                     }
                 }
             }
-            Spacer(Modifier.height(12.dp))
-            MarqueeText(
-                text = title,
-                style = IslandTextStyles.title.copy(fontSize = 16.sp),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-            )
-            Spacer(Modifier.height(4.dp))
-            MarqueeText(
-                text = artist,
-                style = IslandTextStyles.body,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-            )
-            Spacer(Modifier.height(4.dp))
+        }
+        val seekBar: @Composable () -> Unit = {
             IslandSeekBar(
                 value = progress,
                 color = accent,
@@ -182,9 +165,10 @@ fun MediaExpanded(
                     progress = target
                 },
             )
-            Spacer(Modifier.height(4.dp))
+        }
+        val controls: @Composable (Dp) -> Unit = { rowHeight ->
             ConnectedButtonRow(
-                height = 52.dp,
+                height = rowHeight,
                 items = listOfNotNull(
                     ConnectedItem(actions.like, enabled = likable) {
                         IslandIcon(
@@ -210,6 +194,71 @@ fun MediaExpanded(
                     ConnectedItem(actions.next) { IslandIcon(R.drawable.rounded_skip_next_24, size = 24.dp) },
                 ),
             )
+        }
+        if (spec.landscape) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(spec.expandedOutset)
+                    .padding(start = 16.dp, end = 16.dp, top = spec.expandedTopPadding + 12.dp, bottom = spec.expandedBottomPadding),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    art(72.dp)
+                    Column(Modifier.weight(1f)) {
+                        MarqueeText(
+                            text = title,
+                            style = IslandTextStyles.title.copy(fontSize = 16.sp),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        MarqueeText(
+                            text = artist,
+                            style = IslandTextStyles.body,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
+                Column(Modifier.weight(1f)) {
+                    seekBar()
+                    Spacer(Modifier.height(4.dp))
+                    controls(44.dp)
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(spec.expandedOutset)
+                    .padding(start = 12.dp, end = 12.dp, bottom = spec.expandedBottomPadding),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Spacer(Modifier.height(spec.cameraDiameter + 28.dp + spec.expandedTopPadding))
+                art(88.dp)
+                Spacer(Modifier.height(12.dp))
+                MarqueeText(
+                    text = title,
+                    style = IslandTextStyles.title.copy(fontSize = 16.sp),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+                )
+                Spacer(Modifier.height(4.dp))
+                MarqueeText(
+                    text = artist,
+                    style = IslandTextStyles.body,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+                )
+                Spacer(Modifier.height(4.dp))
+                seekBar()
+                Spacer(Modifier.height(4.dp))
+                controls(52.dp)
+            }
         }
     }
 }

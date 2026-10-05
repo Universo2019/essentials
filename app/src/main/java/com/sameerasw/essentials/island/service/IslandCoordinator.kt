@@ -568,6 +568,7 @@ class IslandCoordinator(
             expandedOutset = (expandedWidth * (scale - 1f) / 2f).dp,
             cameraAnchor = geo.anchor,
             cameraPresence = if (geo.hasCamera) 1f else 0f,
+            landscape = isLandscape,
             bondEdge = !geo.hasCamera && settings.isIslandBondEdgeEnabled(),
             maxExpandedHeight = if (isLandscape) ((geo.screenHeight - geo.surfaceTop) / density - 12f).dp else Dp.Unspecified,
             outlineColor = if (settings.isIslandBorderOutlineEnabled()) {
