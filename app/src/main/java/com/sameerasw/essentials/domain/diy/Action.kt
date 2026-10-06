@@ -202,6 +202,32 @@ sealed interface Action {
     }
 
     @Keep
+    data object ToggleDoNotDisturb : Action {
+        override val title: Int = R.string.diy_action_toggle_dnd
+        override val icon: Int = R.drawable.rounded_do_not_disturb_on_24
+        override val permissions: List<String> = listOf("NOTIFICATION_POLICY")
+    }
+
+    @Keep
+    data object OpenCamera : Action {
+        override val title: Int = R.string.diy_action_open_camera
+        override val icon: Int = R.drawable.rounded_photo_camera_24
+    }
+
+    @Keep
+    data object OpenQrScanner : Action {
+        override val title: Int = R.string.diy_action_open_qr_scanner
+        override val icon: Int = R.drawable.rounded_qr_code_24
+        override val permissions: List<String> = listOf("SHIZUKU")
+    }
+
+    @Keep
+    data object OpenVideoCamera : Action {
+        override val title: Int = R.string.diy_action_open_video_camera
+        override val icon: Int = R.drawable.rounded_videocam_24
+    }
+
+    @Keep
     data object ToggleVibrate : Action {
         override val title: Int = R.string.diy_action_toggle_vibrate
         override val icon: Int = R.drawable.rounded_mobile_vibrate_24

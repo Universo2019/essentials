@@ -439,6 +439,50 @@ object CombinedActionExecutor {
                         .cycleNextMode()
                 }
 
+                is Action.ToggleDoNotDisturb -> {
+                    val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+                    if (nm.isNotificationPolicyAccessGranted) {
+                        nm.setInterruptionFilter(
+                            if (nm.currentInterruptionFilter == android.app.NotificationManager.INTERRUPTION_FILTER_ALL) {
+                                android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY
+                            } else {
+                                android.app.NotificationManager.INTERRUPTION_FILTER_ALL
+                            },
+                        )
+                    }
+                }
+
+                is Action.OpenCamera -> {
+                    // The secure camera opens over the lock screen without unlocking, like the Pixel shortcut
+                    val isLocked =
+                        (context.getSystemService(Context.KEYGUARD_SERVICE) as android.app.KeyguardManager)
+                            .isKeyguardLocked
+                    val cameraAction =
+                        if (isLocked) {
+                            android.provider.MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE
+                        } else {
+                            android.provider.MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA
+                        }
+                    try {
+                        context.startActivity(Intent(cameraAction).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+
+                is Action.OpenQrScanner -> openQrScanner(context)
+
+                is Action.OpenVideoCamera -> {
+                    try {
+                        context.startActivity(
+                            Intent(android.provider.MediaStore.INTENT_ACTION_VIDEO_CAMERA)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        )
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+
                 is Action.ToggleMute -> {
                     val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
                     val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
@@ -1113,6 +1157,44 @@ object CombinedActionExecutor {
                 }
             }
         } catch (_: Exception) {
+        }
+    }
+
+    // Same scanner System UI uses for its lock screen and Quick Settings QR shortcuts
+    private fun openQrScanner(context: Context) {
+        val configId =
+            android.content.res.Resources
+                .getSystem()
+                .getIdentifier("config_defaultQrCodeComponent", "string", "android")
+        val component =
+            if (configId != 0) {
+                android.content.res.Resources
+                    .getSystem()
+                    .getString(configId)
+                    .takeIf { it.isNotBlank() }
+                    ?.let { android.content.ComponentName.unflattenFromString(it) }
+            } else {
+                null
+            }
+        // Google's platform scanner closes itself for ordinary app callers, so start it as the shell user
+        if (component != null && ShellUtils.isAvailable(context) && ShellUtils.hasPermission(context)) {
+            ShellUtils.runCommand(
+                context,
+                "am start -n ${component.flattenToShortString()}",
+                featureName = context.getString(Action.OpenQrScanner.title),
+            )
+            return
+        }
+        val intent =
+            if (component != null) {
+                Intent().setComponent(component)
+            } else {
+                Intent("com.google.android.gms.mlkit_barcode_ui.SCAN_QR_CODE")
+            }
+        try {
+            context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }
