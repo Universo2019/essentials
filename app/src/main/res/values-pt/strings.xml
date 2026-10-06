@@ -1643,12 +1643,7 @@ tempo e bateria</string>
     <string name="island_battery_percentage_conditional_title">Apenas para as condições abaixo</string>
     <string name="island_weather_peek_alerts_title">Confira os alertas de gravidade</string>
     <string name="island_launcher_only_title">Só aparece no iniciador</string>
-    <string name="weather_provider_title">Provedor </string>
-    <string name="weather_location_manual">Escolha uma cidade</string>
-    <string name="weather_location_device">localização atual</string>
-    <string name="about_desc_weather">Selecione uma fonte de previsão, defina sua localização, unidades e intervalo de atualização e escolha se a tela completa do tempo aparece na sua lista de aplicativos. O mapa Ilha e o mapa Resumo usam essas configurações.</string>
     <string name="island_weather_effects_title">efeitos climáticos</string>
-    <string name="feat_weather_title">Clima</string>
     <string name="island_media_peek_song_change_title">Prévia ao mudar de música</string>
     <string name="island_media_keep_when_paused_title">Manter em modo de recuperação quando pausado</string>
     <string name="island_media_show_previous_title">mostrar botão para voltar a música anterior</string>

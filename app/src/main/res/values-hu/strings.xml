@@ -1475,12 +1475,6 @@
     <string name="flashlight_pocket_desc">Kapcsold ki a vakut, ha a telefon a zsebedben van</string>
     <string name="search_smart_pixels_enable_title">Okos pixelek engedélyezése</string>
     <string name="smart_pixels_intensity_title">Intenzitás</string>
-    <string name="feat_weather_desc">Szolgáltatók és beállítások konfigurálása</string>
-    <string name="weather_provider_title">Szolgáltató</string>
-    <string name="weather_model_title">Előrejelzés modell</string>
-    <string name="weather_location_device">Jelenlegi tartózkodási hely</string>
-    <string name="weather_location_manual">Hely kiválasztása</string>
-    <string name="weather_refresh_interval_title">Frissítés minden</string>
     <string name="island_weather_effects_title">Időjárás effektek</string>
     <string name="feat_notification_snoozing_title">Értesitések elhalasztása</string>
     <string name="feat_notification_snoozing_desc">Értesítések átütemezése</string>
@@ -1504,7 +1498,6 @@
     <string name="island_call_options_title">Hívások</string>
     <string name="island_show_time_battery_title">Idő és akkumulátor</string>
     <string name="island_show_timers_title">Időzítők és stopperek</string>
-    <string name="feat_weather_title">Időjárás</string>
     <string name="duo_show_media_title">Médialejátszás</string>
     <string name="status_glance_show_calendar_title">Naptári események</string>
     <string name="duo_action_horizontal_slide_sound_mode">Hang mód</string>
@@ -1514,7 +1507,6 @@
     <string name="island_brief_desc">Ismerd meg röviden hogy mi történik</string>
     <string name="island_like_while_playing_title">Zene kedvelése lejátszás közben</string>
     <string name="duo_action_horizontal_slide_title">Vízszintes csúszka</string>
-    <string name="about_desc_weather">Válasszon egy előrejelzési forrást, állítsa be tartózkodási helyét, mértékegységeit és frissítési időközét, majd válassza ki, hogy megjelenjen-e a teljes időjárás-képernyő az alkalmazáslistában. A Sziget és a Röviden ezeket a beállításokat használja</string>
     <string name="watch_watchface_title">Óraszámlap</string>
     <string name="watch_watchface_desc">Óraszámlap testreszabása</string>
     <string name="watch_complications_title">Komplikációk</string>
