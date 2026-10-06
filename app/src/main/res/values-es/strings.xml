@@ -1736,4 +1736,9 @@ Requiere permiso de administrador del dispositivo si se utiliza el bloqueo.</str
     <string name="label_thermal_cpu">Temperatura de.CPU</string>
     <string name="label_auto_reset_battery_stats_title">Reiniciar automaticamente</string>
     <string name="label_auto_reset_battery_stats_desc">Automaticamente reinicia las estadisticas de la bateria si el dispositivo se desconecta despues del 90% c de carga.</string>
+    <string name="weather_units_title">Unidades</string>
+    <string name="island_weather_effects_title">Efectos del clima</string>
+    <string name="island_weather_haptics_title">Háptica de simulación</string>
+    <string name="screen_locked_disable_notification_interactions_title">Deshabilitar las interacciones de notificaciones</string>
+    <string name="screen_locked_disable_notification_interactions_desc">Bloquea las panel de notificaciones y los Ajustes Rapidos si se desliza hacia abajo mientras esta bloqueado</string>
 </resources>

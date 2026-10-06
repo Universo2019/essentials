@@ -194,14 +194,22 @@ class MainViewModel : ViewModel() {
     val islandFontScale = mutableFloatStateOf(1f)
     val isIslandHideInOwnerApp = mutableStateOf(false)
     val isIslandHideOnShade = mutableStateOf(false)
+    val isIslandKeepOnLandscape = mutableStateOf(false)
+    val isIslandBondEdge = mutableStateOf(false)
+    val islandMaxItems = mutableStateOf(2)
+    val isIslandAlwaysGestures = mutableStateOf(false)
+    val islandLandscapeTopSpacing = mutableFloatStateOf(0f)
     val isIslandDismissOnOutside = mutableStateOf(false)
+    val isIslandHideLiveUpdates = mutableStateOf(false)
     val islandExpandedScale = mutableFloatStateOf(1f)
     val islandCameraPosition = mutableStateOf(SettingsRepository.ISLAND_CAMERA_POSITION_CENTER)
     val isIslandShowCalls = mutableStateOf(true)
     val isIslandShowTimers = mutableStateOf(true)
     val isIslandShowWeather = mutableStateOf(false)
     val isIslandTimersShowScreenRecorder = mutableStateOf(true)
+    val isIslandTimersFilterApps = mutableStateOf(false)
     val isIslandShowNetwork = mutableStateOf(true)
+    val isIslandShowSignal = mutableStateOf(false)
     val isIslandShowSoundMode = mutableStateOf(true)
     val isIslandSoundModeKeepIcon = mutableStateOf(true)
     val isIslandShowAlarm = mutableStateOf(false)
@@ -218,6 +226,7 @@ class MainViewModel : ViewModel() {
     val islandExpandedTimeoutMs = mutableLongStateOf(0L)
     val isIslandSuppressSystemHeadsUp = mutableStateOf(false)
     val isIslandDynamicHideStatusBar = mutableStateOf(false)
+    val isIslandCompactHideStatusBar = mutableStateOf(false)
     val isIslandHideWhenScreenOff = mutableStateOf(true)
     val islandTimeoutMs = mutableLongStateOf(4500L)
     val isIslandLineStageEnabled = mutableStateOf(true)
@@ -250,6 +259,7 @@ class MainViewModel : ViewModel() {
     val islandBatteryStyle = mutableStateOf(SettingsRepository.ISLAND_BATTERY_STYLE_RING)
     val isIslandBatteryPercentageEnabled = mutableStateOf(false)
     val isIslandBatteryPercentageConditional = mutableStateOf(false)
+    val isIslandBatteryIconConditional = mutableStateOf(false)
     val isIslandBatteryOnlyLow = mutableStateOf(false)
     val isIslandDevicesBatteryOnlyLow = mutableStateOf(false)
     val islandLongPressAction = mutableStateOf<Action?>(null)
@@ -401,6 +411,7 @@ class MainViewModel : ViewModel() {
     val isShutUpAttemptShizukuRestart = mutableStateOf(true)
     val shutUpRestoreDelay = mutableIntStateOf(10)
     val shutUpRestoreMode = mutableStateOf("Auto")
+    val shutUpKeyboard = mutableStateOf("")
     val shizukuAuthToken = mutableStateOf("")
     val edgeLightingSweepSelectedShapes = mutableStateOf<Set<String>>(emptySet())
 
@@ -446,6 +457,7 @@ class MainViewModel : ViewModel() {
     val consciousGateTitle = mutableStateOf("")
     val consciousGateMessage = mutableStateOf("")
     val isUseUsageAccess = mutableStateOf(false)
+    val isHiddenDebuggingSupport = mutableStateOf(false)
     val isFreezeWhenLockedEnabled = mutableStateOf(false)
     val freezeLockDelayIndex = mutableIntStateOf(1) // Default: 1 minute
     val freezePickedApps = mutableStateOf<List<NotificationApp>>(emptyList())
@@ -1371,6 +1383,10 @@ class MainViewModel : ViewModel() {
                             settingsRepository.getShutUpRestoreDelay()
                     }
 
+                    SettingsRepository.KEY_SHUT_UP_KEYBOARD -> {
+                        shutUpKeyboard.value = settingsRepository.getShutUpKeyboard()
+                    }
+
                     SettingsRepository.KEY_SHUT_UP_RESTORE_MODE -> {
                         shutUpRestoreMode.value =
                             settingsRepository.getShutUpRestoreMode()
@@ -1556,6 +1572,11 @@ class MainViewModel : ViewModel() {
      *
      * @param mode [String] Target mode.
      */
+    fun setShutUpKeyboard(ime: String) {
+        shutUpKeyboard.value = ime
+        settingsRepository.setShutUpKeyboard(ime)
+    }
+
     fun setShutUpRestoreMode(mode: String) {
         shutUpRestoreMode.value = mode
         settingsRepository.setShutUpRestoreMode(mode)
@@ -1706,6 +1727,7 @@ class MainViewModel : ViewModel() {
             settingsRepository.isShutUpAttemptShizukuRestartEnabled()
         shutUpRestoreDelay.intValue =
             settingsRepository.getShutUpRestoreDelay()
+        shutUpKeyboard.value = settingsRepository.getShutUpKeyboard()
         shutUpRestoreMode.value =
             settingsRepository.getShutUpRestoreMode()
         shizukuAuthToken.value =
@@ -2066,6 +2088,8 @@ class MainViewModel : ViewModel() {
         notificationLightingColorMode.value = settingsRepository.getNotificationLightingColorMode()
         isUseUsageAccess.value =
             settingsRepository.getBoolean(SettingsRepository.KEY_USE_USAGE_ACCESS)
+        isHiddenDebuggingSupport.value =
+            settingsRepository.getBoolean(SettingsRepository.KEY_HIDDEN_DEBUGGING_SUPPORT)
         isOnboardingCompleted.value =
             settingsRepository.getBoolean(SettingsRepository.KEY_ONBOARDING_COMPLETED, false)
 
@@ -2244,14 +2268,22 @@ class MainViewModel : ViewModel() {
         islandFontScale.floatValue = settingsRepository.getIslandFontScale()
         isIslandHideInOwnerApp.value = settingsRepository.isIslandHideInOwnerAppEnabled()
         isIslandHideOnShade.value = settingsRepository.isIslandHideOnShadeEnabled()
+        isIslandKeepOnLandscape.value = settingsRepository.isIslandKeepOnLandscapeEnabled()
+        isIslandBondEdge.value = settingsRepository.isIslandBondEdgeEnabled()
+        islandMaxItems.value = settingsRepository.getIslandMaxItems()
+        isIslandAlwaysGestures.value = settingsRepository.isIslandAlwaysGesturesEnabled()
+        islandLandscapeTopSpacing.floatValue = settingsRepository.getIslandLandscapeTopSpacing()
         isIslandDismissOnOutside.value = settingsRepository.isIslandDismissOnOutsideEnabled()
+        isIslandHideLiveUpdates.value = settingsRepository.isIslandHideLiveUpdatesEnabled()
         islandExpandedScale.floatValue = settingsRepository.getIslandExpandedScale()
         islandCameraPosition.value = settingsRepository.getIslandCameraPosition()
         isIslandShowCalls.value = settingsRepository.isIslandShowCallsEnabled()
         isIslandShowTimers.value = settingsRepository.isIslandShowTimersEnabled()
         isIslandShowWeather.value = settingsRepository.isIslandShowWeatherEnabled()
         isIslandTimersShowScreenRecorder.value = settingsRepository.isIslandTimersShowScreenRecorderEnabled()
+        isIslandTimersFilterApps.value = settingsRepository.isIslandTimersFilterAppsEnabled()
         isIslandShowNetwork.value = settingsRepository.isIslandShowNetworkEnabled()
+        isIslandShowSignal.value = settingsRepository.isIslandShowSignalEnabled()
         isIslandShowSoundMode.value = settingsRepository.isIslandShowSoundModeEnabled()
         isIslandSoundModeKeepIcon.value = settingsRepository.isIslandSoundModeKeepIconEnabled()
         isIslandShowAlarm.value = settingsRepository.isIslandShowAlarmEnabled()
@@ -2273,6 +2305,11 @@ class MainViewModel : ViewModel() {
         isIslandDynamicHideStatusBar.value =
             settingsRepository.getBoolean(
                 SettingsRepository.KEY_ISLAND_DYNAMIC_HIDE_STATUS_BAR,
+                false,
+            )
+        isIslandCompactHideStatusBar.value =
+            settingsRepository.getBoolean(
+                SettingsRepository.KEY_ISLAND_COMPACT_HIDE_STATUS_BAR,
                 false,
             )
         isIslandHideWhenScreenOff.value = settingsRepository.isIslandHideWhenScreenOffEnabled()
@@ -2307,6 +2344,7 @@ class MainViewModel : ViewModel() {
         islandBatteryStyle.value = settingsRepository.getIslandBatteryStyle()
         isIslandBatteryPercentageEnabled.value = settingsRepository.isIslandBatteryPercentageEnabled()
         isIslandBatteryPercentageConditional.value = settingsRepository.isIslandBatteryPercentageConditional()
+        isIslandBatteryIconConditional.value = settingsRepository.isIslandBatteryIconConditional()
         isIslandBatteryOnlyLow.value = settingsRepository.isIslandBatteryOnlyLowEnabled()
         isIslandDevicesBatteryOnlyLow.value = settingsRepository.isIslandDevicesBatteryOnlyLowEnabled()
         islandLongPressAction.value = settingsRepository.getIslandLongPressAction()
@@ -5311,6 +5349,11 @@ class MainViewModel : ViewModel() {
         settingsRepository.setIslandSoundModeKeepIconEnabled(enabled)
     }
 
+    fun setIslandShowSignal(enabled: Boolean) {
+        isIslandShowSignal.value = enabled
+        settingsRepository.setIslandShowSignalEnabled(enabled)
+    }
+
     fun setIslandShowNetwork(enabled: Boolean) {
         isIslandShowNetwork.value = enabled
         settingsRepository.setIslandShowNetworkEnabled(enabled)
@@ -5340,6 +5383,21 @@ class MainViewModel : ViewModel() {
         settingsRepository.setIslandTimersShowScreenRecorderEnabled(enabled)
     }
 
+    fun setIslandTimersFilterApps(enabled: Boolean) {
+        isIslandTimersFilterApps.value = enabled
+        settingsRepository.setIslandTimersFilterAppsEnabled(enabled)
+    }
+
+    fun loadIslandTimersSelectedApps(context: Context): List<AppSelection> = settingsRepository.loadIslandTimersSelectedApps()
+
+    fun saveIslandTimersSelectedApps(context: Context, apps: List<AppSelection>) {
+        settingsRepository.saveIslandTimersSelectedApps(apps)
+    }
+
+    fun updateIslandTimersAppEnabled(context: Context, packageName: String, enabled: Boolean) {
+        settingsRepository.updateIslandTimersAppSelection(packageName, enabled)
+    }
+
     fun setIslandShowCalls(enabled: Boolean) {
         isIslandShowCalls.value = enabled
         settingsRepository.setIslandShowCallsEnabled(enabled)
@@ -5355,6 +5413,11 @@ class MainViewModel : ViewModel() {
         settingsRepository.setIslandExpandedScale(value)
     }
 
+    fun setIslandHideLiveUpdates(enabled: Boolean) {
+        isIslandHideLiveUpdates.value = enabled
+        settingsRepository.setIslandHideLiveUpdatesEnabled(enabled)
+    }
+
     fun setIslandDismissOnOutside(enabled: Boolean) {
         isIslandDismissOnOutside.value = enabled
         settingsRepository.setIslandDismissOnOutsideEnabled(enabled)
@@ -5363,6 +5426,31 @@ class MainViewModel : ViewModel() {
     fun setIslandHideInOwnerApp(enabled: Boolean) {
         isIslandHideInOwnerApp.value = enabled
         settingsRepository.setIslandHideInOwnerAppEnabled(enabled)
+    }
+
+    fun setIslandLandscapeTopSpacing(value: Float) {
+        islandLandscapeTopSpacing.floatValue = value
+        settingsRepository.setIslandLandscapeTopSpacing(value)
+    }
+
+    fun setIslandAlwaysGestures(enabled: Boolean) {
+        isIslandAlwaysGestures.value = enabled
+        settingsRepository.setIslandAlwaysGesturesEnabled(enabled)
+    }
+
+    fun setIslandMaxItems(value: Int) {
+        islandMaxItems.value = value
+        settingsRepository.setIslandMaxItems(value)
+    }
+
+    fun setIslandBondEdge(enabled: Boolean) {
+        isIslandBondEdge.value = enabled
+        settingsRepository.setIslandBondEdgeEnabled(enabled)
+    }
+
+    fun setIslandKeepOnLandscape(enabled: Boolean) {
+        isIslandKeepOnLandscape.value = enabled
+        settingsRepository.setIslandKeepOnLandscapeEnabled(enabled)
     }
 
     fun setIslandHideOnShade(enabled: Boolean) {
@@ -5403,6 +5491,11 @@ class MainViewModel : ViewModel() {
     fun setIslandSuppressSystemHeadsUp(enabled: Boolean) {
         isIslandSuppressSystemHeadsUp.value = enabled
         settingsRepository.setIslandSuppressSystemHeadsUpEnabled(enabled)
+    }
+
+    fun setIslandCompactHideStatusBar(enabled: Boolean) {
+        isIslandCompactHideStatusBar.value = enabled
+        settingsRepository.putBoolean(SettingsRepository.KEY_ISLAND_COMPACT_HIDE_STATUS_BAR, enabled)
     }
 
     fun setIslandDynamicHideStatusBar(
@@ -5598,6 +5691,11 @@ class MainViewModel : ViewModel() {
     fun setIslandBatteryOnlyLow(enabled: Boolean) {
         isIslandBatteryOnlyLow.value = enabled
         settingsRepository.setIslandBatteryOnlyLowEnabled(enabled)
+    }
+
+    fun setIslandBatteryIconConditional(enabled: Boolean) {
+        isIslandBatteryIconConditional.value = enabled
+        settingsRepository.setIslandBatteryIconConditional(enabled)
     }
 
     fun setIslandBatteryPercentageConditional(enabled: Boolean) {
@@ -6024,6 +6122,11 @@ class MainViewModel : ViewModel() {
      * @param enabled [Boolean] Target enabled.
      * @param context [Context] Target context.
      */
+    fun setHiddenDebuggingSupport(enabled: Boolean) {
+        isHiddenDebuggingSupport.value = enabled
+        settingsRepository.putBoolean(SettingsRepository.KEY_HIDDEN_DEBUGGING_SUPPORT, enabled)
+    }
+
     fun setUseUsageAccess(
         enabled: Boolean,
         context: Context,
@@ -8771,11 +8874,12 @@ class MainViewModel : ViewModel() {
 
             // Filter out non-installed apps
             val pm = context.packageManager
+            val allowSystem = isEnableUnsupportedFeatures.value
             val installedApps =
                 importedApps.filter { app ->
                     try {
                         pm.getPackageInfo(app.packageName, 0)
-                        true
+                        allowSystem || !com.sameerasw.essentials.utils.AppUtil.hasSystemFlag(context, app.packageName)
                     } catch (e: Exception) {
                         false
                     }

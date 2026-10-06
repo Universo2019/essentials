@@ -34,6 +34,8 @@ class EssentialsApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        com.sameerasw.essentials.utils.DeviceUtils.torchRestrictionLifted =
+            com.sameerasw.essentials.data.repository.SettingsRepository(this).isEnableUnsupportedFeatures()
         context = applicationContext
         com.sameerasw.essentials.utils.HapticUtil.initialize(this)
 

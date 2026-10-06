@@ -32,6 +32,7 @@ import com.sameerasw.essentials.data.repository.SettingsRepository
 import com.sameerasw.essentials.domain.HapticFeedbackType
 import com.sameerasw.essentials.domain.model.AppSelection
 import com.sameerasw.essentials.services.InputEventListenerService
+import com.sameerasw.essentials.services.LiveUpdateSnoozer
 import com.sameerasw.essentials.services.NotificationListener
 import com.sameerasw.essentials.services.handlers.AmbientGlanceHandler
 import com.sameerasw.essentials.services.handlers.AodForceTurnOffHandler
@@ -212,7 +213,9 @@ class ScreenOffAccessibilityService :
 
     private val preferenceChangeListener =
         android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == "circle_to_search_gesture_enabled" ||
+            if (key == SettingsRepository.KEY_ISLAND_HIDE_LIVE_UPDATES) {
+                LiveUpdateSnoozer.onSettingChanged()
+            } else if (key == "circle_to_search_gesture_enabled" ||
                 key == "circle_to_search_gesture_height" ||
                 key == "circle_to_search_gesture_width" ||
                 key == "circle_to_search_preview_enabled"
@@ -303,7 +306,10 @@ class ScreenOffAccessibilityService :
                 .SmartPixelsHandler(this)
         duoOverlayHandler = DuoOverlayHandler(this)
         islandOverlayHandler = IslandCoordinator(this)
-        islandOverlayHandler.onVisibilityChanged = { duoOverlayHandler.setIslandVisible(it) }
+        islandOverlayHandler.onVisibilityChanged = {
+            duoOverlayHandler.setIslandVisible(it)
+            LiveUpdateSnoozer.onIslandVisibility(this, it)
+        }
         duoOverlayHandler.openBrief = { islandOverlayHandler.openBrief() }
         statusGlanceHandler = StatusGlanceHandler(this)
 
@@ -360,7 +366,7 @@ class ScreenOffAccessibilityService :
                         }
 
                         Intent.ACTION_USER_PRESENT -> {
-                            aodWallpaperOverlayHandler.onScreenOn()
+                            aodWallpaperOverlayHandler.onUserPresent()
                             statusGlanceHandler.onUserPresent()
                             duoOverlayHandler.onUserPresent()
                             islandOverlayHandler.updateState()
@@ -466,9 +472,9 @@ class ScreenOffAccessibilityService :
                     AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
             }
         updateOmniOverlay()
-        duoOverlayHandler.updateState()
-        statusGlanceHandler.updateState()
-        islandOverlayHandler.updateState()
+        duoOverlayHandler.restart()
+        statusGlanceHandler.restart()
+        islandOverlayHandler.restart()
     }
 
     private fun updateOmniOverlay() {
@@ -496,6 +502,7 @@ class ScreenOffAccessibilityService :
             unregisterReceiver(screenReceiver)
         } catch (_: Exception) {
         }
+        LiveUpdateSnoozer.release()
         flashlightHandler.unregister()
         notificationLightingHandler.removeOverlay()
         ambientGlanceHandler.removeOverlay()
