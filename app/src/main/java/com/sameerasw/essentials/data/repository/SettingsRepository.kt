@@ -233,6 +233,7 @@ class SettingsRepository(
         const val KEY_FLASHLIGHT_HAPTIC_TYPE = "flashlight_haptic_type" // Legacy
         const val KEY_BUTTON_REMAP_MIGRATION_DONE = "button_remap_action_migration_done"
         const val KEY_BUTTON_REMAP_PAUSE_ON_VOLUME_DIALOG = "button_remap_pause_on_volume_dialog"
+        const val KEY_PINNED_ACTION_PREFIX = "pinned_action_"
 
         const val KEY_DYNAMIC_NIGHT_LIGHT_ENABLED = "dynamic_night_light_enabled"
         const val KEY_DYNAMIC_NIGHT_LIGHT_SELECTED_APPS = "dynamic_night_light_selected_apps"
@@ -4205,4 +4206,12 @@ class SettingsRepository(
 
     fun getStatusGlanceLongPressAction(): Action? = getRemapAction(KEY_STATUS_GLANCE_LONG_PRESS_ACTION)
     fun setStatusGlanceLongPressAction(action: Action?) = setRemapAction(KEY_STATUS_GLANCE_LONG_PRESS_ACTION, action)
+
+    // Home screen shortcuts only carry an id; the action itself never leaves the app
+    fun getPinnedAction(id: String): Action? = getRemapAction(KEY_PINNED_ACTION_PREFIX + id)
+
+    fun savePinnedAction(
+        id: String,
+        action: Action,
+    ) = setRemapAction(KEY_PINNED_ACTION_PREFIX + id, action)
 }

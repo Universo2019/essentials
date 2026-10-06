@@ -512,6 +512,8 @@ object CombinedActionExecutor {
                     }
                 }
 
+                is Action.OpenActivity -> openActivity(context, action)
+
                 is Action.TurnOnHotspot -> setHotspotEnabled(context, true)
                 is Action.TurnOffHotspot -> setHotspotEnabled(context, false)
                 is Action.ToggleHotspot -> setHotspotEnabled(context, !isHotspotEnabled(context))
@@ -1113,6 +1115,34 @@ object CombinedActionExecutor {
                 }
             }
         } catch (_: Exception) {
+        }
+    }
+
+    private fun openActivity(
+        context: Context,
+        action: Action.OpenActivity,
+    ) {
+        if (action.packageName.isBlank() || action.className.isBlank()) return
+        val component = ComponentName(action.packageName, action.className)
+        if (action.requiresRoot) {
+            if (ShellUtils.isRootEnabled(context)) {
+                ShellUtils.runCommand(
+                    context,
+                    "am start -n ${component.flattenToShortString()}",
+                    featureName = context.getString(action.title),
+                )
+            }
+            return
+        }
+        try {
+            context.startActivity(Intent().setComponent(component).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        } catch (e: Exception) {
+            // Exported activities can still require a permission we lack
+            if (ShellUtils.isRootEnabled(context)) {
+                ShellUtils.runCommand(context, "am start -n ${component.flattenToShortString()}")
+            } else {
+                e.printStackTrace()
+            }
         }
     }
 }

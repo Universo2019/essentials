@@ -1136,6 +1136,32 @@ object FeatureRegistry {
                 ) = viewModel.setFlashlightPulseEnabled(enabled, context)
             },
             object : Feature(
+                id = "Activity launcher",
+                title = R.string.feat_activity_launcher_title,
+                iconRes = R.drawable.rounded_app_registration_24,
+                category = R.string.cat_interaction,
+                description = R.string.feat_activity_launcher_desc,
+                aboutDescription = R.string.about_desc_activity_launcher,
+                showToggle = false,
+                searchableSettings =
+                    listOf(
+                        SearchSetting(
+                            R.string.search_activity_launcher_title,
+                            R.string.search_activity_launcher_desc,
+                            "browse_activities",
+                        ),
+                    ),
+                parentFeatureId = "Input",
+            ) {
+                override fun isEnabled(viewModel: MainViewModel) = false
+
+                override fun onToggle(
+                    viewModel: MainViewModel,
+                    context: Context,
+                    enabled: Boolean,
+                ) {}
+            },
+            object : Feature(
                 id = "Link actions",
                 title = R.string.feat_link_actions_title,
                 iconRes = R.drawable.rounded_link_24,
