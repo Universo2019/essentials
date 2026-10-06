@@ -52,6 +52,8 @@ fun initPermissionRegistry() {
     PermissionRegistry.register("ACCESSIBILITY", R.string.feat_screen_off_widget_title)
     PermissionRegistry.register("ACCESSIBILITY", R.string.feat_notification_lighting_title)
     PermissionRegistry.register("ACCESSIBILITY", R.string.feat_face_unlock_brightness_title)
+    PermissionRegistry.register("SHIZUKU", R.string.feat_face_unlock_brightness_title)
+    PermissionRegistry.register("ROOT", R.string.feat_face_unlock_brightness_title)
     PermissionRegistry.register("ACCESSIBILITY", R.string.feat_dynamic_night_light_title)
     PermissionRegistry.register("ACCESSIBILITY", R.string.feat_app_lock_title)
     PermissionRegistry.register("ACCESSIBILITY", R.string.feat_essentials_on_display_title)

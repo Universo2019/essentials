@@ -3081,9 +3081,11 @@
     <string name="island_notif_tap_to_open_title">Tap to open notifications</string>
     <string name="island_notif_queue_title">Notification queue</string>
     <string name="island_notification_options_title">Notification options</string>
-    <string name="feat_face_unlock_brightness_title">Face unlock brightness</string>
+    <string name="feat_face_unlock_brightness_title">Face illumination</string>
     <string name="feat_face_unlock_brightness_desc">Bump brightness in low light</string>
     <string name="face_unlock_illuminate">Illuminate</string>
+    <string name="face_unlock_trigger_unlock_title">Trigger unlock</string>
+    <string name="face_unlock_light_tint_title">Light tint</string>
     <string name="island_notif_skip_silent_title">Skip silent notifications</string>
     <string name="island_notif_filter_apps_title">Filter apps</string>
     <string name="island_notif_compact_heads_up_title">Compact heads up</string>

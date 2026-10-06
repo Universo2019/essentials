@@ -707,6 +707,9 @@ class SettingsRepository(
         const val KEY_RECENT_SEARCHES = "recent_searches"
         const val KEY_POCKET_MODE_ENABLED = "pocket_mode_enabled"
         const val KEY_FACE_UNLOCK_BRIGHTNESS_ENABLED = "face_unlock_brightness_enabled"
+        const val KEY_FACE_UNLOCK_MAX_BRIGHTNESS = "face_unlock_max_brightness"
+        const val KEY_FACE_UNLOCK_TRIGGER_UNLOCK = "face_unlock_trigger_unlock"
+        const val KEY_FACE_UNLOCK_LIGHT_TINT = "face_unlock_light_tint"
         const val KEY_POCKET_MODE_USE_LIGHT_SENSOR = "pocket_mode_use_light_sensor"
         const val KEY_POCKET_MODE_EXCLUDED_APPS = "pocket_mode_excluded_apps"
         const val KEY_POCKET_MODE_TRIGGER_DELAY = "pocket_mode_trigger_delay"
@@ -4034,6 +4037,15 @@ class SettingsRepository(
 
     fun isFaceUnlockBrightnessEnabled(): Boolean = getBoolean(KEY_FACE_UNLOCK_BRIGHTNESS_ENABLED, false)
     fun setFaceUnlockBrightnessEnabled(enabled: Boolean) = putBoolean(KEY_FACE_UNLOCK_BRIGHTNESS_ENABLED, enabled)
+
+    fun getFaceUnlockMaxBrightness(): Int = getInt(KEY_FACE_UNLOCK_MAX_BRIGHTNESS, 100)
+    fun setFaceUnlockMaxBrightness(value: Int) = putInt(KEY_FACE_UNLOCK_MAX_BRIGHTNESS, value)
+
+    fun isFaceUnlockTriggerUnlockEnabled(): Boolean = getBoolean(KEY_FACE_UNLOCK_TRIGGER_UNLOCK, true)
+    fun setFaceUnlockTriggerUnlockEnabled(enabled: Boolean) = putBoolean(KEY_FACE_UNLOCK_TRIGGER_UNLOCK, enabled)
+
+    fun isFaceUnlockLightTintEnabled(): Boolean = getBoolean(KEY_FACE_UNLOCK_LIGHT_TINT, false)
+    fun setFaceUnlockLightTintEnabled(enabled: Boolean) = putBoolean(KEY_FACE_UNLOCK_LIGHT_TINT, enabled)
 
     fun isIslandNotifSkipSilentEnabled(): Boolean = getBoolean(KEY_ISLAND_NOTIF_SKIP_SILENT, true)
     fun setIslandNotifSkipSilentEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_NOTIF_SKIP_SILENT, enabled)

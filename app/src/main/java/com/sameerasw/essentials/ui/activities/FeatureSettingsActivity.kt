@@ -100,6 +100,7 @@ import com.sameerasw.essentials.ui.features.system.NetworksSettingsUI
 import com.sameerasw.essentials.ui.features.system.NotificationLightingSettingsUI
 import com.sameerasw.essentials.ui.features.system.NotificationSnoozingSettingsUI
 import com.sameerasw.essentials.ui.features.system.OtherCustomizationsSettingsUI
+import com.sameerasw.essentials.ui.features.system.FaceUnlockBrightnessSettingsUI
 import com.sameerasw.essentials.ui.features.system.PocketModeSettingsUI
 import com.sameerasw.essentials.ui.features.system.PowerAndBatterySettingsUI
 import com.sameerasw.essentials.ui.features.system.QuickSettingsTilesSettingsUI
@@ -738,12 +739,12 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                                     listOf(
                                                         listOf(
                                                             "Screen locked security",
-                                                            "Face unlock brightness",
                                                             "App lock",
                                                             "Shut-Up!",
                                                         ),
                                                         listOf(
                                                             "Lockdown mode",
+                                                            "Face unlock brightness",
                                                         ),
                                                     )
 
@@ -1058,6 +1059,14 @@ class FeatureSettingsActivity : AppCompatActivity() {
 
                                     "Screen locked security" -> {
                                         ScreenLockedSecuritySettingsUI(
+                                            viewModel = viewModel,
+                                            modifier = Modifier.padding(top = 16.dp),
+                                            highlightSetting = highlightSetting,
+                                        )
+                                    }
+
+                                    "Face unlock brightness" -> {
+                                        FaceUnlockBrightnessSettingsUI(
                                             viewModel = viewModel,
                                             modifier = Modifier.padding(top = 16.dp),
                                             highlightSetting = highlightSetting,

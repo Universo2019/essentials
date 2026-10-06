@@ -242,8 +242,8 @@ class FaceUnlockBrightnessHandler(
                             HapticUtil.performVirtualKeyHaptic(container)
                             removePill()
                             bump()
-                            showTint()
-                            showBouncer()
+                            if (settings.isFaceUnlockLightTintEnabled()) showTint()
+                            if (settings.isFaceUnlockTriggerUnlockEnabled()) showBouncer()
                         },
                     )
                 }
@@ -316,7 +316,7 @@ class FaceUnlockBrightnessHandler(
                 PixelFormat.TRANSLUCENT,
             ).apply {
                 gravity = Gravity.TOP or Gravity.START
-                screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
+                screenBrightness = settings.getFaceUnlockMaxBrightness() / 100f
             }
         val view = View(service)
         try {

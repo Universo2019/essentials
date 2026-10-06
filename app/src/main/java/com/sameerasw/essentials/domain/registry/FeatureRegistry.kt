@@ -2525,12 +2525,29 @@ object FeatureRegistry {
             object : Feature(
                 id = "Face unlock brightness",
                 title = R.string.feat_face_unlock_brightness_title,
-                iconRes = R.drawable.rounded_brightness_6_24,
-                category = R.string.cat_protection,
+                iconRes = R.drawable.rounded_face_24,
+                category = R.string.cat_tools,
                 description = R.string.feat_face_unlock_brightness_desc,
                 aboutDescription = R.string.feat_face_unlock_brightness_desc,
                 permissionKeys = listOf("ACCESSIBILITY"),
-                hasMoreSettings = false,
+                searchableSettings =
+                    listOf(
+                        SearchSetting(
+                            R.string.flashlight_pulse_max_brightness,
+                            R.string.feat_face_unlock_brightness_title,
+                            "face_unlock_max_brightness",
+                        ),
+                        SearchSetting(
+                            R.string.face_unlock_trigger_unlock_title,
+                            R.string.feat_face_unlock_brightness_title,
+                            "face_unlock_trigger_unlock",
+                        ),
+                        SearchSetting(
+                            R.string.face_unlock_light_tint_title,
+                            R.string.feat_face_unlock_brightness_title,
+                            "face_unlock_light_tint",
+                        ),
+                    ),
                 parentFeatureId = "Security",
             ) {
                 override fun isEnabled(viewModel: MainViewModel) = viewModel.isFaceUnlockBrightnessEnabled.value
