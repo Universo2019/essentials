@@ -388,6 +388,18 @@ class DuoOverlayHandler(
         updateState()
     }
 
+    private fun syncScreenOffFromDisplay() {
+        val displayManager = service.getSystemService(Context.DISPLAY_SERVICE) as? android.hardware.display.DisplayManager ?: return
+        val state = displayManager.getDisplay(android.view.Display.DEFAULT_DISPLAY)?.state ?: return
+        val off = state == android.view.Display.STATE_OFF ||
+            state == android.view.Display.STATE_DOZE ||
+            state == android.view.Display.STATE_DOZE_SUSPEND
+        if (off == isScreenOff) return
+        isScreenOff = off
+        overlayView?.isScreenOff = off
+        overlayView?.isLockedHidden = shouldHideForLock()
+    }
+
     private var lastKnownRotation = -1
     private var lastKnownDisplayProfile: String? = null
     private var isRotationListenerRegistered = false
@@ -400,6 +412,7 @@ class DuoOverlayHandler(
 
             override fun onDisplayChanged(displayId: Int) {
                 if (displayId != android.view.Display.DEFAULT_DISPLAY) return
+                syncScreenOffFromDisplay()
                 @Suppress("DEPRECATION")
                 val rotation = windowManager?.defaultDisplay?.rotation ?: return
                 val profile = settingsRepository.getDisplayProfileId()

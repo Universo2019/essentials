@@ -202,7 +202,8 @@ fun IslandPlacementSettingsUI(
                     valueRange = 0f..100f,
                     increment = 1f,
                     iconRes = R.drawable.rounded_border_left_24,
-                    valueFormatter = { "${it.toInt()}%" },
+                    valueFormatter = { "%.1f%%".format(it) },
+                    allowDecimals = true,
                 )
                 ConfigSliderItem(
                     title = stringResource(R.string.island_camera_offset_y_title),
@@ -215,6 +216,7 @@ fun IslandPlacementSettingsUI(
                     increment = 0.5f,
                     iconRes = R.drawable.rounded_border_top_24,
                     valueFormatter = { "%.1f%%".format(it) },
+                    allowDecimals = true,
                 )
             }
 
@@ -229,6 +231,7 @@ fun IslandPlacementSettingsUI(
                 increment = 0.05f,
                 iconRes = R.drawable.rounded_arrows_outward_24,
                 valueFormatter = { "%.2fx".format(it) },
+                allowDecimals = true,
                 modifier = Modifier.highlight(highlightSetting == "island_camera_size"),
             )
 
@@ -242,7 +245,8 @@ fun IslandPlacementSettingsUI(
                 valueRange = 150f..500f,
                 increment = 10f,
                 iconRes = R.drawable.rounded_arrows_outward_24,
-                valueFormatter = { "${it.toInt()} dp" },
+                valueFormatter = { "%.1f dp".format(it) },
+                allowDecimals = true,
                 modifier = Modifier.highlight(highlightSetting == "island_max_width"),
             )
 
@@ -256,7 +260,8 @@ fun IslandPlacementSettingsUI(
                 valueRange = 200f..500f,
                 increment = 10f,
                 iconRes = R.drawable.rounded_arrows_outward_24,
-                valueFormatter = { "${it.toInt()} dp" },
+                valueFormatter = { "%.1f dp".format(it) },
+                allowDecimals = true,
                 modifier = Modifier.highlight(highlightSetting == "island_expanded_width"),
             )
 
@@ -270,9 +275,53 @@ fun IslandPlacementSettingsUI(
                 valueRange = 0f..16f,
                 increment = 1f,
                 iconRes = R.drawable.rounded_arrows_outward_24,
-                valueFormatter = { "${it.toInt()} dp" },
+                valueFormatter = { "%.1f dp".format(it) },
+                allowDecimals = true,
                 modifier = Modifier.highlight(highlightSetting == "island_cutout_gap"),
             )
+        }
+
+        RoundedCardContainer(
+            spacing = 2.dp,
+            cornerRadius = 24.dp,
+        ) {
+            IconToggleItem(
+                iconRes = R.drawable.rounded_mobile_rotate_24,
+                title = stringResource(R.string.island_keep_on_landscape_title),
+                isChecked = viewModel.isIslandKeepOnLandscape.value,
+                onCheckedChange = { checked ->
+                    HapticUtil.performVirtualKeyHaptic(view)
+                    viewModel.setIslandKeepOnLandscape(checked)
+                },
+                modifier = Modifier.highlight(highlightSetting == "island_keep_on_landscape"),
+            )
+
+            if (viewModel.isIslandKeepOnLandscape.value) {
+                ConfigSliderItem(
+                    title = stringResource(R.string.island_landscape_top_spacing_title),
+                    value = viewModel.islandLandscapeTopSpacing.floatValue,
+                    onValueChange = {
+                        HapticUtil.performUIHaptic(view)
+                        viewModel.setIslandLandscapeTopSpacing(it)
+                    },
+                    valueRange = 0f..60f,
+                    increment = 0.5f,
+                    iconRes = R.drawable.rounded_vertical_align_top_24,
+                    valueFormatter = { "%.1f dp".format(it) },
+                    modifier = Modifier.highlight(highlightSetting == "island_landscape_top_spacing"),
+                )
+
+                IconToggleItem(
+                    iconRes = R.drawable.rounded_vertical_align_top_24,
+                    title = stringResource(R.string.island_bond_edge_title),
+                    isChecked = viewModel.isIslandBondEdge.value,
+                    onCheckedChange = { checked ->
+                        HapticUtil.performVirtualKeyHaptic(view)
+                        viewModel.setIslandBondEdge(checked)
+                    },
+                    modifier = Modifier.highlight(highlightSetting == "island_bond_edge"),
+                )
+            }
         }
     }
 }
@@ -538,6 +587,18 @@ fun IslandBehaviorSettingsUI(
             spacing = 2.dp,
             cornerRadius = 24.dp,
         ) {
+            IconToggleItem(
+                iconRes = R.drawable.rounded_motion_play_24,
+                title = stringResource(R.string.island_line_peek_title),
+                description = stringResource(R.string.island_line_peek_desc),
+                isChecked = viewModel.isIslandLineStageEnabled.value,
+                onCheckedChange = { checked ->
+                    HapticUtil.performVirtualKeyHaptic(view)
+                    viewModel.setIslandLineStageEnabled(checked)
+                },
+                modifier = Modifier.highlight(highlightSetting == "island_line_stage_enabled"),
+            )
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -574,19 +635,6 @@ fun IslandBehaviorSettingsUI(
                 )
             }
 
-
-            IconToggleItem(
-                iconRes = R.drawable.rounded_motion_play_24,
-                title = stringResource(R.string.island_line_peek_title),
-                description = stringResource(R.string.island_line_peek_desc),
-                isChecked = viewModel.isIslandLineStageEnabled.value,
-                onCheckedChange = { checked ->
-                    HapticUtil.performVirtualKeyHaptic(view)
-                    viewModel.setIslandLineStageEnabled(checked)
-                },
-                modifier = Modifier.highlight(highlightSetting == "island_line_stage_enabled"),
-            )
-
             IconToggleItem(
                 iconRes = R.drawable.rounded_visibility_off_24,
                 title = stringResource(R.string.island_hide_in_owner_app_title),
@@ -608,18 +656,12 @@ fun IslandBehaviorSettingsUI(
                 },
                 modifier = Modifier.highlight(highlightSetting == "island_hide_on_shade"),
             )
+        }
 
-            IconToggleItem(
-                iconRes = R.drawable.rounded_touch_app_24,
-                title = stringResource(R.string.island_dismiss_on_outside_title),
-                isChecked = viewModel.isIslandDismissOnOutside.value,
-                onCheckedChange = { checked ->
-                    HapticUtil.performVirtualKeyHaptic(view)
-                    viewModel.setIslandDismissOnOutside(checked)
-                },
-                modifier = Modifier.highlight(highlightSetting == "island_dismiss_on_outside"),
-            )
-
+        RoundedCardContainer(
+            spacing = 2.dp,
+            cornerRadius = 24.dp,
+        ) {
             IconToggleItem(
                 iconRes = R.drawable.rounded_notifications_off_24,
                 title = stringResource(R.string.island_suppress_system_heads_up_title),
@@ -682,6 +724,22 @@ fun IslandBehaviorSettingsUI(
                     }
                 },
                 modifier = Modifier.highlight(highlightSetting == "island_compact_hide_status_bar"),
+            )
+        }
+
+        RoundedCardContainer(
+            spacing = 2.dp,
+            cornerRadius = 24.dp,
+        ) {
+            IconToggleItem(
+                iconRes = R.drawable.rounded_touch_app_24,
+                title = stringResource(R.string.island_dismiss_on_outside_title),
+                isChecked = viewModel.isIslandDismissOnOutside.value,
+                onCheckedChange = { checked ->
+                    HapticUtil.performVirtualKeyHaptic(view)
+                    viewModel.setIslandDismissOnOutside(checked)
+                },
+                modifier = Modifier.highlight(highlightSetting == "island_dismiss_on_outside"),
             )
         }
     }

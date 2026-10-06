@@ -70,8 +70,7 @@ class SettingsRepository(
             )
         for (key in remapKeys) {
             val raw = prefs.getString(key, null) ?: continue
-            // Skip if already JSON (starts with '{') — already migrated or set by new code
-            if (raw.startsWith("{")) continue
+            if (raw.startsWith("{") || raw.startsWith("[")) continue
             val action: Action? =
                 when (raw) {
                     "Toggle flashlight" -> Action.ToggleFlashlight
@@ -121,6 +120,26 @@ class SettingsRepository(
             prefs.edit().remove(key).apply()
         } else {
             prefs.edit().putString(key, ActionGsonAdapter.toJson(action)).apply()
+        }
+    }
+
+    fun getRemapActions(key: String): List<Action> {
+        val json = prefs.getString(key, null) ?: return emptyList()
+        return if (json.trimStart().startsWith("[")) {
+            ActionGsonAdapter.listFromJson(json)
+        } else {
+            listOfNotNull(ActionGsonAdapter.fromJson(json))
+        }
+    }
+
+    fun setRemapActions(
+        key: String,
+        actions: List<Action>,
+    ) {
+        when (actions.size) {
+            0 -> prefs.edit().remove(key).apply()
+            1 -> setRemapAction(key, actions.first())
+            else -> prefs.edit().putString(key, ActionGsonAdapter.listToJson(actions)).apply()
         }
     }
 
@@ -508,6 +527,11 @@ class SettingsRepository(
         const val KEY_ISLAND_FONT_SCALE = "island_font_scale"
         const val KEY_ISLAND_HIDE_IN_OWNER_APP = "island_hide_in_owner_app"
         const val KEY_ISLAND_HIDE_ON_SHADE = "island_hide_on_shade"
+        const val KEY_ISLAND_KEEP_ON_LANDSCAPE = "island_keep_on_landscape"
+        const val KEY_ISLAND_LANDSCAPE_TOP_SPACING = "island_landscape_top_spacing"
+        const val KEY_ISLAND_BOND_EDGE = "island_bond_edge"
+        const val KEY_ISLAND_MAX_ITEMS = "island_max_items"
+        const val KEY_ISLAND_ALWAYS_GESTURES = "island_always_gestures"
         const val KEY_ISLAND_DISMISS_ON_OUTSIDE = "island_dismiss_on_outside"
         const val KEY_ISLAND_HIDE_LIVE_UPDATES = "island_hide_live_updates"
         const val KEY_ISLAND_CAMERA_POSITION = "island_camera_position"
@@ -641,6 +665,7 @@ class SettingsRepository(
         const val KEY_SHUT_UP_ATTEMPT_SHIZUKU_RESTART = "shut_up_attempt_shizuku_restart"
         const val KEY_SHUT_UP_RESTORE_DELAY = "shut_up_restore_delay"
         const val KEY_SHUT_UP_RESTORE_MODE = "shut_up_restore_mode"
+        const val KEY_SHUT_UP_KEYBOARD = "shut_up_keyboard"
         const val KEY_SHIZUKU_AUTH_TOKEN = "shizuku_auth_token"
         const val KEY_EDGE_LIGHTING_SWEEP_SELECTED_SHAPES = "edge_lighting_sweep_selected_shapes"
         const val KEY_DISABLE_ROTATION_SUGGESTION = "disable_rotation_suggestion"
@@ -2040,6 +2065,10 @@ class SettingsRepository(
      * Executes the get shut up restore mode operation.
      * @return The resulting String data.
      */
+    fun getShutUpKeyboard(): String = prefs.getString(KEY_SHUT_UP_KEYBOARD, "") ?: ""
+
+    fun setShutUpKeyboard(ime: String) = putString(KEY_SHUT_UP_KEYBOARD, ime)
+
     fun getShutUpRestoreMode(): String = prefs.getString(KEY_SHUT_UP_RESTORE_MODE, "Auto") ?: "Auto"
 
     /**
@@ -2430,7 +2459,10 @@ class SettingsRepository(
      *
      * @param enabled [Boolean] Target enabled.
      */
-    fun setEnableUnsupportedFeatures(enabled: Boolean) = putBoolean(KEY_ENABLE_UNSUPPORTED_FEATURES, enabled)
+    fun setEnableUnsupportedFeatures(enabled: Boolean) {
+        com.sameerasw.essentials.utils.DeviceUtils.torchRestrictionLifted = enabled
+        putBoolean(KEY_ENABLE_UNSUPPORTED_FEATURES, enabled)
+    }
 
     fun isShowLegacyFeatures(): Boolean = getBoolean(KEY_SHOW_LEGACY_FEATURES, true)
 
@@ -3944,6 +3976,26 @@ class SettingsRepository(
 
     fun isIslandHideInOwnerAppEnabled(): Boolean = getBoolean(KEY_ISLAND_HIDE_IN_OWNER_APP, false)
     fun setIslandHideInOwnerAppEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_HIDE_IN_OWNER_APP, enabled)
+
+    fun isIslandKeepOnLandscapeEnabled(): Boolean = getBoolean(KEY_ISLAND_KEEP_ON_LANDSCAPE, false)
+
+    fun setIslandKeepOnLandscapeEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_KEEP_ON_LANDSCAPE, enabled)
+
+    fun isIslandAlwaysGesturesEnabled(): Boolean = getBoolean(KEY_ISLAND_ALWAYS_GESTURES, false)
+
+    fun setIslandAlwaysGesturesEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_ALWAYS_GESTURES, enabled)
+
+    fun getIslandMaxItems(): Int = getInt(KEY_ISLAND_MAX_ITEMS, 2).coerceIn(1, 4)
+
+    fun setIslandMaxItems(value: Int) = putInt(KEY_ISLAND_MAX_ITEMS, value)
+
+    fun isIslandBondEdgeEnabled(): Boolean = getBoolean(KEY_ISLAND_BOND_EDGE, false)
+
+    fun setIslandBondEdgeEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_BOND_EDGE, enabled)
+
+    fun getIslandLandscapeTopSpacing(): Float = getFloat(KEY_ISLAND_LANDSCAPE_TOP_SPACING, 0f)
+
+    fun setIslandLandscapeTopSpacing(value: Float) = putFloat(KEY_ISLAND_LANDSCAPE_TOP_SPACING, value)
 
     fun isIslandHideOnShadeEnabled(): Boolean = getBoolean(KEY_ISLAND_HIDE_ON_SHADE, false)
 

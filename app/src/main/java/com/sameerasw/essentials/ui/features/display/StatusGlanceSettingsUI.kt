@@ -138,6 +138,8 @@ fun StatusGlanceSettingsUI(
                 "WRITE_SETTINGS" -> !viewModel.isWriteSettingsEnabled.value
                 "NOTIFICATION_POLICY" -> !viewModel.isNotificationPolicyAccessGranted.value
                 "WRITE_SECURE_SETTINGS" -> !viewModel.isWriteSecureSettingsEnabled.value
+                "DRAW_OVERLAYS" -> !viewModel.isOverlayPermissionGranted.value
+                "ACCESSIBILITY" -> !viewModel.isAccessibilityEnabled.value
                 else -> false
             }
         }
@@ -858,6 +860,8 @@ fun StatusGlanceSettingsUI(
 
     if (showFreezeAppsSettings && (configAction is Action.FreezeApps || configAction is Action.UnfreezeApps)) {
         AppSelectionSheet(
+            restrictSystemApps = !viewModel.isEnableUnsupportedFeatures.value,
+            showInvertSelection = false,
             onDismissRequest = {
                 val finalAction = when (val action = configAction) {
                     is Action.FreezeApps -> action.copy(packageNames = temporarySelectedAppsForAction)

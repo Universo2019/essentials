@@ -1100,6 +1100,8 @@ object FeatureRegistry {
                 parentFeatureId = "Notifications",
                 animationRes = R.raw.flash_animation,
             ) {
+                override fun isDeviceSupported(context: Context) = !DeviceUtils.isTorchRestrictedDevice()
+
                 override fun isEnabled(viewModel: MainViewModel) = viewModel.isFlashlightPulseEnabled.value
 
                 override fun isToggleEnabled(
@@ -1177,6 +1179,8 @@ object FeatureRegistry {
                 hasMoreSettings = true,
                 animationRes = R.raw.flash_animation,
             ) {
+                override fun isDeviceSupported(context: Context) = !DeviceUtils.isTorchRestrictedDevice()
+
                 override fun isEnabled(viewModel: MainViewModel) = true
 
                 override fun onToggle(

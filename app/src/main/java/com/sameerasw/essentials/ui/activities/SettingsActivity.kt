@@ -473,8 +473,26 @@ fun SettingsContent(
         UnsupportedFeaturesConfirmationSheet(
             onDismissRequest = { showUnsupportedFeaturesSheet = false },
             onConfirm = {
-                showUnsupportedFeaturesSheet = false
-                viewModel.setEnableUnsupportedFeatures(true, context)
+                val activity = context as? androidx.fragment.app.FragmentActivity
+                val canAuthenticate =
+                    androidx.biometric.BiometricManager
+                        .from(context)
+                        .canAuthenticate(com.sameerasw.essentials.utils.BiometricHelper.allowedAuthenticators) ==
+                        androidx.biometric.BiometricManager.BIOMETRIC_SUCCESS
+                if (activity == null || !canAuthenticate) {
+                    showUnsupportedFeaturesSheet = false
+                    viewModel.setEnableUnsupportedFeatures(true, context)
+                } else {
+                    com.sameerasw.essentials.utils.BiometricHelper.showBiometricPrompt(
+                        activity = activity,
+                        title = context.getString(R.string.unsupported_auth_title),
+                        subtitle = context.getString(R.string.unsupported_auth_subtitle),
+                        onSuccess = {
+                            showUnsupportedFeaturesSheet = false
+                            viewModel.setEnableUnsupportedFeatures(true, context)
+                        },
+                    )
+                }
             },
             featureTitleResIds = FeatureRegistry.getUnsupportedFeatures(context).map { it.title },
         )
@@ -719,14 +737,27 @@ fun SettingsContent(
                 AppHapticMode.ENABLED to stringResource(R.string.haptic_mode_enabled),
                 AppHapticMode.STRONGER to stringResource(R.string.haptic_mode_stronger),
             )
-            SegmentedPicker(
-                items = AppHapticMode.entries,
-                selectedItem = hapticMode,
-                onItemSelected = { HapticUtil.saveHapticMode(context, it) },
-                labelProvider = { hapticModeLabels.getValue(it) },
-                modifier = Modifier.fillMaxWidth(),
-                title = stringResource(R.string.label_haptic_feedback),
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceBright, MaterialTheme.shapes.extraSmall)
+                    .padding(top = 12.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.label_haptics_title),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+                SegmentedPicker(
+                    items = AppHapticMode.entries,
+                    selectedItem = hapticMode,
+                    onItemSelected = { HapticUtil.saveHapticMode(context, it) },
+                    labelProvider = { hapticModeLabels.getValue(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    title = stringResource(R.string.label_haptic_feedback),
+                )
+            }
 
             IconToggleItem(
                 iconRes = R.drawable.rounded_invert_colors_24,

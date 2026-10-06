@@ -37,6 +37,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
@@ -61,6 +62,7 @@ import com.sameerasw.essentials.domain.model.NotificationLightingColorMode
 import com.sameerasw.essentials.domain.model.NotificationLightingSide
 import com.sameerasw.essentials.domain.model.NotificationLightingStyle
 import com.sameerasw.essentials.domain.model.NotificationLightingSweepPosition
+import com.sameerasw.essentials.domain.model.RemapSlot
 import com.sameerasw.essentials.domain.model.ScaleAnimationsProfile
 import com.sameerasw.essentials.domain.model.SearchableItem
 import com.sameerasw.essentials.domain.model.UpdateInfo
@@ -126,10 +128,7 @@ class MainViewModel : ViewModel() {
     val isButtonRemapUseShizuku = mutableStateOf(false)
     val isButtonRemapPauseOnVolumeDialog = mutableStateOf(true)
     val shizukuDetectedDevicePath = mutableStateOf<String?>(null)
-    val volumeUpActionOff = mutableStateOf<Action?>(null)
-    val volumeDownActionOff = mutableStateOf<Action?>(null)
-    val volumeUpActionOn = mutableStateOf<Action?>(null)
-    val volumeDownActionOn = mutableStateOf<Action?>(null)
+    val remapActions = mutableStateMapOf<RemapSlot, List<Action>>()
     val remapHapticType = mutableStateOf(HapticFeedbackType.DOUBLE)
     val isDynamicNightLightEnabled = mutableStateOf(false)
     val isSmartPixelsEnabled = mutableStateOf(false)
@@ -199,6 +198,11 @@ class MainViewModel : ViewModel() {
     val islandFontScale = mutableFloatStateOf(1f)
     val isIslandHideInOwnerApp = mutableStateOf(false)
     val isIslandHideOnShade = mutableStateOf(false)
+    val isIslandKeepOnLandscape = mutableStateOf(false)
+    val isIslandBondEdge = mutableStateOf(false)
+    val islandMaxItems = mutableStateOf(2)
+    val isIslandAlwaysGestures = mutableStateOf(false)
+    val islandLandscapeTopSpacing = mutableFloatStateOf(0f)
     val isIslandDismissOnOutside = mutableStateOf(false)
     val isIslandHideLiveUpdates = mutableStateOf(false)
     val islandExpandedScale = mutableFloatStateOf(1f)
@@ -413,6 +417,7 @@ class MainViewModel : ViewModel() {
     val isShutUpAttemptShizukuRestart = mutableStateOf(true)
     val shutUpRestoreDelay = mutableIntStateOf(10)
     val shutUpRestoreMode = mutableStateOf("Auto")
+    val shutUpKeyboard = mutableStateOf("")
     val shizukuAuthToken = mutableStateOf("")
     val edgeLightingSweepSelectedShapes = mutableStateOf<Set<String>>(emptySet())
 
@@ -1384,6 +1389,10 @@ class MainViewModel : ViewModel() {
                             settingsRepository.getShutUpRestoreDelay()
                     }
 
+                    SettingsRepository.KEY_SHUT_UP_KEYBOARD -> {
+                        shutUpKeyboard.value = settingsRepository.getShutUpKeyboard()
+                    }
+
                     SettingsRepository.KEY_SHUT_UP_RESTORE_MODE -> {
                         shutUpRestoreMode.value =
                             settingsRepository.getShutUpRestoreMode()
@@ -1569,6 +1578,11 @@ class MainViewModel : ViewModel() {
      *
      * @param mode [String] Target mode.
      */
+    fun setShutUpKeyboard(ime: String) {
+        shutUpKeyboard.value = ime
+        settingsRepository.setShutUpKeyboard(ime)
+    }
+
     fun setShutUpRestoreMode(mode: String) {
         shutUpRestoreMode.value = mode
         settingsRepository.setShutUpRestoreMode(mode)
@@ -1719,6 +1733,7 @@ class MainViewModel : ViewModel() {
             settingsRepository.isShutUpAttemptShizukuRestartEnabled()
         shutUpRestoreDelay.intValue =
             settingsRepository.getShutUpRestoreDelay()
+        shutUpKeyboard.value = settingsRepository.getShutUpKeyboard()
         shutUpRestoreMode.value =
             settingsRepository.getShutUpRestoreMode()
         shizukuAuthToken.value =
@@ -2176,10 +2191,9 @@ class MainViewModel : ViewModel() {
                 false,
             ) // Default false here as key check logic
 
-        volumeUpActionOff.value = settingsRepository.getRemapAction(SettingsRepository.KEY_BUTTON_REMAP_VOL_UP_ACTION_OFF)
-        volumeDownActionOff.value = settingsRepository.getRemapAction(SettingsRepository.KEY_BUTTON_REMAP_VOL_DOWN_ACTION_OFF)
-        volumeUpActionOn.value = settingsRepository.getRemapAction(SettingsRepository.KEY_BUTTON_REMAP_VOL_UP_ACTION_ON)
-        volumeDownActionOn.value = settingsRepository.getRemapAction(SettingsRepository.KEY_BUTTON_REMAP_VOL_DOWN_ACTION_ON)
+        RemapSlot.ALL.forEach { slot ->
+            remapActions[slot] = settingsRepository.getRemapActions(slot.prefKey)
+        }
 
         val hapticName =
             settingsRepository.getString(
@@ -2259,6 +2273,11 @@ class MainViewModel : ViewModel() {
         islandFontScale.floatValue = settingsRepository.getIslandFontScale()
         isIslandHideInOwnerApp.value = settingsRepository.isIslandHideInOwnerAppEnabled()
         isIslandHideOnShade.value = settingsRepository.isIslandHideOnShadeEnabled()
+        isIslandKeepOnLandscape.value = settingsRepository.isIslandKeepOnLandscapeEnabled()
+        isIslandBondEdge.value = settingsRepository.isIslandBondEdgeEnabled()
+        islandMaxItems.value = settingsRepository.getIslandMaxItems()
+        isIslandAlwaysGestures.value = settingsRepository.isIslandAlwaysGesturesEnabled()
+        islandLandscapeTopSpacing.floatValue = settingsRepository.getIslandLandscapeTopSpacing()
         isIslandDismissOnOutside.value = settingsRepository.isIslandDismissOnOutsideEnabled()
         isIslandHideLiveUpdates.value = settingsRepository.isIslandHideLiveUpdatesEnabled()
         islandExpandedScale.floatValue = settingsRepository.getIslandExpandedScale()
@@ -4878,62 +4897,14 @@ class MainViewModel : ViewModel() {
     }
 
     /**
-     * Executes the set volume up action off operation.
-     *
-     * @param action [Action?] Target action.
-     * @param context [Context] Target context.
+     * Sets the ordered actions for a Button Remap slot.
      */
-    fun setVolumeUpActionOff(
-        action: Action?,
-        context: Context,
+    fun setRemapActions(
+        slot: RemapSlot,
+        actions: List<Action>,
     ) {
-        volumeUpActionOff.value = action
-        settingsRepository.setRemapAction(SettingsRepository.KEY_BUTTON_REMAP_VOL_UP_ACTION_OFF, action)
-    }
-
-    /**
-     * Executes the set volume down action off operation.
-     *
-     * @param action [Action?] Target action.
-     * @param context [Context] Target context.
-     */
-    fun setVolumeDownActionOff(
-        action: Action?,
-        context: Context,
-    ) {
-        volumeDownActionOff.value = action
-        settingsRepository.setRemapAction(
-            SettingsRepository.KEY_BUTTON_REMAP_VOL_DOWN_ACTION_OFF,
-            action,
-        )
-    }
-
-    /**
-     * Executes the set volume up action on operation.
-     *
-     * @param action [Action?] Target action.
-     * @param context [Context] Target context.
-     */
-    fun setVolumeUpActionOn(
-        action: Action?,
-        context: Context,
-    ) {
-        volumeUpActionOn.value = action
-        settingsRepository.setRemapAction(SettingsRepository.KEY_BUTTON_REMAP_VOL_UP_ACTION_ON, action)
-    }
-
-    /**
-     * Executes the set volume down action on operation.
-     *
-     * @param action [Action?] Target action.
-     * @param context [Context] Target context.
-     */
-    fun setVolumeDownActionOn(
-        action: Action?,
-        context: Context,
-    ) {
-        volumeDownActionOn.value = action
-        settingsRepository.setRemapAction(SettingsRepository.KEY_BUTTON_REMAP_VOL_DOWN_ACTION_ON, action)
+        remapActions[slot] = actions
+        settingsRepository.setRemapActions(slot.prefKey, actions)
     }
 
     /**
@@ -5445,6 +5416,31 @@ class MainViewModel : ViewModel() {
     fun setIslandHideInOwnerApp(enabled: Boolean) {
         isIslandHideInOwnerApp.value = enabled
         settingsRepository.setIslandHideInOwnerAppEnabled(enabled)
+    }
+
+    fun setIslandLandscapeTopSpacing(value: Float) {
+        islandLandscapeTopSpacing.floatValue = value
+        settingsRepository.setIslandLandscapeTopSpacing(value)
+    }
+
+    fun setIslandAlwaysGestures(enabled: Boolean) {
+        isIslandAlwaysGestures.value = enabled
+        settingsRepository.setIslandAlwaysGesturesEnabled(enabled)
+    }
+
+    fun setIslandMaxItems(value: Int) {
+        islandMaxItems.value = value
+        settingsRepository.setIslandMaxItems(value)
+    }
+
+    fun setIslandBondEdge(enabled: Boolean) {
+        isIslandBondEdge.value = enabled
+        settingsRepository.setIslandBondEdgeEnabled(enabled)
+    }
+
+    fun setIslandKeepOnLandscape(enabled: Boolean) {
+        isIslandKeepOnLandscape.value = enabled
+        settingsRepository.setIslandKeepOnLandscapeEnabled(enabled)
     }
 
     fun setIslandHideOnShade(enabled: Boolean) {
@@ -8886,11 +8882,12 @@ class MainViewModel : ViewModel() {
 
             // Filter out non-installed apps
             val pm = context.packageManager
+            val allowSystem = isEnableUnsupportedFeatures.value
             val installedApps =
                 importedApps.filter { app ->
                     try {
                         pm.getPackageInfo(app.packageName, 0)
-                        true
+                        allowSystem || !com.sameerasw.essentials.utils.AppUtil.hasSystemFlag(context, app.packageName)
                     } catch (e: Exception) {
                         false
                     }

@@ -25,11 +25,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.sameerasw.essentials.data.repository.SettingsRepository
 import com.sameerasw.essentials.island.gestures.CompactGestureController
+import com.sameerasw.essentials.island.gestures.HiddenGestureDetector
 import com.sameerasw.essentials.island.gestures.CompactGestures
 import com.sameerasw.essentials.island.state.IslandUiState
 import com.sameerasw.essentials.island.model.IslandPlugin
@@ -153,7 +155,11 @@ class IslandCoordinator(
     private var textInputActive = false
 
     private val isWindowSuppressed get() = isFullscreenApp ||
-        if (settings.isFoldableDevice()) settings.isIslandHiddenInCurrentOrientation() else isLandscape
+        if (settings.isFoldableDevice()) {
+            settings.isIslandHiddenInCurrentOrientation()
+        } else {
+            isLandscape && !settings.isIslandKeepOnLandscapeEnabled()
+        }
     private val isContentSuppressed: Boolean
         get() = isWindowSuppressed ||
             when (settings.getIslandShowWhen()) {
@@ -169,6 +175,17 @@ class IslandCoordinator(
         scope = { scope },
         openBrief = { openBrief() },
     )
+
+    private val hiddenGestures = HiddenGestureDetector(
+        context = service,
+        gestures = { compactGestures },
+        onTap = { if (settings.isIslandBriefEnabled()) openBrief() },
+        onFeedback = { controller.setFeedbackActive(it) },
+    )
+
+    private fun syncGestureHitbox() {
+        windowHost.setAlwaysGestures(running && settings.isIslandAlwaysGesturesEnabled() && !isContentSuppressed)
+    }
 
     private val actions = object : IslandActions {
         override val compactGestures: CompactGestures get() = this@IslandCoordinator.compactGestures
@@ -392,6 +409,7 @@ class IslandCoordinator(
         applyConfig()
         val geo = geometry ?: return
         windowHost.onOutsideTouch = ::onOutsideTouch
+        windowHost.hiddenTouch = hiddenGestures::onTouch
         val attached = windowHost.attach(geo) {
             val state by controller.state.collectAsState()
             val layoutSpec by spec.collectAsState()
@@ -548,7 +566,8 @@ class IslandCoordinator(
             CameraAnchor.Start -> screenWidthDp - (geo.centerX / density - slotDp / 2f) - 8f
             CameraAnchor.End -> geo.centerX / density + slotDp / 2f - 8f
         }.coerceAtLeast(slotDp * 3f)
-        val scale = settings.getIslandExpandedScale().coerceIn(1f, 1.3f)
+        val flatExpanded = !geo.hasCamera && settings.isIslandBondEdgeEnabled()
+        val scale = if (flatExpanded) 1f else settings.getIslandExpandedScale().coerceIn(1f, 1.3f)
         val lineWidth = minOf(settings.getIslandMaxWidth(), available)
         val expandedWidth = minOf(settings.getIslandExpandedWidth(), available / scale)
         spec.value = IslandLayoutSpec(
@@ -562,10 +581,14 @@ class IslandCoordinator(
             expandedPadding = settings.getIslandExpandedPadding().dp,
             expandedTopPadding = settings.getIslandExpandedTopPadding().dp,
             expandedBottomPadding = settings.getIslandExpandedBottomPadding().dp,
-            expandedScale = settings.getIslandExpandedScale().coerceIn(1f, 1.3f),
+            expandedScale = scale,
             fontScale = settings.getIslandFontScale().coerceIn(0.8f, 1.3f),
             expandedOutset = (expandedWidth * (scale - 1f) / 2f).dp,
             cameraAnchor = geo.anchor,
+            cameraPresence = if (geo.hasCamera) 1f else 0f,
+            landscape = isLandscape,
+            bondEdge = !geo.hasCamera && settings.isIslandBondEdgeEnabled(),
+            maxExpandedHeight = if (isLandscape) ((geo.screenHeight - geo.surfaceTop) / density - 12f).dp else Dp.Unspecified,
             outlineColor = if (settings.isIslandBorderOutlineEnabled()) {
                 runCatching { Color(AndroidColor.parseColor(settings.getIslandBorderOutlineColor())) }
                     .getOrElse { Color(AndroidColor.parseColor(SettingsRepository.ISLAND_BORDER_OUTLINE_DEFAULT_COLOR)) }
@@ -581,9 +604,10 @@ class IslandCoordinator(
             pulseSpread = settings.getIslandPulseShadowSpread().coerceIn(1f, 4f),
             pulseDurationMs = settings.getIslandPulseShadowDurationMs().coerceIn(300f, 4000f).toInt(),
         )
-        windowHost.maxWidthPx = (maxOf(lineWidth, expandedWidth * settings.getIslandExpandedScale().coerceIn(1f, 1.3f)) * density).toInt()
+        windowHost.maxWidthPx = (maxOf(lineWidth, expandedWidth * scale) * density).toInt()
         windowHost.updateGeometry(geo)
         controller.lineStageEnabled = settings.isIslandLineStageEnabled()
+        controller.maxCells = settings.getIslandMaxItems() * 2
         controller.relayout()
         controller.expandedTimeoutMs = settings.getIslandExpandedTimeoutMs()
         applyPreviewRing()
@@ -591,6 +615,7 @@ class IslandCoordinator(
 
     private fun applySuppression() {
         controller.setSuppressed(isContentSuppressed || revealing || hiding)
+        syncGestureHitbox()
     }
 
     private fun complicationCount(state: IslandUiState): Int =
@@ -614,9 +639,10 @@ class IslandCoordinator(
         key ?: return
         val baseKey = key.substringBefore('@')
         when (baseKey) {
-            SettingsRepository.KEY_ISLAND_ENABLED -> updateState()
+            SettingsRepository.KEY_ISLAND_ENABLED, SettingsRepository.KEY_ISLAND_KEEP_ON_LANDSCAPE -> updateState()
             SettingsRepository.KEY_ISLAND_HIDE_PORTRAIT,
             SettingsRepository.KEY_ISLAND_HIDE_LANDSCAPE -> updateState()
+            SettingsRepository.KEY_ISLAND_ALWAYS_GESTURES -> syncGestureHitbox()
             SettingsRepository.KEY_ISLAND_PRIORITY_ORDER -> if (running) reloadPriorities()
             SettingsRepository.KEY_ISLAND_DYNAMIC_HIDE_STATUS_BAR, SettingsRepository.KEY_ISLAND_COMPACT_HIDE_STATUS_BAR -> syncStatusBar()
             SettingsRepository.KEY_ISLAND_HIDE_WHEN_SCREEN_OFF, SettingsRepository.KEY_ISLAND_SHOW_WHEN -> applySuppression()
@@ -674,6 +700,9 @@ class IslandCoordinator(
             SettingsRepository.KEY_ISLAND_ORIENTATION_PROFILES,
             SettingsRepository.KEY_ISLAND_HIDE_PORTRAIT,
             SettingsRepository.KEY_ISLAND_HIDE_LANDSCAPE,
+            SettingsRepository.KEY_ISLAND_LANDSCAPE_TOP_SPACING,
+            SettingsRepository.KEY_ISLAND_BOND_EDGE,
+            SettingsRepository.KEY_ISLAND_MAX_ITEMS,
         )
     }
 }
