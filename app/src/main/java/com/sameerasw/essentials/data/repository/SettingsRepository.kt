@@ -3490,7 +3490,6 @@ class SettingsRepository(
 
     fun getKnownDisplayProfileCount(): Int = prefs.getStringSet(KEY_DUO_KNOWN_DISPLAY_PROFILES, emptySet())?.size ?: 0
 
-    /** Hardware features avoid treating an attached monitor as a second front camera. */
     fun isFoldableDevice(): Boolean =
         context.packageManager.hasSystemFeature("android.hardware.sensor.hinge_angle") ||
             context.packageManager.hasSystemFeature("com.google.pixel.camera.concurrent_foldable_dual_front")
@@ -3516,7 +3515,7 @@ class SettingsRepository(
             putFloat(orientationKey(baseKey), value)
         } else {
             putFloat("$baseKey@${getDisplayProfileId()}", value)
-            putFloat(baseKey, value) // Legacy fallback and existing export behavior.
+            putFloat(baseKey, value)
         }
     }
 
@@ -3557,7 +3556,7 @@ class SettingsRepository(
     fun setIslandOrientationProfilesEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_ORIENTATION_PROFILES, enabled)
     fun isIslandHiddenInCurrentOrientation(): Boolean =
         if (context.resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE)
-            getCameraHidden(KEY_ISLAND_HIDE_LANDSCAPE, true)
+            getCameraHidden(KEY_ISLAND_HIDE_LANDSCAPE, !isIslandKeepOnLandscapeEnabled())
         else getCameraHidden(KEY_ISLAND_HIDE_PORTRAIT, false)
     fun setIslandHiddenInCurrentOrientation(hidden: Boolean) =
         setCameraHidden(if (context.resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE)

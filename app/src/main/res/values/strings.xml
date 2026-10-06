@@ -2722,9 +2722,7 @@
     <string name="duo_per_display_hint">Position and size are saved separately for each display (for example folded and unfolded). Adjust them on each one.</string>
     <string name="foldable_camera_profile_hint">This screen has its own camera placement. Fold or unfold the device to configure the other camera.</string>
     <string name="foldable_orientation_profiles_title">Separate portrait and landscape placement</string>
-    <string name="foldable_orientation_profiles_desc">Use a different camera position and size for each orientation on each screen. Existing placement is the starting value.</string>
     <string name="foldable_hide_current_orientation_title">Hide on this screen in this orientation</string>
-    <string name="foldable_hide_current_orientation_desc">Only hides this overlay for the screen and orientation you are using now.</string>
     <string name="duo_camera_offset_y_title">Vertical position</string>
     <string name="duo_camera_size_title">Camera size</string>
     <string name="duo_arc_thickness_title">Ring thickness</string>

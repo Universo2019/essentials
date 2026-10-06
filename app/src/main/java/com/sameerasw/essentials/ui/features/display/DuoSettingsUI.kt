@@ -220,14 +220,12 @@ fun DuoSettingsUI(
                 IconToggleItem(
                     iconRes = R.drawable.rounded_center_focus_strong_24,
                     title = stringResource(R.string.foldable_orientation_profiles_title),
-                    description = stringResource(R.string.foldable_orientation_profiles_desc),
                     isChecked = viewModel.isDuoOrientationProfiles.value,
                     onCheckedChange = { viewModel.setDuoOrientationProfiles(it) },
                 )
                 IconToggleItem(
                     iconRes = R.drawable.rounded_visibility_off_24,
                     title = stringResource(R.string.foldable_hide_current_orientation_title),
-                    description = stringResource(R.string.foldable_hide_current_orientation_desc),
                     isChecked = viewModel.isDuoHiddenInCurrentOrientation.value,
                     onCheckedChange = { viewModel.setDuoHiddenInCurrentOrientation(it) },
                 )

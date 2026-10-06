@@ -955,7 +955,6 @@ class DuoOverlayHandler(
             } else {
                 overlayView?.invalidate()
             }
-            // Keep the display listener attached so rotating or unfolding can restore Duo.
             overlayView?.visibility = if (hideForOrientation) View.GONE else View.VISIBLE
 
             if (settingsRepository.isDuoShowTimeEnabled()) {

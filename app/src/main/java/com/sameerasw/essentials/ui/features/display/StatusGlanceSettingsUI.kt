@@ -224,14 +224,12 @@ fun StatusGlanceSettingsUI(
                         )
                         IconToggleItem(
                             title = stringResource(R.string.foldable_orientation_profiles_title),
-                            description = stringResource(R.string.foldable_orientation_profiles_desc),
                             iconRes = R.drawable.rounded_center_focus_strong_24,
                             isChecked = viewModel.isStatusGlanceOrientationProfiles.value,
                             onCheckedChange = { viewModel.setStatusGlanceOrientationProfiles(it) },
                         )
                         IconToggleItem(
                             title = stringResource(R.string.foldable_hide_current_orientation_title),
-                            description = stringResource(R.string.foldable_hide_current_orientation_desc),
                             iconRes = R.drawable.rounded_visibility_off_24,
                             isChecked = viewModel.isStatusGlanceHiddenInCurrentOrientation.value,
                             onCheckedChange = { viewModel.setStatusGlanceHiddenInCurrentOrientation(it) },
