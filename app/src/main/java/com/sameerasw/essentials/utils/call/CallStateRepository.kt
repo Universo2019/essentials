@@ -25,6 +25,7 @@ data class CallSnapshot(
     val answerIntent: PendingIntent? = null,
     val endIntent: PendingIntent? = null,
     val contentIntent: PendingIntent? = null,
+    val fromTelephony: Boolean = false,
 )
 
 
@@ -44,6 +45,7 @@ object CallStateRepository {
         } catch (_: Exception) {
             null
         }
+        if (telephony == null) dropDialerNotificationCalls(context)
         publish()
     }
 
@@ -70,6 +72,41 @@ object CallStateRepository {
     fun onCallNotificationRemoved(key: String) {
         activeSince.remove(key)
         if (notificationCalls.remove(key) != null) publish()
+    }
+
+    private fun dropDialerNotificationCalls(context: Context) {
+        val dialer = defaultDialer(context) ?: return
+        val gone = notificationCalls.values.filter { it.packageName == dialer }.map { it.key }
+        gone.forEach {
+            notificationCalls.remove(it)
+            activeSince.remove(it)
+        }
+    }
+
+    @Synchronized
+    fun reconcile(context: Context, notificationKeys: Set<String>?) {
+        var changed = false
+        if (notificationKeys != null) {
+            val gone = notificationCalls.keys.filter { it !in notificationKeys }
+            gone.forEach {
+                notificationCalls.remove(it)
+                activeSince.remove(it)
+            }
+            if (gone.isNotEmpty()) changed = true
+        }
+        if (telephony != null && phoneIsIdle(context)) {
+            telephony = null
+            dropDialerNotificationCalls(context)
+            changed = true
+        }
+        if (changed) publish()
+    }
+
+    @Suppress("DEPRECATION")
+    private fun phoneIsIdle(context: Context): Boolean = try {
+        (context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager)?.callState == TelephonyManager.CALL_STATE_IDLE
+    } catch (_: Exception) {
+        false
     }
 
     @Synchronized
@@ -100,6 +137,7 @@ object CallStateRepository {
             answerIntent = call.answerIntent,
             endIntent = call.endIntent,
             contentIntent = call.contentIntent,
+            fromTelephony = phone != null,
         )
     }
 
@@ -120,6 +158,7 @@ object CallStateRepository {
             incoming = incoming,
             startedAt = if (sameCall && previous?.phase == phase) previous.startedAt else System.currentTimeMillis(),
             packageName = defaultDialer(context),
+            fromTelephony = true,
         )
     }
 }
