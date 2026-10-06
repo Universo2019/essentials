@@ -44,6 +44,7 @@ import com.sameerasw.essentials.services.handlers.FlashlightHandler
 import com.sameerasw.essentials.island.service.IslandCoordinator
 import com.sameerasw.essentials.services.handlers.NotificationLightingHandler
 import com.sameerasw.essentials.services.handlers.OmniGestureOverlayHandler
+import com.sameerasw.essentials.services.handlers.FaceUnlockBrightnessHandler
 import com.sameerasw.essentials.services.handlers.PocketModeHandler
 import com.sameerasw.essentials.services.handlers.StatusBarIconHandler
 import com.sameerasw.essentials.services.handlers.StatusGlanceHandler
@@ -74,6 +75,7 @@ class ScreenOffAccessibilityService :
     private lateinit var omniGestureOverlayHandler: OmniGestureOverlayHandler
     private lateinit var statusBarIconHandler: StatusBarIconHandler
     private lateinit var pocketModeHandler: PocketModeHandler
+    private lateinit var faceUnlockBrightnessHandler: FaceUnlockBrightnessHandler
     private lateinit var smartPixelsHandler: com.sameerasw.essentials.services.handlers.SmartPixelsHandler
     private lateinit var duoOverlayHandler: DuoOverlayHandler
     lateinit var islandOverlayHandler: IslandCoordinator
@@ -301,6 +303,7 @@ class ScreenOffAccessibilityService :
         omniGestureOverlayHandler = OmniGestureOverlayHandler(this)
         statusBarIconHandler = StatusBarIconHandler(this)
         pocketModeHandler = PocketModeHandler(this)
+        faceUnlockBrightnessHandler = FaceUnlockBrightnessHandler(this)
         smartPixelsHandler =
             com.sameerasw.essentials.services.handlers
                 .SmartPixelsHandler(this)
@@ -340,6 +343,7 @@ class ScreenOffAccessibilityService :
                             aodWallpaperOverlayHandler.onScreenOn()
                             duoOverlayHandler.onScreenOn()
                             statusGlanceHandler.onScreenOn()
+                            faceUnlockBrightnessHandler.onScreenOn()
                             islandOverlayHandler.updateState()
                             freezeHandler.removeCallbacks(freezeRunnable)
                             stopInputEventListener()
@@ -362,10 +366,12 @@ class ScreenOffAccessibilityService :
                             statusGlanceHandler.onScreenOff()
                             omniGestureOverlayHandler.updateOverlay(false) // Always hide when screen is off
                             pocketModeHandler.onScreenOff()
+                            faceUnlockBrightnessHandler.onScreenOff()
                             updatePocketModeSensors()
                         }
 
                         Intent.ACTION_USER_PRESENT -> {
+                            faceUnlockBrightnessHandler.onUserPresent()
                             aodWallpaperOverlayHandler.onUserPresent()
                             statusGlanceHandler.onUserPresent()
                             duoOverlayHandler.onUserPresent()
@@ -509,6 +515,7 @@ class ScreenOffAccessibilityService :
         aodForceTurnOffHandler.removeOverlay()
         aodWallpaperOverlayHandler.removeOverlay()
         pocketModeHandler.removeOverlay()
+        faceUnlockBrightnessHandler.onDestroy()
         buttonRemapHandler.isVolumeDialogVisible = false
         omniGestureOverlayHandler.removeOverlay()
         smartPixelsHandler.destroy()
@@ -569,6 +576,7 @@ class ScreenOffAccessibilityService :
             freezeHandler.removeCallbacks(shadeRecheckRunnable)
             freezeHandler.postDelayed(shadeRecheckRunnable, 300)
             checkVolumeDialogState()
+            faceUnlockBrightnessHandler.onWindowsChanged()
         }
     }
 
@@ -771,6 +779,7 @@ class ScreenOffAccessibilityService :
         islandOverlayHandler.onConfigurationChanged()
         statusGlanceHandler.onConfigurationChanged(newConfig)
         ambientGlanceHandler.onConfigurationChanged()
+        faceUnlockBrightnessHandler.onConfigurationChanged()
     }
 
     override fun onKeyEvent(event: KeyEvent): Boolean {

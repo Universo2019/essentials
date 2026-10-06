@@ -241,6 +241,8 @@ class MainViewModel : ViewModel() {
     val isIslandNotifCompactHeadsUp = mutableStateOf(true)
     val isIslandNotifKeepProgress = mutableStateOf(true)
     val isIslandNotifQueue = mutableStateOf(true)
+    val isIslandNotifSkipSilent = mutableStateOf(true)
+    val isIslandNotifFilterApps = mutableStateOf(false)
     val isIslandShowNotifications = mutableStateOf(true)
     val isIslandNotifTapToOpen = mutableStateOf(false)
     val isIslandCatchUpEnabled = mutableStateOf(true)
@@ -357,6 +359,10 @@ class MainViewModel : ViewModel() {
     val isAodWallpaperKeepOnMedia = mutableStateOf(false)
     val currentWallpaperBitmap = mutableStateOf<Bitmap?>(null)
     val isPocketModeEnabled = mutableStateOf(false)
+    val isFaceUnlockBrightnessEnabled = mutableStateOf(false)
+    val faceUnlockMaxBrightness = mutableIntStateOf(100)
+    val isFaceUnlockTriggerUnlock = mutableStateOf(true)
+    val isFaceUnlockLightTint = mutableStateOf(false)
     val isPocketModeUseLightSensor = mutableStateOf(false)
     val pocketModeTriggerDelay = mutableFloatStateOf(3f) // seconds
     val isPocketModeLockScreenOnly = mutableStateOf(false)
@@ -881,6 +887,12 @@ class MainViewModel : ViewModel() {
                     SettingsRepository.KEY_ISLAND_NOTIF_QUEUE ->
                         isIslandNotifQueue.value = settingsRepository.isIslandNotifQueueEnabled()
 
+                    SettingsRepository.KEY_ISLAND_NOTIF_SKIP_SILENT ->
+                        isIslandNotifSkipSilent.value = settingsRepository.isIslandNotifSkipSilentEnabled()
+
+                    SettingsRepository.KEY_ISLAND_NOTIF_FILTER_APPS ->
+                        isIslandNotifFilterApps.value = settingsRepository.isIslandNotifFilterAppsEnabled()
+
                     SettingsRepository.KEY_ISLAND_SHOW_NOTIFICATIONS ->
                         isIslandShowNotifications.value = settingsRepository.isIslandShowNotificationsEnabled()
 
@@ -1290,6 +1302,18 @@ class MainViewModel : ViewModel() {
                     SettingsRepository.KEY_POCKET_MODE_ENABLED ->
                         isPocketModeEnabled.value =
                             settingsRepository.getBoolean(key)
+
+                    SettingsRepository.KEY_FACE_UNLOCK_BRIGHTNESS_ENABLED ->
+                        isFaceUnlockBrightnessEnabled.value = settingsRepository.isFaceUnlockBrightnessEnabled()
+
+                    SettingsRepository.KEY_FACE_UNLOCK_MAX_BRIGHTNESS ->
+                        faceUnlockMaxBrightness.intValue = settingsRepository.getFaceUnlockMaxBrightness()
+
+                    SettingsRepository.KEY_FACE_UNLOCK_TRIGGER_UNLOCK ->
+                        isFaceUnlockTriggerUnlock.value = settingsRepository.isFaceUnlockTriggerUnlockEnabled()
+
+                    SettingsRepository.KEY_FACE_UNLOCK_LIGHT_TINT ->
+                        isFaceUnlockLightTint.value = settingsRepository.isFaceUnlockLightTintEnabled()
 
                     SettingsRepository.KEY_POCKET_MODE_USE_LIGHT_SENSOR ->
                         isPocketModeUseLightSensor.value =
@@ -2331,6 +2355,8 @@ class MainViewModel : ViewModel() {
         isIslandNotifCompactHeadsUp.value = settingsRepository.isIslandNotifCompactHeadsUpEnabled()
         isIslandNotifKeepProgress.value = settingsRepository.isIslandNotifKeepProgressEnabled()
         isIslandNotifQueue.value = settingsRepository.isIslandNotifQueueEnabled()
+        isIslandNotifSkipSilent.value = settingsRepository.isIslandNotifSkipSilentEnabled()
+        isIslandNotifFilterApps.value = settingsRepository.isIslandNotifFilterAppsEnabled()
         isIslandShowNotifications.value = settingsRepository.isIslandShowNotificationsEnabled()
         isIslandNotifTapToOpen.value = settingsRepository.isIslandNotifTapToOpenEnabled()
         isIslandCatchUpEnabled.value = settingsRepository.isIslandCatchUpEnabled()
@@ -2670,6 +2696,10 @@ class MainViewModel : ViewModel() {
         pixelSearchEngine.value = settingsRepository.getPixelSearchEngine()
         isPocketModeEnabled.value =
             settingsRepository.getBoolean(SettingsRepository.KEY_POCKET_MODE_ENABLED)
+        isFaceUnlockBrightnessEnabled.value = settingsRepository.isFaceUnlockBrightnessEnabled()
+        faceUnlockMaxBrightness.intValue = settingsRepository.getFaceUnlockMaxBrightness()
+        isFaceUnlockTriggerUnlock.value = settingsRepository.isFaceUnlockTriggerUnlockEnabled()
+        isFaceUnlockLightTint.value = settingsRepository.isFaceUnlockLightTintEnabled()
         isPocketModeUseLightSensor.value =
             settingsRepository.getBoolean(SettingsRepository.KEY_POCKET_MODE_USE_LIGHT_SENSOR)
         pocketModeTriggerDelay.floatValue =
@@ -5550,6 +5580,26 @@ class MainViewModel : ViewModel() {
     fun setIslandNotifQueue(enabled: Boolean) {
         isIslandNotifQueue.value = enabled
         settingsRepository.setIslandNotifQueueEnabled(enabled)
+    }
+
+    fun setIslandNotifSkipSilent(enabled: Boolean) {
+        isIslandNotifSkipSilent.value = enabled
+        settingsRepository.setIslandNotifSkipSilentEnabled(enabled)
+    }
+
+    fun setIslandNotifFilterApps(enabled: Boolean) {
+        isIslandNotifFilterApps.value = enabled
+        settingsRepository.setIslandNotifFilterAppsEnabled(enabled)
+    }
+
+    fun loadIslandNotifFilterApps(): List<AppSelection> = settingsRepository.loadIslandNotifFilterApps()
+
+    fun saveIslandNotifFilterApps(apps: List<AppSelection>) {
+        settingsRepository.saveIslandNotifFilterApps(apps)
+    }
+
+    fun updateIslandNotifFilterApp(packageName: String, enabled: Boolean) {
+        settingsRepository.updateIslandNotifFilterAppSelection(packageName, enabled)
     }
 
     fun setIslandNotifTapToOpen(enabled: Boolean) {
@@ -9160,6 +9210,26 @@ class MainViewModel : ViewModel() {
             } catch (_: Throwable) {
             }
         }
+    }
+
+    fun setFaceUnlockBrightnessEnabled(enabled: Boolean) {
+        settingsRepository.setFaceUnlockBrightnessEnabled(enabled)
+        isFaceUnlockBrightnessEnabled.value = enabled
+    }
+
+    fun setFaceUnlockMaxBrightness(value: Int) {
+        settingsRepository.setFaceUnlockMaxBrightness(value)
+        faceUnlockMaxBrightness.intValue = value
+    }
+
+    fun setFaceUnlockTriggerUnlock(enabled: Boolean) {
+        settingsRepository.setFaceUnlockTriggerUnlockEnabled(enabled)
+        isFaceUnlockTriggerUnlock.value = enabled
+    }
+
+    fun setFaceUnlockLightTint(enabled: Boolean) {
+        settingsRepository.setFaceUnlockLightTintEnabled(enabled)
+        isFaceUnlockLightTint.value = enabled
     }
 
     /**

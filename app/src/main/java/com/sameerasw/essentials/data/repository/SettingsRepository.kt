@@ -603,6 +603,9 @@ class SettingsRepository(
         const val KEY_ISLAND_NOTIF_COMPACT_HEADS_UP = "island_notif_compact_heads_up"
         const val KEY_ISLAND_NOTIF_KEEP_PROGRESS = "island_notif_keep_progress"
         const val KEY_ISLAND_NOTIF_QUEUE = "island_notif_queue"
+        const val KEY_ISLAND_NOTIF_SKIP_SILENT = "island_notif_skip_silent"
+        const val KEY_ISLAND_NOTIF_FILTER_APPS = "island_notif_filter_apps"
+        const val KEY_ISLAND_NOTIF_FILTER_APPS_LIST = "island_notif_filter_apps_list"
         const val KEY_ISLAND_SHOW_NOTIFICATIONS = "island_show_notifications"
         const val KEY_ISLAND_NOTIF_TAP_TO_OPEN = "island_notif_tap_to_open"
         const val KEY_ISLAND_BORDER_OUTLINE_ENABLED = "island_border_outline_enabled"
@@ -703,6 +706,10 @@ class SettingsRepository(
         const val KEY_LOCK_SCREEN_CLOCK_SEED_COLOR = "lock_screen_clock_seed_color"
         const val KEY_RECENT_SEARCHES = "recent_searches"
         const val KEY_POCKET_MODE_ENABLED = "pocket_mode_enabled"
+        const val KEY_FACE_UNLOCK_BRIGHTNESS_ENABLED = "face_unlock_brightness_enabled"
+        const val KEY_FACE_UNLOCK_MAX_BRIGHTNESS = "face_unlock_max_brightness"
+        const val KEY_FACE_UNLOCK_TRIGGER_UNLOCK = "face_unlock_trigger_unlock"
+        const val KEY_FACE_UNLOCK_LIGHT_TINT = "face_unlock_light_tint"
         const val KEY_POCKET_MODE_USE_LIGHT_SENSOR = "pocket_mode_use_light_sensor"
         const val KEY_POCKET_MODE_EXCLUDED_APPS = "pocket_mode_excluded_apps"
         const val KEY_POCKET_MODE_TRIGGER_DELAY = "pocket_mode_trigger_delay"
@@ -4027,6 +4034,29 @@ class SettingsRepository(
 
     fun isIslandNotifQueueEnabled(): Boolean = getBoolean(KEY_ISLAND_NOTIF_QUEUE, true)
     fun setIslandNotifQueueEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_NOTIF_QUEUE, enabled)
+
+    fun isFaceUnlockBrightnessEnabled(): Boolean = getBoolean(KEY_FACE_UNLOCK_BRIGHTNESS_ENABLED, false)
+    fun setFaceUnlockBrightnessEnabled(enabled: Boolean) = putBoolean(KEY_FACE_UNLOCK_BRIGHTNESS_ENABLED, enabled)
+
+    fun getFaceUnlockMaxBrightness(): Int = getInt(KEY_FACE_UNLOCK_MAX_BRIGHTNESS, 100)
+    fun setFaceUnlockMaxBrightness(value: Int) = putInt(KEY_FACE_UNLOCK_MAX_BRIGHTNESS, value)
+
+    fun isFaceUnlockTriggerUnlockEnabled(): Boolean = getBoolean(KEY_FACE_UNLOCK_TRIGGER_UNLOCK, true)
+    fun setFaceUnlockTriggerUnlockEnabled(enabled: Boolean) = putBoolean(KEY_FACE_UNLOCK_TRIGGER_UNLOCK, enabled)
+
+    fun isFaceUnlockLightTintEnabled(): Boolean = getBoolean(KEY_FACE_UNLOCK_LIGHT_TINT, false)
+    fun setFaceUnlockLightTintEnabled(enabled: Boolean) = putBoolean(KEY_FACE_UNLOCK_LIGHT_TINT, enabled)
+
+    fun isIslandNotifSkipSilentEnabled(): Boolean = getBoolean(KEY_ISLAND_NOTIF_SKIP_SILENT, true)
+    fun setIslandNotifSkipSilentEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_NOTIF_SKIP_SILENT, enabled)
+
+    fun isIslandNotifFilterAppsEnabled(): Boolean = getBoolean(KEY_ISLAND_NOTIF_FILTER_APPS, false)
+    fun setIslandNotifFilterAppsEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_NOTIF_FILTER_APPS, enabled)
+
+    fun loadIslandNotifFilterApps() = loadAppSelection(KEY_ISLAND_NOTIF_FILTER_APPS_LIST)
+    fun saveIslandNotifFilterApps(apps: List<AppSelection>) = saveAppSelection(KEY_ISLAND_NOTIF_FILTER_APPS_LIST, apps)
+    fun updateIslandNotifFilterAppSelection(packageName: String, enabled: Boolean) =
+        updateAppSelection(KEY_ISLAND_NOTIF_FILTER_APPS_LIST, packageName, enabled)
 
     fun isIslandNotifTapToOpenEnabled(): Boolean = getBoolean(KEY_ISLAND_NOTIF_TAP_TO_OPEN, false)
     fun setIslandNotifTapToOpenEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_NOTIF_TAP_TO_OPEN, enabled)
