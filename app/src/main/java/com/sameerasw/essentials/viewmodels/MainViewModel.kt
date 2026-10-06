@@ -140,6 +140,9 @@ class MainViewModel : ViewModel() {
     val isDuoTapForBrief = mutableStateOf(false)
     val isDuoHideOnShade = mutableStateOf(false)
     val isDuoAutoDetect = mutableStateOf(true)
+    val isFoldableCameraDevice = mutableStateOf(false)
+    val isDuoOrientationProfiles = mutableStateOf(false)
+    val isDuoHiddenInCurrentOrientation = mutableStateOf(false)
     val hasMultipleDuoDisplays = mutableStateOf(false)
     val duoCameraOffsetX = mutableFloatStateOf(50f)
     val duoCameraOffsetY = mutableFloatStateOf(3f)
@@ -183,6 +186,8 @@ class MainViewModel : ViewModel() {
 
     val isIslandEnabled = mutableStateOf(false)
     val isIslandAutoDetect = mutableStateOf(true)
+    val isIslandOrientationProfiles = mutableStateOf(false)
+    val isIslandHiddenInCurrentOrientation = mutableStateOf(false)
     val islandCameraOffsetX = mutableFloatStateOf(50f)
     val islandCameraOffsetY = mutableFloatStateOf(3f)
     val islandCameraSize = mutableFloatStateOf(1.0f)
@@ -269,6 +274,8 @@ class MainViewModel : ViewModel() {
 
     val isStatusGlanceEnabled = mutableStateOf(false)
     val isStatusGlanceAutoDetect = mutableStateOf(true)
+    val isStatusGlanceOrientationProfiles = mutableStateOf(false)
+    val isStatusGlanceHiddenInCurrentOrientation = mutableStateOf(false)
     val statusGlanceOffsetX = mutableFloatStateOf(60f)
     val statusGlanceOffsetY = mutableFloatStateOf(2f)
     val statusGlanceMaxWidth = mutableFloatStateOf(180f)
@@ -4998,10 +5005,43 @@ class MainViewModel : ViewModel() {
 
     fun refreshDuoCameraPlacement() {
         settingsRepository.markDisplayProfileSeen()
+        isFoldableCameraDevice.value = settingsRepository.isFoldableDevice()
+        isDuoOrientationProfiles.value = settingsRepository.isDuoOrientationProfilesEnabled()
+        isDuoHiddenInCurrentOrientation.value = settingsRepository.isDuoHiddenInCurrentOrientation()
         duoCameraOffsetX.floatValue = settingsRepository.getDuoCameraOffsetX()
         duoCameraOffsetY.floatValue = settingsRepository.getDuoCameraOffsetY()
         duoCameraSize.floatValue = settingsRepository.getDuoCameraSize()
-        hasMultipleDuoDisplays.value = settingsRepository.getKnownDisplayProfileCount() > 1
+        hasMultipleDuoDisplays.value = settingsRepository.isFoldableDevice()
+    }
+
+    fun setDuoOrientationProfiles(enabled: Boolean) {
+        settingsRepository.setDuoOrientationProfilesEnabled(enabled)
+        refreshDuoCameraPlacement()
+    }
+
+    fun setDuoHiddenInCurrentOrientation(hidden: Boolean) {
+        settingsRepository.setDuoHiddenInCurrentOrientation(hidden)
+        isDuoHiddenInCurrentOrientation.value = hidden
+    }
+
+    fun refreshIslandCameraPlacement() {
+        isFoldableCameraDevice.value = settingsRepository.isFoldableDevice()
+        isIslandOrientationProfiles.value = settingsRepository.isIslandOrientationProfilesEnabled()
+        isIslandHiddenInCurrentOrientation.value = settingsRepository.isIslandHiddenInCurrentOrientation()
+        islandCameraOffsetX.floatValue = settingsRepository.getIslandCameraOffsetX()
+        islandCameraOffsetY.floatValue = settingsRepository.getIslandCameraOffsetY()
+        islandCameraSize.floatValue = settingsRepository.getIslandCameraSize()
+        islandCameraPosition.value = settingsRepository.getIslandCameraPosition()
+    }
+
+    fun setIslandOrientationProfiles(enabled: Boolean) {
+        settingsRepository.setIslandOrientationProfilesEnabled(enabled)
+        refreshIslandCameraPlacement()
+    }
+
+    fun setIslandHiddenInCurrentOrientation(hidden: Boolean) {
+        settingsRepository.setIslandHiddenInCurrentOrientation(hidden)
+        isIslandHiddenInCurrentOrientation.value = hidden
     }
 
     fun setDuoArcThickness(value: Float) {
@@ -5761,6 +5801,24 @@ class MainViewModel : ViewModel() {
     fun setStatusGlanceAutoDetect(enabled: Boolean) {
         isStatusGlanceAutoDetect.value = enabled
         settingsRepository.setStatusGlanceAutoDetectEnabled(enabled)
+    }
+
+    fun refreshStatusGlanceCameraPlacement() {
+        isFoldableCameraDevice.value = settingsRepository.isFoldableDevice()
+        isStatusGlanceOrientationProfiles.value = settingsRepository.isStatusGlanceOrientationProfilesEnabled()
+        isStatusGlanceHiddenInCurrentOrientation.value = settingsRepository.isStatusGlanceHiddenInCurrentOrientation()
+        statusGlanceOffsetX.floatValue = settingsRepository.getStatusGlanceOffsetX()
+        statusGlanceOffsetY.floatValue = settingsRepository.getStatusGlanceOffsetY()
+    }
+
+    fun setStatusGlanceOrientationProfiles(enabled: Boolean) {
+        settingsRepository.setStatusGlanceOrientationProfilesEnabled(enabled)
+        refreshStatusGlanceCameraPlacement()
+    }
+
+    fun setStatusGlanceHiddenInCurrentOrientation(hidden: Boolean) {
+        settingsRepository.setStatusGlanceHiddenInCurrentOrientation(hidden)
+        isStatusGlanceHiddenInCurrentOrientation.value = hidden
     }
 
     fun setStatusGlanceOffsetX(value: Float) {
