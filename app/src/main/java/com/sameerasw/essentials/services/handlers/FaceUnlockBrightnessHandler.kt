@@ -96,7 +96,6 @@ class FaceUnlockBrightnessHandler(
     private var tintView: View? = null
     private var isListening = false
     private var isLowLight = false
-    private var isDismissed = false
 
     private val scanRunnable = Runnable { update() }
     private val endBumpRunnable = Runnable { endBump() }
@@ -106,7 +105,7 @@ class FaceUnlockBrightnessHandler(
     private val sensorListener =
         object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
-                if (isDismissed || !canRun()) return
+                if (!canRun()) return
                 val lux = event.values[0]
                 val low = if (isLowLight) lux < ENOUGH_LUX_THRESHOLD else lux < LOW_LUX_THRESHOLD
                 if (low == isLowLight) return
@@ -128,7 +127,7 @@ class FaceUnlockBrightnessHandler(
     }
 
     fun onWindowsChanged() {
-        if (pill != null || (isLowLight && !isDismissed)) scheduleScans(WINDOW_CHANGE_SCAN_DELAYS_MS)
+        if (pill != null || isLowLight) scheduleScans(WINDOW_CHANGE_SCAN_DELAYS_MS)
     }
 
     fun onConfigurationChanged() {
@@ -156,7 +155,6 @@ class FaceUnlockBrightnessHandler(
         endTint(animate = false)
         endBump()
         isLowLight = false
-        isDismissed = false
     }
 
     private fun stopListening() {
@@ -171,7 +169,7 @@ class FaceUnlockBrightnessHandler(
     }
 
     private fun update() {
-        if (!canRun() || !isLowLight || isDismissed) {
+        if (!canRun() || !isLowLight || brightnessView != null) {
             removePill()
             return
         }
@@ -200,7 +198,7 @@ class FaceUnlockBrightnessHandler(
                 if (!node.isVisibleToUser) continue
                 val id = node.viewIdResourceName?.substringAfter(":id/").orEmpty()
                 if (LOCKSCREEN_MARKERS.any { id == it }) lockscreenVisible = true
-                if (OCCLUDING_MARKERS.any { id.contains(it) }) occluded = true
+                if (OCCLUDING_MARKERS.any { id.contains(it, ignoreCase = true) }) occluded = true
                 for (i in 0 until node.childCount) {
                     node.getChild(i)?.let { queue.add(it) }
                 }
@@ -242,8 +240,6 @@ class FaceUnlockBrightnessHandler(
                         visibleState = visibleState,
                         onClick = {
                             HapticUtil.performVirtualKeyHaptic(container)
-                            isDismissed = true
-                            stopListening()
                             removePill()
                             bump()
                             showTint()
@@ -387,6 +383,7 @@ class FaceUnlockBrightnessHandler(
             windowManager?.removeView(view)
         } catch (_: Exception) {
         }
+        scheduleScans(AFTER_BUMP_SCAN_DELAYS_MS)
     }
 
     @Composable
@@ -461,6 +458,7 @@ class FaceUnlockBrightnessHandler(
             listOf("bouncer", "element:shade", "element:quickSettings", "qs_frame", "shade_header_root", "quick_qs_panel")
         private val SCREEN_ON_SCAN_DELAYS_MS = listOf(300L, 900L, 1800L)
         private val WINDOW_CHANGE_SCAN_DELAYS_MS = listOf(150L, 600L)
+        private val AFTER_BUMP_SCAN_DELAYS_MS = listOf(250L)
         private val OUTSIDE_TOUCH_SCAN_DELAYS_MS = listOf(120L, 350L, 700L)
     }
 }
