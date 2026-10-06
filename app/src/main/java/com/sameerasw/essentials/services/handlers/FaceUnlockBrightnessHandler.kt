@@ -13,6 +13,7 @@ import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.res.Configuration
+import android.graphics.Color
 import android.graphics.PixelFormat
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -25,6 +26,7 @@ import android.os.PowerManager
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
@@ -69,6 +71,8 @@ import com.sameerasw.essentials.data.repository.SettingsRepository
 import com.sameerasw.essentials.island.service.OverlayLifecycleOwner
 import com.sameerasw.essentials.ui.theme.GoogleSansFlexRounded
 import com.sameerasw.essentials.utils.HapticUtil
+import com.sameerasw.essentials.utils.ShellUtils
+import kotlin.concurrent.thread
 
 class FaceUnlockBrightnessHandler(
     private val service: AccessibilityService,
@@ -89,6 +93,7 @@ class FaceUnlockBrightnessHandler(
 
     private var pill: PillOverlay? = null
     private var brightnessView: View? = null
+    private var tintView: View? = null
     private var isListening = false
     private var isLowLight = false
     private var isDismissed = false
@@ -148,6 +153,7 @@ class FaceUnlockBrightnessHandler(
         removePill(animate = false)
         handler.removeCallbacks(finishLeaveRunnable)
         destroyPill(leavingPill.also { leavingPill = null })
+        endTint(animate = false)
         endBump()
         isLowLight = false
         isDismissed = false
@@ -240,6 +246,8 @@ class FaceUnlockBrightnessHandler(
                             stopListening()
                             removePill()
                             bump()
+                            showTint()
+                            showBouncer()
                         },
                     )
                 }
@@ -294,6 +302,11 @@ class FaceUnlockBrightnessHandler(
         }
     }
 
+    private fun showBouncer() {
+        if (!ShellUtils.isAvailable(service) || !ShellUtils.hasPermission(service)) return
+        thread { ShellUtils.runCommand(service, "input keyevent KEYCODE_SPACE", notifyOnError = false) }
+    }
+
     private fun bump() {
         if (brightnessView != null) return
         val params =
@@ -318,8 +331,56 @@ class FaceUnlockBrightnessHandler(
         }
     }
 
+    private fun showTint() {
+        if (tintView != null) return
+        val view =
+            View(service).apply {
+                setBackgroundColor(Color.WHITE)
+                alpha = 0f
+                setOnClickListener { endTint() }
+            }
+        val params =
+            WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                PixelFormat.TRANSLUCENT,
+            ).apply {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+                }
+            }
+        try {
+            windowManager?.addView(view, params)
+            tintView = view
+            view.animate().alpha(TINT_ALPHA).setDuration(TINT_FADE_MS).start()
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun endTint(animate: Boolean = true) {
+        val view = tintView ?: return
+        tintView = null
+        if (!animate) {
+            removeTintView(view)
+            return
+        }
+        view.animate().alpha(0f).setDuration(TINT_FADE_MS).withEndAction { removeTintView(view) }.start()
+    }
+
+    private fun removeTintView(view: View) {
+        try {
+            windowManager?.removeView(view)
+        } catch (_: Exception) {
+        }
+    }
+
     private fun endBump() {
         handler.removeCallbacks(endBumpRunnable)
+        endTint()
         val view = brightnessView ?: return
         brightnessView = null
         try {
@@ -387,6 +448,8 @@ class FaceUnlockBrightnessHandler(
         private const val LOW_LUX_THRESHOLD = 10f
         private const val ENOUGH_LUX_THRESHOLD = 15f
         private const val BUMP_DURATION_MS = 5_000L
+        private const val TINT_ALPHA = 0.5f
+        private const val TINT_FADE_MS = 200L
         private const val WINDOW_BOTTOM_MARGIN_DP = 24f
         private const val PILL_LIFT_DP = 48f
         private const val PILL_TRAVEL_DP = 24f
