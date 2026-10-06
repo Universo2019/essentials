@@ -117,10 +117,6 @@ object ActionRegistry {
         )
     }
 
-    /**
-     * Lock screen shortcut picker: the options Pixel offers for its own lock screen shortcuts first,
-     * followed by every screen-on action.
-     */
     fun getLockscreenCategories(sdkInt: Int = Build.VERSION.SDK_INT): List<ActionCategory> =
         listOf(
             ActionCategory(

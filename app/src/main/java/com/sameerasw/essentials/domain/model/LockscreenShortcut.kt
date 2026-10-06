@@ -18,10 +18,7 @@ enum class LockscreenShortcutSide(
     RIGHT(SettingsRepository.KEY_LOCKSCREEN_SHORTCUT_RIGHT_ACTIONS),
 }
 
-/**
- * Whether System UI is showing its own lock screen shortcuts. Only known after the
- * accessibility service has seen the lock screen at least once.
- */
+// UNKNOWN until the lock screen has been scanned once
 enum class SystemShortcutsState {
     UNKNOWN,
     NONE,

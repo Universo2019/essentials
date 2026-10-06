@@ -24,11 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
-/**
- * A background service cannot dismiss the keyguard, so actions that open an app or screen are routed
- * through this activity: it asks the system to unlock (showing the bouncer when the device is secure)
- * and only runs the action once unlocking succeeds.
- */
+// Services can't dismiss the keyguard, so UI-opening actions unlock through this activity first
 class LockscreenActionActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,8 +60,7 @@ class LockscreenActionActivity : ComponentActivity() {
         )
     }
 
-    // Some targets (e.g. the ML Kit QR scanner) close themselves if started while the keyguard is
-    // still animating away, so wait until it is fully gone and launch from this activity
+    // Some targets (e.g. the QR scanner) close themselves if started while the keyguard is still going away
     private fun runAndFinish(action: Action) {
         lifecycleScope.launch {
             val keyguardManager = getSystemService(KeyguardManager::class.java)

@@ -90,7 +90,6 @@ class LockscreenShortcutsHandler(
 
     private val overlays = mutableMapOf<LockscreenShortcutSide, ShortcutOverlay>()
     private var actionJob: Job? = null
-    private var isPolling = false
 
     private class ShortcutOverlay(
         val view: View,
@@ -101,16 +100,8 @@ class LockscreenShortcutsHandler(
     )
 
     private val scanRunnable = Runnable { updateState() }
-    private val pollRunnable =
-        object : Runnable {
-            override fun run() {
-                updateState()
-                if (isPolling) handler.postDelayed(this, POLL_INTERVAL_MS)
-            }
-        }
 
-    // Buttons are built while the screen is off and revealed together when it turns on, so both sides
-    // appear immediately instead of after a scan and one composition at a time. Scans then correct them.
+    // Prebuilt while the screen is off so both sides appear together on wake
     fun onScreenOn() {
         if (canShowFromLastScan() && keyguardManager?.isKeyguardLocked == true) {
             syncOverlays()
@@ -120,7 +111,6 @@ class LockscreenShortcutsHandler(
     }
 
     fun onScreenOff() {
-        stopPolling()
         handler.removeCallbacks(scanRunnable)
         if (canShowFromLastScan()) {
             syncOverlays()
@@ -131,7 +121,6 @@ class LockscreenShortcutsHandler(
     }
 
     fun onUserPresent() {
-        stopPolling()
         handler.removeCallbacks(scanRunnable)
         removeAll()
     }
@@ -156,7 +145,6 @@ class LockscreenShortcutsHandler(
             return
         }
         if (powerManager?.isInteractive != true) {
-            stopPolling()
             setVisible(false)
             return
         }
@@ -178,8 +166,6 @@ class LockscreenShortcutsHandler(
         } else {
             removeAll()
         }
-
-        if (isEnabled) startPolling() else stopPolling()
     }
 
     private fun canShowFromLastScan() =
@@ -191,18 +177,6 @@ class LockscreenShortcutsHandler(
         delays.forEach { handler.postDelayed(scanRunnable, it) }
     }
 
-    private fun startPolling() {
-        if (isPolling) return
-        isPolling = true
-        handler.postDelayed(pollRunnable, POLL_INTERVAL_MS)
-    }
-
-    private fun stopPolling() {
-        isPolling = false
-        handler.removeCallbacks(pollRunnable)
-    }
-
-    // Each side runs a single action; anything beyond the first is ignored
     private fun syncOverlays() {
         LockscreenShortcutSide.entries.forEach { side ->
             val action = settings.getRemapActions(side.prefKey).firstOrNull()
@@ -224,7 +198,8 @@ class LockscreenShortcutsHandler(
         overlays.values.forEach { overlay ->
             if (overlay.isVisible == visible) return@forEach
             overlay.isVisible = visible
-            overlay.view.visibility = if (visible) View.VISIBLE else View.INVISIBLE
+            // Alpha, not INVISIBLE: an invisible window stops receiving the outside touches that trigger rescans
+            overlay.view.alpha = if (visible) 1f else 0f
             overlay.params.flags =
                 if (visible) {
                     overlay.params.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
@@ -247,11 +222,11 @@ class LockscreenShortcutsHandler(
         owner.onCreate()
         val container =
             FrameLayout(service).apply {
-                visibility = View.INVISIBLE
+                alpha = 0f
                 setViewTreeLifecycleOwner(owner)
                 setViewTreeSavedStateRegistryOwner(owner)
                 setViewTreeViewModelStoreOwner(owner)
-                // A touch elsewhere may be the start of an unlock swipe, so recheck for the bouncer
+                // Shade and bouncer changes on the lock screen don't change windows, but always start with a touch
                 setOnTouchListener { _, event ->
                     if (event.action == MotionEvent.ACTION_OUTSIDE) scheduleScans(OUTSIDE_TOUCH_SCAN_DELAYS_MS)
                     false
@@ -320,7 +295,6 @@ class LockscreenShortcutsHandler(
         val icon: ImageBitmap,
     )
 
-    // Open app shortcuts show the target app's own icon and name instead of the generic action icon
     private fun loadApp(packageName: String): AppInfo? {
         if (packageName.isBlank()) return null
         return try {
@@ -336,7 +310,7 @@ class LockscreenShortcutsHandler(
         }
     }
 
-    // These launch an app or screen, which would open hidden behind the keyguard without unlocking first
+    // These would open behind the keyguard without unlocking first
     private fun opensUi(action: Action): Boolean =
         action is Action.OpenApp ||
             action is Action.AIAssistant ||
@@ -345,7 +319,7 @@ class LockscreenShortcutsHandler(
             action is Action.OpenVideoCamera ||
             action is Action.OpenQrScanner
 
-    // Matches the AOSP keyguard affordance placement: 48dp button, 16dp from the side, 32dp from the bottom
+    // AOSP keyguard affordance placement
     private fun layoutParams(side: LockscreenShortcutSide): WindowManager.LayoutParams {
         val density = service.resources.displayMetrics.density
         val windowSize = (WINDOW_SIZE_DP * density).toInt()
@@ -449,9 +423,8 @@ class LockscreenShortcutsHandler(
         private const val SIDE_MARGIN_DP = 16f
         private const val BOTTOM_MARGIN_DP = 32f
         private const val PRESSED_SCALE = 1.2f
-        private const val POLL_INTERVAL_MS = 1000L
         private val SCREEN_ON_SCAN_DELAYS_MS = listOf(300L, 900L, 1800L)
         private val WINDOW_CHANGE_SCAN_DELAYS_MS = listOf(150L, 600L)
-        private val OUTSIDE_TOUCH_SCAN_DELAYS_MS = listOf(120L, 350L, 700L)
+        private val OUTSIDE_TOUCH_SCAN_DELAYS_MS = listOf(150L, 450L, 900L, 1500L)
     }
 }

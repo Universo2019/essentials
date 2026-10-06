@@ -10,9 +10,12 @@
 package com.sameerasw.essentials.services.automation.executors
 
 import android.app.ActivityManager
+import android.app.KeyguardManager
+import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.hardware.camera2.CameraManager
 import android.media.AudioManager
 import android.media.session.MediaController
@@ -20,6 +23,7 @@ import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import android.net.wifi.WifiManager
 import android.os.Build
+import android.provider.MediaStore
 import android.provider.Settings
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
@@ -33,8 +37,6 @@ import com.sameerasw.essentials.domain.model.DashConfig
 import com.sameerasw.essentials.domain.model.NotificationLightingStyle
 import com.sameerasw.essentials.domain.model.RippleConfig
 import com.sameerasw.essentials.services.NotificationLightingService
-import com.sameerasw.essentials.utils.overlay.fromPrefs
-import com.sameerasw.essentials.utils.overlay.writeTo
 import com.sameerasw.essentials.services.NotificationListener
 import com.sameerasw.essentials.services.tiles.ScreenOffAccessibilityService
 import com.sameerasw.essentials.ui.activities.PixelSearchResultsActivity
@@ -42,6 +44,8 @@ import com.sameerasw.essentials.utils.DeviceLockUtils
 import com.sameerasw.essentials.utils.HapticUtil
 import com.sameerasw.essentials.utils.PermissionUtils
 import com.sameerasw.essentials.utils.ShellUtils
+import com.sameerasw.essentials.utils.overlay.fromPrefs
+import com.sameerasw.essentials.utils.overlay.writeTo
 import com.sameerasw.essentials.utils.performHapticFeedback
 import rikka.shizuku.ShizukuBinderWrapper
 import rikka.shizuku.SystemServiceHelper
@@ -440,13 +444,13 @@ object CombinedActionExecutor {
                 }
 
                 is Action.ToggleDoNotDisturb -> {
-                    val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+                    val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     if (nm.isNotificationPolicyAccessGranted) {
                         nm.setInterruptionFilter(
-                            if (nm.currentInterruptionFilter == android.app.NotificationManager.INTERRUPTION_FILTER_ALL) {
-                                android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY
+                            if (nm.currentInterruptionFilter == NotificationManager.INTERRUPTION_FILTER_ALL) {
+                                NotificationManager.INTERRUPTION_FILTER_PRIORITY
                             } else {
-                                android.app.NotificationManager.INTERRUPTION_FILTER_ALL
+                                NotificationManager.INTERRUPTION_FILTER_ALL
                             },
                         )
                     }
@@ -455,13 +459,13 @@ object CombinedActionExecutor {
                 is Action.OpenCamera -> {
                     // The secure camera opens over the lock screen without unlocking, like the Pixel shortcut
                     val isLocked =
-                        (context.getSystemService(Context.KEYGUARD_SERVICE) as android.app.KeyguardManager)
+                        (context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager)
                             .isKeyguardLocked
                     val cameraAction =
                         if (isLocked) {
-                            android.provider.MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE
+                            MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE
                         } else {
-                            android.provider.MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA
+                            MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA
                         }
                     try {
                         context.startActivity(Intent(cameraAction).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -475,7 +479,7 @@ object CombinedActionExecutor {
                 is Action.OpenVideoCamera -> {
                     try {
                         context.startActivity(
-                            Intent(android.provider.MediaStore.INTENT_ACTION_VIDEO_CAMERA)
+                            Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA)
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                         )
                     } catch (e: Exception) {
@@ -1163,16 +1167,16 @@ object CombinedActionExecutor {
     // Same scanner System UI uses for its lock screen and Quick Settings QR shortcuts
     private fun openQrScanner(context: Context) {
         val configId =
-            android.content.res.Resources
+            Resources
                 .getSystem()
                 .getIdentifier("config_defaultQrCodeComponent", "string", "android")
         val component =
             if (configId != 0) {
-                android.content.res.Resources
+                Resources
                     .getSystem()
                     .getString(configId)
                     .takeIf { it.isNotBlank() }
-                    ?.let { android.content.ComponentName.unflattenFromString(it) }
+                    ?.let { ComponentName.unflattenFromString(it) }
             } else {
                 null
             }

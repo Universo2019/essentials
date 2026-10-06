@@ -228,7 +228,6 @@ fun ActionSequenceEditor(
                             ).padding(16.dp),
                 )
             } else if (maxActions == 1) {
-                // A single-action slot has nothing to reorder
                 val action = actions.first()
                 RemapSequenceItem(
                     position = 1,

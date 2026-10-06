@@ -14,18 +14,13 @@ import android.graphics.Rect
 import android.os.Build
 import android.view.accessibility.AccessibilityNodeInfo
 
-/**
- * System UI keeps lock screen shortcut selections in a provider guarded by a signature permission,
- * so instead we look for the shortcut buttons themselves in the lock screen's accessibility tree.
- */
+// Shortcut selections are behind a signature permission, so look for the buttons in System UI's tree
 object LockscreenShortcutDetector {
     private const val SYSTEM_UI = "com.android.systemui"
     private const val MAX_NODES = 600
 
-    // Lock screen root markers: scene container builds use "element:lockscreen", legacy keyguard uses the rest
     private val LOCKSCREEN_MARKERS =
         listOf("element:lockscreen", "keyguard_root_view", "keyguard_bottom_area", "keyguard_indication_area")
-    // Present only when the bouncer, shade or quick settings cover the lock screen
     private val OCCLUDING_MARKERS =
         listOf("bouncer", "element:shade", "element:quickSettings", "qs_frame", "shade_header_root", "quick_qs_panel")
     private val AFFORDANCE_IDS = listOf("start_button", "end_button")
@@ -45,17 +40,20 @@ object LockscreenShortcutDetector {
         var occluded = false
         var hasShortcuts = false
 
-        // The service does not subscribe to content-change events, so its node cache goes stale
-        // while System UI animates between the lock screen, shade and bouncer
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) service.clearCache()
-        val refreshEachNode = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
-
         val roots =
             try {
                 service.windows.mapNotNull { it.root }.filter { it.packageName?.toString() == SYSTEM_UI }
             } catch (_: Exception) {
                 emptyList()
             }
+        // No content-change events reach the service, so System UI's cached nodes go stale between scans
+        val canClearSubtree = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+        if (canClearSubtree) {
+            roots.forEach {
+                service.clearCachedSubtree(it)
+                it.refresh()
+            }
+        }
 
         val bounds = Rect()
         for (root in roots) {
@@ -65,7 +63,7 @@ object LockscreenShortcutDetector {
             while (queue.isNotEmpty() && visited < MAX_NODES) {
                 val node = queue.removeFirst()
                 visited++
-                if (refreshEachNode) node.refresh()
+                if (!canClearSubtree) node.refresh()
                 if (!node.isVisibleToUser) continue
 
                 val id = node.viewIdResourceName?.substringAfter(":id/").orEmpty()
@@ -94,10 +92,6 @@ object LockscreenShortcutDetector {
         )
     }
 
-    /**
-     * A System UI node counts as a shortcut if it has a known affordance id, or if it is a
-     * clickable element sitting in the bottom-left or bottom-right corner of the screen.
-     */
     fun isShortcutCandidate(
         id: String,
         isClickable: Boolean,
@@ -113,7 +107,6 @@ object LockscreenShortcutDetector {
         if (EXCLUDED_IDS.any { id.contains(it) }) return false
         val width = right - left
         if (width <= 0 || bottom - top <= 0) return false
-        // Full-width rows (notifications, indication text) are never corner shortcuts
         if (width > screenWidth / 3) return false
 
         val centerX = (left + right) / 2f

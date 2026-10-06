@@ -92,7 +92,6 @@ fun LockscreenShortcutsSettingsUI(
                     Button(
                         onClick = {
                             HapticUtil.performVirtualKeyHaptic(view)
-                            // Prefer Pixel's Wallpaper & style app, which hosts the shortcut picker
                             val intent = Intent(Intent.ACTION_SET_WALLPAPER).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             val pixelIntent = Intent(intent).setPackage(PIXEL_WALLPAPER_PACKAGE)
                             try {
@@ -111,8 +110,7 @@ fun LockscreenShortcutsSettingsUI(
             }
         }
 
-        // Turning on is only allowed once the lock screen has been checked and has no system shortcuts.
-        // Turning off is always allowed.
+        // Can always be turned off; turning on needs a lock screen without system shortcuts
         RoundedCardContainer {
             IconToggleItem(
                 iconRes = R.drawable.rounded_mobile_lock_portrait_24,
