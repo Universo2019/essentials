@@ -359,6 +359,7 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                 "Flashlight pulse" -> !isNotificationListenerEnabled
                                 "Notification Sync" -> !isNotificationListenerEnabled
                                 "Button remap" -> !isAccessibilityEnabled
+                                "Face unlock brightness" -> !isAccessibilityEnabled
                                 "Pocket mode" -> !isAccessibilityEnabled
                                 "Dynamic night light" ->
                                     (if (viewModel.isUseUsageAccess.value) !viewModel.isUsageStatsPermissionGranted.value else !isAccessibilityEnabled) ||
@@ -737,6 +738,7 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                                     listOf(
                                                         listOf(
                                                             "Screen locked security",
+                                                            "Face unlock brightness",
                                                             "App lock",
                                                             "Shut-Up!",
                                                         ),
@@ -794,6 +796,7 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                                                     !isNotificationListenerEnabled
                                                             "Flashlight pulse" -> !isNotificationListenerEnabled
                                                             "Button remap" -> !isAccessibilityEnabled
+                                                            "Face unlock brightness" -> !isAccessibilityEnabled
                                                             "Dynamic night light" ->
                                                                 (if (viewModel.isUseUsageAccess.value) !viewModel.isUsageStatsPermissionGranted.value else !isAccessibilityEnabled) ||
                                                                     !isWriteSecureSettingsEnabled

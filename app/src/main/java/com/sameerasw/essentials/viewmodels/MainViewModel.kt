@@ -359,6 +359,7 @@ class MainViewModel : ViewModel() {
     val isAodWallpaperKeepOnMedia = mutableStateOf(false)
     val currentWallpaperBitmap = mutableStateOf<Bitmap?>(null)
     val isPocketModeEnabled = mutableStateOf(false)
+    val isFaceUnlockBrightnessEnabled = mutableStateOf(false)
     val isPocketModeUseLightSensor = mutableStateOf(false)
     val pocketModeTriggerDelay = mutableFloatStateOf(3f) // seconds
     val isPocketModeLockScreenOnly = mutableStateOf(false)
@@ -1298,6 +1299,9 @@ class MainViewModel : ViewModel() {
                     SettingsRepository.KEY_POCKET_MODE_ENABLED ->
                         isPocketModeEnabled.value =
                             settingsRepository.getBoolean(key)
+
+                    SettingsRepository.KEY_FACE_UNLOCK_BRIGHTNESS_ENABLED ->
+                        isFaceUnlockBrightnessEnabled.value = settingsRepository.isFaceUnlockBrightnessEnabled()
 
                     SettingsRepository.KEY_POCKET_MODE_USE_LIGHT_SENSOR ->
                         isPocketModeUseLightSensor.value =
@@ -2680,6 +2684,7 @@ class MainViewModel : ViewModel() {
         pixelSearchEngine.value = settingsRepository.getPixelSearchEngine()
         isPocketModeEnabled.value =
             settingsRepository.getBoolean(SettingsRepository.KEY_POCKET_MODE_ENABLED)
+        isFaceUnlockBrightnessEnabled.value = settingsRepository.isFaceUnlockBrightnessEnabled()
         isPocketModeUseLightSensor.value =
             settingsRepository.getBoolean(SettingsRepository.KEY_POCKET_MODE_USE_LIGHT_SENSOR)
         pocketModeTriggerDelay.floatValue =
@@ -9197,6 +9202,11 @@ class MainViewModel : ViewModel() {
      *
      * @param enabled [Boolean] Target enabled.
      */
+    fun setFaceUnlockBrightnessEnabled(enabled: Boolean) {
+        settingsRepository.setFaceUnlockBrightnessEnabled(enabled)
+        isFaceUnlockBrightnessEnabled.value = enabled
+    }
+
     fun setPocketModeEnabled(enabled: Boolean) {
         settingsRepository.putBoolean(SettingsRepository.KEY_POCKET_MODE_ENABLED, enabled)
         isPocketModeEnabled.value = enabled

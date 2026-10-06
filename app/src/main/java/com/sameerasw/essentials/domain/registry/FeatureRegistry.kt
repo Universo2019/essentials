@@ -2523,6 +2523,25 @@ object FeatureRegistry {
                 override fun isDeviceSupported(context: Context) = DeviceUtils.isGoogleDevice()
             },
             object : Feature(
+                id = "Face unlock brightness",
+                title = R.string.feat_face_unlock_brightness_title,
+                iconRes = R.drawable.rounded_brightness_6_24,
+                category = R.string.cat_protection,
+                description = R.string.feat_face_unlock_brightness_desc,
+                aboutDescription = R.string.feat_face_unlock_brightness_desc,
+                permissionKeys = listOf("ACCESSIBILITY"),
+                hasMoreSettings = false,
+                parentFeatureId = "Security",
+            ) {
+                override fun isEnabled(viewModel: MainViewModel) = viewModel.isFaceUnlockBrightnessEnabled.value
+
+                override fun onToggle(
+                    viewModel: MainViewModel,
+                    context: Context,
+                    enabled: Boolean,
+                ) = viewModel.setFaceUnlockBrightnessEnabled(enabled)
+            },
+            object : Feature(
                 id = "Lockdown mode",
                 title = R.string.tile_lockdown_mode,
                 iconRes = R.drawable.rounded_lock_24,
