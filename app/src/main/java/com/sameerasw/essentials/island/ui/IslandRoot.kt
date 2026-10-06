@@ -388,6 +388,7 @@ fun IslandRoot(
     }
     val lastCatchUp = lastBubbleKey?.let { knownBubbles[it] }
     val hasCompactCells = state.arrangement.before.isNotEmpty() || state.arrangement.after.isNotEmpty()
+    val bubbleOnlyLayout = !hasCompactCells && spec.cameraPresence <= 0f
     val catchUpAnim = remember { Animatable(0f) }
     LaunchedEffect(catchUpShown) {
         if (catchUpShown) {
@@ -455,7 +456,7 @@ fun IslandRoot(
         }
     }
 
-    LaunchedEffect(target, windowWidth, stage, queueShown, pillSize, lineInsetActive, catchUpShown, hasCompactCells) {
+    LaunchedEffect(target, windowWidth, stage, queueShown, pillSize, lineInsetActive, catchUpShown, hasCompactCells, bubbleOnlyLayout) {
         if (target == IntSize.Zero || windowWidth == 0) return@LaunchedEffect
         val g = if (stage == IslandStage.Expanded) outsetPx.roundToInt() else 0
         val shift = if ((lineInsetActive || (catchUpShown && hasCompactCells)) && spec.growDirection == 0) (bubbleSizePx + bubbleGapPx) / 2 else 0
@@ -470,7 +471,10 @@ fun IslandRoot(
             val bx = if (spec.growDirection > 0) left + target.width + bubbleGapPx else left - bubbleGapPx - bubbleSizePx
             bounds = IntRect(minOf(bounds.left, bx), bounds.top, maxOf(bounds.right, bx + bubbleSizePx), maxOf(bounds.bottom, surfaceTopPx + bubbleSizePx))
         }
-        if (catchUpShown) {
+        if (catchUpShown && bubbleOnlyLayout) {
+            val bx = windowWidth / 2 - bubbleSizePx / 2
+            bounds = IntRect(bx, surfaceTopPx, bx + bubbleSizePx, surfaceTopPx + bubbleSizePx)
+        } else if (catchUpShown) {
             val bx = if (spec.growDirection > 0) left + target.width + bubbleGapPx else left - bubbleGapPx - bubbleSizePx
             bounds = IntRect(minOf(bounds.left, bx), bounds.top, maxOf(bounds.right, bx + bubbleSizePx), maxOf(bounds.bottom, surfaceTopPx + bubbleSizePx))
         }
@@ -566,14 +570,22 @@ fun IslandRoot(
                     size = spec.compactHeight,
                     modifier = Modifier
                         .offset {
-                            val w = surfaceSize.width
-                            val endX = bubbleX(w)
-                            val startX = if (spec.growDirection > 0) surfaceLeft(w) + w - bubbleSizePx else surfaceLeft(w)
-                            val v = catchUpAnim.value
-                            IntOffset((startX + (endX - startX) * v + dragX.value).roundToInt(), surfaceTopPx)
+                            if (bubbleOnlyLayout) {
+                                IntOffset((windowWidth / 2 - bubbleSizePx / 2 + dragX.value).roundToInt(), surfaceTopPx)
+                            } else {
+                                val w = surfaceSize.width
+                                val endX = bubbleX(w)
+                                val startX = if (spec.growDirection > 0) surfaceLeft(w) + w - bubbleSizePx else surfaceLeft(w)
+                                val v = catchUpAnim.value
+                                IntOffset((startX + (endX - startX) * v + dragX.value).roundToInt(), surfaceTopPx)
+                            }
                         }
                         .graphicsLayer {
-                            alpha = 1f - (abs(dragX.value) / maxDrag).coerceIn(0f, 0.8f)
+                            val appear = if (bubbleOnlyLayout) catchUpAnim.value.coerceIn(0f, 1f) else 1f
+                            alpha = (1f - (abs(dragX.value) / maxDrag).coerceIn(0f, 0.8f)) * appear
+                            val appearScale = if (bubbleOnlyLayout) 0.6f + 0.4f * appear else 1f
+                            scaleX = appearScale
+                            scaleY = appearScale
                         }
                         .pointerInput(Unit) {
                             detectTapGestures {
@@ -661,7 +673,7 @@ fun IslandRoot(
                     }
                 }
                 .graphicsLayer {
-                    alpha = if (visible) 1f else 0f
+                    alpha = (if (visible) 1f else 0f) * (1f - if (bubbleOnlyLayout) catchUpAnim.value.coerceIn(0f, 1f) else 0f)
                     // Corner follows the live height so it can never outrun the size animation.
                     shape = if (bond > 0f) bondedShape(bond, compactHeightPx, expandedCornerPx) else surfaceShape
                     clip = true
