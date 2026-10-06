@@ -36,6 +36,7 @@ import com.sameerasw.essentials.data.repository.SettingsRepository
 import com.sameerasw.essentials.ui.components.sliders.ConfigSliderItem
 import com.sameerasw.essentials.ui.core.cards.IconToggleItem
 import com.sameerasw.essentials.ui.core.containers.RoundedCardContainer
+import com.sameerasw.essentials.ui.core.sheets.AppSelectionSheet
 import com.sameerasw.essentials.ui.core.sheets.EssentialsBottomSheet
 import com.sameerasw.essentials.ui.modifiers.highlight
 import com.sameerasw.essentials.utils.HapticUtil
@@ -50,6 +51,7 @@ fun IslandNotificationOptionsBottomSheet(
 ) {
     val view = LocalView.current
     val context = LocalContext.current
+    var showFilterAppsSheet by remember { mutableStateOf(false) }
     var concealed by remember { mutableStateOf(SettingsRepository(context).getBoolean(SettingsRepository.KEY_ISLAND_NOTIF_CONCEAL_LOCKED, false)) }
 
     EssentialsBottomSheet(
@@ -74,6 +76,44 @@ fun IslandNotificationOptionsBottomSheet(
                 spacing = 2.dp,
                 cornerRadius = 24.dp,
             ) {
+                IconToggleItem(
+                    iconRes = R.drawable.rounded_notifications_off_24,
+                    title = stringResource(R.string.island_notif_skip_silent_title),
+                    isChecked = viewModel.isIslandNotifSkipSilent.value,
+                    onCheckedChange = { checked ->
+                        HapticUtil.performVirtualKeyHaptic(view)
+                        viewModel.setIslandNotifSkipSilent(checked)
+                    },
+                    modifier = Modifier.highlight(highlightSetting == "island_notif_skip_silent"),
+                )
+
+                IconToggleItem(
+                    iconRes = R.drawable.rounded_filter_alt_24,
+                    title = stringResource(R.string.island_notif_filter_apps_title),
+                    isChecked = viewModel.isIslandNotifFilterApps.value,
+                    onCheckedChange = { checked ->
+                        HapticUtil.performVirtualKeyHaptic(view)
+                        viewModel.setIslandNotifFilterApps(checked)
+                    },
+                    modifier = Modifier.highlight(highlightSetting == "island_notif_filter_apps"),
+                )
+
+                AnimatedVisibility(
+                    visible = viewModel.isIslandNotifFilterApps.value,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically(),
+                ) {
+                    IconToggleItem(
+                        iconRes = R.drawable.rounded_apps_24,
+                        title = stringResource(R.string.action_select_apps),
+                        showToggle = false,
+                        onClick = {
+                            HapticUtil.performVirtualKeyHaptic(view)
+                            showFilterAppsSheet = true
+                        },
+                    )
+                }
+
                 if (rememberIslandShowsWhileLocked()) {
                     IslandPrefToggle(
                         settingKey = SettingsRepository.KEY_ISLAND_NOTIF_CONCEAL_LOCKED,
@@ -179,6 +219,17 @@ fun IslandNotificationOptionsBottomSheet(
                 }
             }
         }
+    }
+
+    if (showFilterAppsSheet) {
+        AppSelectionSheet(
+            title = stringResource(R.string.island_notif_filter_apps_title),
+            onDismissRequest = { showFilterAppsSheet = false },
+            onLoadApps = { viewModel.loadIslandNotifFilterApps() },
+            onSaveApps = { _, apps -> viewModel.saveIslandNotifFilterApps(apps) },
+            onAppToggle = { _, pkg, enabled -> viewModel.updateIslandNotifFilterApp(pkg, enabled) },
+            context = context,
+        )
     }
 }
 

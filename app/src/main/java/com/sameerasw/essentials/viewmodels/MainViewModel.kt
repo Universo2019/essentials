@@ -241,6 +241,8 @@ class MainViewModel : ViewModel() {
     val isIslandNotifCompactHeadsUp = mutableStateOf(true)
     val isIslandNotifKeepProgress = mutableStateOf(true)
     val isIslandNotifQueue = mutableStateOf(true)
+    val isIslandNotifSkipSilent = mutableStateOf(true)
+    val isIslandNotifFilterApps = mutableStateOf(false)
     val isIslandShowNotifications = mutableStateOf(true)
     val isIslandNotifTapToOpen = mutableStateOf(false)
     val isIslandCatchUpEnabled = mutableStateOf(true)
@@ -880,6 +882,12 @@ class MainViewModel : ViewModel() {
 
                     SettingsRepository.KEY_ISLAND_NOTIF_QUEUE ->
                         isIslandNotifQueue.value = settingsRepository.isIslandNotifQueueEnabled()
+
+                    SettingsRepository.KEY_ISLAND_NOTIF_SKIP_SILENT ->
+                        isIslandNotifSkipSilent.value = settingsRepository.isIslandNotifSkipSilentEnabled()
+
+                    SettingsRepository.KEY_ISLAND_NOTIF_FILTER_APPS ->
+                        isIslandNotifFilterApps.value = settingsRepository.isIslandNotifFilterAppsEnabled()
 
                     SettingsRepository.KEY_ISLAND_SHOW_NOTIFICATIONS ->
                         isIslandShowNotifications.value = settingsRepository.isIslandShowNotificationsEnabled()
@@ -2331,6 +2339,8 @@ class MainViewModel : ViewModel() {
         isIslandNotifCompactHeadsUp.value = settingsRepository.isIslandNotifCompactHeadsUpEnabled()
         isIslandNotifKeepProgress.value = settingsRepository.isIslandNotifKeepProgressEnabled()
         isIslandNotifQueue.value = settingsRepository.isIslandNotifQueueEnabled()
+        isIslandNotifSkipSilent.value = settingsRepository.isIslandNotifSkipSilentEnabled()
+        isIslandNotifFilterApps.value = settingsRepository.isIslandNotifFilterAppsEnabled()
         isIslandShowNotifications.value = settingsRepository.isIslandShowNotificationsEnabled()
         isIslandNotifTapToOpen.value = settingsRepository.isIslandNotifTapToOpenEnabled()
         isIslandCatchUpEnabled.value = settingsRepository.isIslandCatchUpEnabled()
@@ -5550,6 +5560,26 @@ class MainViewModel : ViewModel() {
     fun setIslandNotifQueue(enabled: Boolean) {
         isIslandNotifQueue.value = enabled
         settingsRepository.setIslandNotifQueueEnabled(enabled)
+    }
+
+    fun setIslandNotifSkipSilent(enabled: Boolean) {
+        isIslandNotifSkipSilent.value = enabled
+        settingsRepository.setIslandNotifSkipSilentEnabled(enabled)
+    }
+
+    fun setIslandNotifFilterApps(enabled: Boolean) {
+        isIslandNotifFilterApps.value = enabled
+        settingsRepository.setIslandNotifFilterAppsEnabled(enabled)
+    }
+
+    fun loadIslandNotifFilterApps(): List<AppSelection> = settingsRepository.loadIslandNotifFilterApps()
+
+    fun saveIslandNotifFilterApps(apps: List<AppSelection>) {
+        settingsRepository.saveIslandNotifFilterApps(apps)
+    }
+
+    fun updateIslandNotifFilterApp(packageName: String, enabled: Boolean) {
+        settingsRepository.updateIslandNotifFilterAppSelection(packageName, enabled)
     }
 
     fun setIslandNotifTapToOpen(enabled: Boolean) {

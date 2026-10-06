@@ -1002,8 +1002,8 @@ class NotificationListener : NotificationListenerService() {
             scheduleProgressRefresh()
         }
 
-        if (!isRepost && isHeadsUpNotification(sbn, rankingMap)) {
-            val alert = extractNotificationAlert(sbn)
+        if (!isRepost && isHeadsUpNotification(sbn, rankingMap, allowSilent = true)) {
+            val alert = extractNotificationAlert(sbn)?.copy(isSilent = isSilentNotification(sbn, rankingMap))
             if (alert != null) {
                 notifyAlertPosted(alert)
             }
@@ -1864,6 +1864,7 @@ class NotificationListener : NotificationListenerService() {
     fun isHeadsUpNotification(
         sbn: StatusBarNotification,
         rankingMap: RankingMap? = null,
+        allowSilent: Boolean = false,
     ): Boolean {
         if (sbn.isOngoing) return false
         if (sbn.packageName == packageName) return false
@@ -1872,6 +1873,7 @@ class NotificationListener : NotificationListenerService() {
         val notif = sbn.notification
         val isGroupSummary = (notif.flags and Notification.FLAG_GROUP_SUMMARY) != 0
         if (isGroupSummary) return false
+        if (allowSilent) return true
 
         try {
             val map = rankingMap ?: currentRanking

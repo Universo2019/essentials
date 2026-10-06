@@ -825,6 +825,16 @@ object FeatureRegistry {
                             "island_notif_compact_heads_up",
                         ),
                         SearchSetting(
+                            R.string.island_notif_skip_silent_title,
+                            R.string.island_notification_options_title,
+                            "island_notif_skip_silent",
+                        ),
+                        SearchSetting(
+                            R.string.island_notif_filter_apps_title,
+                            R.string.island_notification_options_title,
+                            "island_notif_filter_apps",
+                        ),
+                        SearchSetting(
                             R.string.island_media_peek_song_change_title,
                             R.string.island_media_peek_song_change_desc,
                             "island_media_peek_song_change",

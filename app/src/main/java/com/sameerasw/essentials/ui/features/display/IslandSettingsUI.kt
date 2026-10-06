@@ -92,6 +92,8 @@ import com.sameerasw.essentials.viewmodels.MainViewModel
 private val notificationSheetSettings =
     setOf(
         "island_notif_compact_heads_up",
+        "island_notif_skip_silent",
+        "island_notif_filter_apps",
         "island_notif_keep_progress",
         "island_notif_queue",
         "island_notif_tap_to_open",

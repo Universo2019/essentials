@@ -39,6 +39,9 @@ class NotificationsPlugin : BaseIslandPlugin() {
         SettingsRepository.KEY_ISLAND_NOTIF_COMPACT_HEADS_UP,
         SettingsRepository.KEY_ISLAND_SHOW_GLOW,
         SettingsRepository.KEY_ISLAND_NOTIF_QUEUE,
+        SettingsRepository.KEY_ISLAND_NOTIF_SKIP_SILENT,
+        SettingsRepository.KEY_ISLAND_NOTIF_FILTER_APPS,
+        SettingsRepository.KEY_ISLAND_NOTIF_FILTER_APPS_LIST,
         SettingsRepository.KEY_ISLAND_NOTIF_TAP_TO_OPEN,
         SettingsRepository.KEY_ISLAND_SHOW_NOTIFICATIONS,
         SettingsRepository.KEY_ISLAND_NOTIF_CONCEAL_LOCKED,
@@ -155,13 +158,19 @@ class NotificationsPlugin : BaseIslandPlugin() {
         if (ctx?.isContentSuppressed?.invoke() == true) clearAll() else render()
     }
 
+    private fun passesFilters(alert: ActiveNotificationAlert): Boolean {
+        if (alert.isSilent && settings.isIslandNotifSkipSilentEnabled()) return false
+        if (!settings.isIslandNotifFilterAppsEnabled()) return true
+        return settings.loadIslandNotifFilterApps().any { it.isEnabled && it.packageName == alert.packageName }
+    }
+
     private fun concealed(): Boolean =
         settings.getBoolean(SettingsRepository.KEY_ISLAND_NOTIF_CONCEAL_LOCKED, false) &&
             (context.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager)?.isKeyguardLocked == true
 
     private fun onPosted(alert: ActiveNotificationAlert) {
         val c = ctx ?: return
-        if (c.isContentSuppressed() || !settings.isIslandShowNotificationsEnabled()) return
+        if (c.isContentSuppressed() || !settings.isIslandShowNotificationsEnabled() || !passesFilters(alert)) return
         val existing = alerts.indexOfFirst { it.key == alert.key }
         if (existing >= 0) {
             alerts[existing] = alert

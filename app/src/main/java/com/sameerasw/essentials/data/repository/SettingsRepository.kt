@@ -603,6 +603,9 @@ class SettingsRepository(
         const val KEY_ISLAND_NOTIF_COMPACT_HEADS_UP = "island_notif_compact_heads_up"
         const val KEY_ISLAND_NOTIF_KEEP_PROGRESS = "island_notif_keep_progress"
         const val KEY_ISLAND_NOTIF_QUEUE = "island_notif_queue"
+        const val KEY_ISLAND_NOTIF_SKIP_SILENT = "island_notif_skip_silent"
+        const val KEY_ISLAND_NOTIF_FILTER_APPS = "island_notif_filter_apps"
+        const val KEY_ISLAND_NOTIF_FILTER_APPS_LIST = "island_notif_filter_apps_list"
         const val KEY_ISLAND_SHOW_NOTIFICATIONS = "island_show_notifications"
         const val KEY_ISLAND_NOTIF_TAP_TO_OPEN = "island_notif_tap_to_open"
         const val KEY_ISLAND_BORDER_OUTLINE_ENABLED = "island_border_outline_enabled"
@@ -4027,6 +4030,17 @@ class SettingsRepository(
 
     fun isIslandNotifQueueEnabled(): Boolean = getBoolean(KEY_ISLAND_NOTIF_QUEUE, true)
     fun setIslandNotifQueueEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_NOTIF_QUEUE, enabled)
+
+    fun isIslandNotifSkipSilentEnabled(): Boolean = getBoolean(KEY_ISLAND_NOTIF_SKIP_SILENT, true)
+    fun setIslandNotifSkipSilentEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_NOTIF_SKIP_SILENT, enabled)
+
+    fun isIslandNotifFilterAppsEnabled(): Boolean = getBoolean(KEY_ISLAND_NOTIF_FILTER_APPS, false)
+    fun setIslandNotifFilterAppsEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_NOTIF_FILTER_APPS, enabled)
+
+    fun loadIslandNotifFilterApps() = loadAppSelection(KEY_ISLAND_NOTIF_FILTER_APPS_LIST)
+    fun saveIslandNotifFilterApps(apps: List<AppSelection>) = saveAppSelection(KEY_ISLAND_NOTIF_FILTER_APPS_LIST, apps)
+    fun updateIslandNotifFilterAppSelection(packageName: String, enabled: Boolean) =
+        updateAppSelection(KEY_ISLAND_NOTIF_FILTER_APPS_LIST, packageName, enabled)
 
     fun isIslandNotifTapToOpenEnabled(): Boolean = getBoolean(KEY_ISLAND_NOTIF_TAP_TO_OPEN, false)
     fun setIslandNotifTapToOpenEnabled(enabled: Boolean) = putBoolean(KEY_ISLAND_NOTIF_TAP_TO_OPEN, enabled)
