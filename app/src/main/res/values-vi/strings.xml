@@ -1883,7 +1883,6 @@ Khi ẩn, thông báo vẫn sẽ đến âm thầm trong vùng làm mờ mà kh�
 
 Nút Tiếp tục sẽ bị vô hiệu hóa trong vài giây để bạn có thời gian suy nghĩ Bạn sẽ có cơ hội quyết định ngay lúc này, và chức năng tạm dừng có thể tùy chọn xuất hiện trở lại nếu bạn tiếp tục sử dụng ứng dụng quá thời gian đã định.</string>
     <string name="island_section_notifications">Thông báo</string>
-    <string name="feat_weather_title">Thời tiết</string>
     <string name="diy_volume_channel_alarm">Báo thức</string>
     <string name="island_sound_mode_keep_icon_title">Tiếp tục hiển thị biểu tượng</string>
     <string name="island_alarm_window_title">Hiển thị báo thức trong vòng</string>
@@ -1925,18 +1924,9 @@ Nút Tiếp tục sẽ bị vô hiệu hóa trong vài giây để bạn có th�
     <string name="island_battery_percentage_conditional_title">Chỉ áp dụng trong các điều kiện dưới đây</string>
     <string name="island_call_sticky_title">Không tự động thu gọn</string>
     <string name="island_call_show_mode_title">Cách xem</string>
-    <string name="weather_model_title">Mô hình dự báo</string>
     <string name="island_media_show_previous_title">Hiển thị nút bài hát trước</string>
     <string name="duo_rotate_album_art_title">Xoay ảnh bìa album</string>
     <string name="duo_hide_when_locked_title">Ẩn khi bị khóa</string>
-    <string name="feat_weather_desc">Cấu hình nhà cung cấp và cài đặt</string>
-    <string name="dev_weather_experimental_title">Thử nghiệm thời tiết</string>
-    <string name="dev_simulate_weather_title">Mô phỏng thời tiết</string>
-    <string name="weather_sim_time_title">Thời gian trong ngày</string>
-    <string name="weather_sim_time_dawn">Bình minh</string>
-    <string name="weather_sim_time_day">Ngày</string>
-    <string name="weather_sim_time_dusk">Hoàng hôn</string>
-    <string name="weather_sim_time_night">Đêm</string>
     <string name="haptic_mode_stronger">Mạnh</string>
     <string name="island_border_outline_dynamic_title">Màu sắc sống động</string>
     <string name="island_border_outline_hide_expanded_title">Ẩn khi mở rộng</string>
@@ -1955,7 +1945,6 @@ Tính năng này chỉ hoạt động với hình nền tĩnh. Hình nền độ
 
 Cần có quyền truy cập trợ năng để hiển thị lớp phủ và cần quyền truy cập bộ nhớ để đọc dữ liệu hình nền hiện tại của bạn. Chỉ cần quyền truy cập thông báo nếu bạn bật ảnh bìa album.</string>
     <string name="feat_conscious_gate_desc">Tạm dừng trước khi mở các ứng dụng đã chọn</string>
-    <string name="about_desc_weather">Chọn nguồn dự báo, thiết lập vị trí, đơn vị đo và khoảng thời gian cập nhật, đồng thời chọn xem màn hình thời tiết đầy đủ có hiển thị trong danh sách ứng dụng của bạn hay không. Tính năng Island và Brief sử dụng các cài đặt này.</string>
     <string name="label_unsupported">Không hỗ trợ</string>
     <string name="app_icon_legacy">Cũ</string>
     <string name="watchface_promo_step1_title">1. Tham gia nhóm Google</string>

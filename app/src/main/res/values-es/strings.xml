@@ -1748,14 +1748,6 @@ Requiere permiso de administrador del dispositivo si se utiliza el bloqueo.</str
     <string name="watchface_glance_complications_desc">Seleccionar qué mostrar</string>
     <string name="watchface_show_glow_title">Mostrar brillo</string>
     <string name="watchface_show_glow_desc">Degradado dinámico en la parte superior para eventos y viajes</string>
-    <string name="feat_weather_title">Clima</string>
-    <string name="feat_weather_desc">Configura provedores y ajustes</string>
-    <string name="weather_provider_title">Provedor</string>
-    <string name="weather_model_title">Modelo de predicción </string>
-    <string name="weather_location_device">Ubicación actual</string>
-    <string name="weather_location_manual">Selecciona una ciudad</string>
-    <string name="weather_error_location_permission">Se necesita el permiso de ubicación para obtener la ubicación actual</string>
-    <string name="weather_refresh_interval_title">Actualizar cada</string>
     <string name="perm_overcast_weather_title">Permiso del clima de Overcast</string>
     <string name="perm_overcast_weather_desc">Essentials lee el ultimo clima de tu actual o guardada ubicacion de Overcast</string>
     <string name="setting_hidden_debugging_title">Ocultar soporte de deduperacion</string>
