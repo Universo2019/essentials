@@ -97,6 +97,7 @@ import com.sameerasw.essentials.ui.core.sheets.AppSelectionSheet
 import com.sameerasw.essentials.ui.core.sheets.BluetoothDeviceSelectionSheet
 import com.sameerasw.essentials.ui.core.sheets.CustomSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.DimWallpaperSettingsSheet
+import com.sameerasw.essentials.ui.core.sheets.HilightEffectSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.ScreenOffSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.SingleAppSelectionSheet
 import com.sameerasw.essentials.ui.core.sheets.ChargingModeSettingsSheet
@@ -347,6 +348,7 @@ class AutomationEditorActivity : ComponentActivity() {
                 var showSetKeyboardSheet by remember { mutableStateOf(false) }
                 var showCustomSettingsSettings by remember { mutableStateOf(false) }
                 var showSetVolumeSettings by remember { mutableStateOf(false) }
+                var showHilightSettings by remember { mutableStateOf(false) }
                 var configAction by remember { mutableStateOf<Action?>(null) } // Generic config action
 
                 val isTriggerConfigured =
@@ -1364,6 +1366,7 @@ class AutomationEditorActivity : ComponentActivity() {
                                                                         showSetKeyboardSheet = true
                                                                     }
                                                                     is Action.SetVolume -> showSetVolumeSettings = true
+                                                                    is Action.Hilight -> showHilightSettings = true
                                                                     is Action.CustomSettings -> showCustomSettingsSettings = true
                                                                     else -> {}
                                                                 }
@@ -1705,6 +1708,36 @@ class AutomationEditorActivity : ComponentActivity() {
                                     onDismiss = { showSetVolumeSettings = false },
                                     onSave = { newAction ->
                                         showSetVolumeSettings = false
+                                        when (automationType) {
+                                            Automation.Type.TRIGGER -> selectedAction = newAction
+                                            Automation.Type.ACTION_SHORTCUT,
+                                            Automation.Type.ACCESSIBILITY_SHORTCUT,
+                                            Automation.Type.ACCESSIBILITY_SHORTCUT_1,
+                                            Automation.Type.ACCESSIBILITY_SHORTCUT_2,
+                                            Automation.Type.ACCESSIBILITY_SHORTCUT_3,
+                                            Automation.Type.PIXEL_SEARCHBAR ->
+                                                selectedAction =
+                                                    newAction
+
+                                            Automation.Type.STATE, Automation.Type.APP -> {
+                                                if (selectedActionTab == 0) {
+                                                    selectedInAction = newAction
+                                                } else {
+                                                    selectedOutAction = newAction
+                                                }
+                                            }
+                                        }
+                                        configAction = null
+                                    },
+                                )
+                            }
+
+                            if (showHilightSettings && configAction is Action.Hilight) {
+                                HilightEffectSettingsSheet(
+                                    initialAction = configAction as Action.Hilight,
+                                    onDismiss = { showHilightSettings = false },
+                                    onSave = { newAction ->
+                                        showHilightSettings = false
                                         when (automationType) {
                                             Automation.Type.TRIGGER -> selectedAction = newAction
                                             Automation.Type.ACTION_SHORTCUT,

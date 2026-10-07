@@ -11,11 +11,14 @@ package com.sameerasw.essentials.services
 
 import android.graphics.drawable.Icon
 import android.content.pm.LauncherApps
+import com.sameerasw.essentials.domain.controller.HilightController
+import com.sameerasw.essentials.utils.DeviceUtils
 import com.sameerasw.essentials.utils.notification.NotificationRepostFilter
 import com.sameerasw.essentials.utils.chronometer.ChronometerRepository
 import com.sameerasw.essentials.utils.call.CallNotificationParser
 import com.sameerasw.essentials.utils.call.CallStateRepository
 import android.app.Notification
+import android.app.NotificationManager
 import android.app.Person
 import android.content.Context
 import android.content.Intent
@@ -1107,6 +1110,8 @@ class NotificationListener : NotificationListenerService() {
                 return
             }
 
+            handleHilight(sbn)
+
             val prefs =
                 applicationContext.getSharedPreferences("essentials_prefs", MODE_PRIVATE)
 
@@ -1312,6 +1317,20 @@ class NotificationListener : NotificationListenerService() {
     }
 
     private val lastCallVibrateTime = mutableMapOf<String, Long>()
+
+    private fun handleHilight(sbn: StatusBarNotification) {
+        if (!DeviceUtils.isHilightDevice()) return
+        val settings = SettingsRepository(applicationContext)
+        if (!settings.isHilightNotificationsEnabled()) return
+        val flags = sbn.notification.flags
+        val skipFlags = Notification.FLAG_ONGOING_EVENT or Notification.FLAG_FOREGROUND_SERVICE or Notification.FLAG_GROUP_SUMMARY
+        if (flags and skipFlags != 0) return
+        val ranking = Ranking()
+        if (currentRanking.getRanking(sbn.key, ranking) && ranking.importance <= NotificationManager.IMPORTANCE_LOW) return
+        if (settings.isHilightOnlyWhenScreenOff() && getSystemService(PowerManager::class.java)?.isInteractive == true) return
+        val effect = settings.getHilightEffectForApp(sbn.packageName) ?: return
+        HilightController.play(effect)
+    }
 
     private fun handleCallVibrations(sbn: StatusBarNotification) {
         try {

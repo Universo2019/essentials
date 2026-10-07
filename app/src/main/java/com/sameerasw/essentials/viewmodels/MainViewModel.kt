@@ -58,6 +58,7 @@ import com.sameerasw.essentials.domain.model.AppIcon
 import com.sameerasw.essentials.domain.model.AppSelection
 import com.sameerasw.essentials.domain.model.AppStandbyInfo
 import com.sameerasw.essentials.domain.model.DnsPreset
+import com.sameerasw.essentials.domain.model.HilightEffect
 import com.sameerasw.essentials.domain.model.NotificationApp
 import com.sameerasw.essentials.domain.model.NotificationLightingColorMode
 import com.sameerasw.essentials.domain.model.NotificationLightingSide
@@ -131,6 +132,9 @@ class MainViewModel : ViewModel() {
     val isButtonRemapPauseOnVolumeDialog = mutableStateOf(true)
     val shizukuDetectedDevicePath = mutableStateOf<String?>(null)
     val remapActions = mutableStateMapOf<RemapSlot, List<Action>>()
+    val isHilightNotificationsEnabled = mutableStateOf(false)
+    val isHilightOnlyWhenScreenOff = mutableStateOf(true)
+    val hilightAppEffects = mutableStateMapOf<String, HilightEffect>()
     val remapHapticType = mutableStateOf(HapticFeedbackType.DOUBLE)
     val isDynamicNightLightEnabled = mutableStateOf(false)
     val isSmartPixelsEnabled = mutableStateOf(false)
@@ -2239,6 +2243,11 @@ class MainViewModel : ViewModel() {
         RemapSlot.ALL.forEach { slot ->
             remapActions[slot] = settingsRepository.getRemapActions(slot.prefKey)
         }
+
+        isHilightNotificationsEnabled.value = settingsRepository.isHilightNotificationsEnabled()
+        isHilightOnlyWhenScreenOff.value = settingsRepository.isHilightOnlyWhenScreenOff()
+        hilightAppEffects.clear()
+        hilightAppEffects.putAll(settingsRepository.getHilightAppEffects())
 
         val hapticName =
             settingsRepository.getString(
@@ -7992,6 +8001,29 @@ class MainViewModel : ViewModel() {
         enabled: Boolean,
     ) {
         settingsRepository.updateNotificationLightingAppSelection(packageName, enabled)
+    }
+
+    fun setHilightNotificationsEnabled(enabled: Boolean) {
+        isHilightNotificationsEnabled.value = enabled
+        settingsRepository.setHilightNotificationsEnabled(enabled)
+    }
+
+    fun setHilightOnlyWhenScreenOff(enabled: Boolean) {
+        isHilightOnlyWhenScreenOff.value = enabled
+        settingsRepository.setHilightOnlyWhenScreenOff(enabled)
+    }
+
+    fun setHilightAppEffect(
+        packageName: String,
+        effect: HilightEffect,
+    ) {
+        hilightAppEffects[packageName] = effect
+        settingsRepository.setHilightAppEffect(packageName, effect)
+    }
+
+    fun removeHilightApp(packageName: String) {
+        hilightAppEffects.remove(packageName)
+        settingsRepository.setHilightAppEffect(packageName, null)
     }
 
     /**

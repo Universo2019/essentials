@@ -21,6 +21,7 @@ import com.sameerasw.essentials.domain.model.AppIcon
 import com.sameerasw.essentials.domain.model.AppSelection
 import com.sameerasw.essentials.domain.model.AppTag
 import com.sameerasw.essentials.domain.model.DnsPreset
+import com.sameerasw.essentials.domain.model.HilightEffect
 import com.sameerasw.essentials.domain.model.NotificationLightingColorMode
 import com.sameerasw.essentials.domain.model.NotificationLightingSide
 import com.sameerasw.essentials.domain.model.NotificationLightingStyle
@@ -173,6 +174,9 @@ class SettingsRepository(
         const val KEY_MAPS_DISCOVERED_CHANNELS = "maps_discovered_channels"
         const val KEY_MAPS_DETECTION_CHANNELS = "maps_detection_channels"
         const val KEY_EDGE_LIGHTING_ENABLED = "edge_lighting_enabled"
+        const val KEY_HILIGHT_NOTIFICATIONS_ENABLED = "hilight_notifications_enabled"
+        const val KEY_HILIGHT_APP_EFFECTS = "hilight_app_effects"
+        const val KEY_HILIGHT_ONLY_SCREEN_OFF = "hilight_only_screen_off"
         const val KEY_EDGE_LIGHTING_ONLY_SCREEN_OFF = "edge_lighting_only_screen_off"
         const val KEY_EDGE_LIGHTING_AMBIENT_DISPLAY = "edge_lighting_ambient_display"
         const val KEY_EDGE_LIGHTING_AMBIENT_SHOW_LOCK_SCREEN =
@@ -1246,6 +1250,35 @@ class SettingsRepository(
     // Feature specific App selections
 
     fun loadNotificationLightingSelectedApps() = loadAppSelection(KEY_EDGE_LIGHTING_SELECTED_APPS)
+
+    // Each app the user adds gets its own effect; apps not in the map never light up
+    fun getHilightAppEffects(): Map<String, HilightEffect> =
+        getString(KEY_HILIGHT_APP_EFFECTS)?.let {
+            try {
+                gson.fromJson<Map<String, HilightEffect>>(it, object : TypeToken<Map<String, HilightEffect>>() {}.type)
+            } catch (_: Exception) {
+                null
+            }
+        } ?: emptyMap()
+
+    fun getHilightEffectForApp(packageName: String): HilightEffect? = getHilightAppEffects()[packageName]
+
+    fun setHilightAppEffect(
+        packageName: String,
+        effect: HilightEffect?,
+    ) {
+        val effects = getHilightAppEffects().toMutableMap()
+        if (effect == null) effects.remove(packageName) else effects[packageName] = effect
+        putString(KEY_HILIGHT_APP_EFFECTS, gson.toJson(effects))
+    }
+
+    fun isHilightNotificationsEnabled(): Boolean = getBoolean(KEY_HILIGHT_NOTIFICATIONS_ENABLED, false)
+
+    fun setHilightNotificationsEnabled(enabled: Boolean) = putBoolean(KEY_HILIGHT_NOTIFICATIONS_ENABLED, enabled)
+
+    fun isHilightOnlyWhenScreenOff(): Boolean = getBoolean(KEY_HILIGHT_ONLY_SCREEN_OFF, true)
+
+    fun setHilightOnlyWhenScreenOff(enabled: Boolean) = putBoolean(KEY_HILIGHT_ONLY_SCREEN_OFF, enabled)
 
     /**
      * Executes the save notification lighting selected apps operation.

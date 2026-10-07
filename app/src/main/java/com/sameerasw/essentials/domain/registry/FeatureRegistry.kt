@@ -1094,6 +1094,40 @@ object FeatureRegistry {
                 ) = viewModel.setNotificationLightingEnabled(enabled, context)
             },
             object : Feature(
+                id = "Hilight",
+                title = R.string.feat_hilight_title,
+                iconRes = R.drawable.rounded_auto_awesome_24,
+                category = R.string.cat_interface,
+                description = R.string.feat_hilight_desc,
+                permissionKeys = listOf("SHIZUKU", "NOTIFICATION_LISTENER"),
+                aboutDescription = R.string.about_desc_hilight,
+                searchableSettings =
+                    listOf(
+                        SearchSetting(
+                            R.string.search_hilight_notifications_title,
+                            R.string.search_hilight_notifications_desc,
+                            "hilight_notifications",
+                        ),
+                    ),
+                parentFeatureId = "Notifications",
+            ) {
+                override fun isEnabled(viewModel: MainViewModel) = viewModel.isHilightNotificationsEnabled.value
+
+                // Disabled rather than marked unsupported, so the list shows no unsupported badge
+                override fun isToggleEnabled(
+                    viewModel: MainViewModel,
+                    context: Context,
+                ) = DeviceUtils.isHilightDevice() &&
+                    viewModel.isShizukuPermissionGranted.value &&
+                    viewModel.isNotificationListenerEnabled.value
+
+                override fun onToggle(
+                    viewModel: MainViewModel,
+                    context: Context,
+                    enabled: Boolean,
+                ) = viewModel.setHilightNotificationsEnabled(enabled)
+            },
+            object : Feature(
                 id = "Flashlight pulse",
                 title = R.string.flashlight_pulse_title,
                 iconRes = R.drawable.rounded_flashlight_on_24,

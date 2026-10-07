@@ -28,6 +28,7 @@ import android.widget.Toast
 import com.sameerasw.essentials.R
 import com.sameerasw.essentials.data.repository.SettingsRepository
 import com.sameerasw.essentials.domain.HapticFeedbackType
+import com.sameerasw.essentials.domain.controller.HilightController
 import com.sameerasw.essentials.domain.diy.Action
 import com.sameerasw.essentials.domain.model.DashConfig
 import com.sameerasw.essentials.domain.model.NotificationLightingStyle
@@ -134,6 +135,7 @@ object CombinedActionExecutor {
                     HapticUtil.performCustomHaptic(context, 0.6f)
                 }
 
+                is Action.Hilight -> HilightController.play(action.toEffect())
                 is Action.TurnOnFlashlight -> toggleFlashlight(context, true)
                 is Action.TurnOffFlashlight -> toggleFlashlight(context, false)
                 is Action.ToggleFlashlight -> {
