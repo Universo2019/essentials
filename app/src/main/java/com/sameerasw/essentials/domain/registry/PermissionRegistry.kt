@@ -97,6 +97,7 @@ fun initPermissionRegistry() {
     PermissionRegistry.register("SHIZUKU", R.string.feat_transparent_navigation_bar_title)
     PermissionRegistry.register("SHIZUKU", R.string.feat_standby_apps_title)
     PermissionRegistry.register("SHIZUKU", R.string.island_dynamic_hide_status_bar_title)
+    PermissionRegistry.register("SHIZUKU", R.string.island_hide_live_updates_title)
     PermissionRegistry.register("USAGE_STATS", R.string.feat_freeze_title)
     PermissionRegistry.register("USAGE_STATS", R.string.feat_app_lock_title)
     PermissionRegistry.register("USAGE_STATS", R.string.feat_dynamic_night_light_title)
@@ -112,6 +113,7 @@ fun initPermissionRegistry() {
     PermissionRegistry.register("ROOT", R.string.feat_standby_apps_title)
     PermissionRegistry.register("ROOT", R.string.feat_screen_locked_security_title)
     PermissionRegistry.register("ROOT", R.string.island_dynamic_hide_status_bar_title)
+    PermissionRegistry.register("ROOT", R.string.island_hide_live_updates_title)
     PermissionRegistry.register("ROOT", R.string.feat_prefer_gpu_composing_title)
 
     // Notification listener permission
