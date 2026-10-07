@@ -120,6 +120,8 @@ fun initPermissionRegistry() {
     PermissionRegistry.register("NOTIFICATION_LISTENER", R.string.feat_call_vibrations_title)
     PermissionRegistry.register("NOTIFICATION_LISTENER", R.string.feat_essentials_on_display_title)
     PermissionRegistry.register("NOTIFICATION_LISTENER", R.string.feat_aod_wallpaper_use_album_art)
+    PermissionRegistry.register("NOTIFICATION_LISTENER", R.string.feat_aod_wallpaper_extended_media)
+    PermissionRegistry.register("WRITE_SECURE_SETTINGS", R.string.feat_aod_wallpaper_extended_media)
     PermissionRegistry.register("NOTIFICATION_LISTENER", R.string.duo_title)
     PermissionRegistry.register("NOTIFICATION_LISTENER", R.string.feat_status_glance_title)
 

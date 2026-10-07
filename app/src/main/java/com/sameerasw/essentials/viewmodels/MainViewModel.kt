@@ -359,6 +359,8 @@ class MainViewModel : ViewModel() {
     val isAodWallpaperUseAlbumArt = mutableStateOf(false)
     val isAodWallpaperDisableOnDnd = mutableStateOf(false)
     val isAodWallpaperKeepOnMedia = mutableStateOf(false)
+    val isAodWallpaperExtendedInfo = mutableStateOf(false)
+    val isAodWallpaperExtendedMedia = mutableStateOf(false)
     val currentWallpaperBitmap = mutableStateOf<Bitmap?>(null)
     val isPocketModeEnabled = mutableStateOf(false)
     val isFaceUnlockBrightnessEnabled = mutableStateOf(false)
@@ -1299,6 +1301,14 @@ class MainViewModel : ViewModel() {
 
                     SettingsRepository.KEY_AOD_WALLPAPER_KEEP_ON_MEDIA ->
                         isAodWallpaperKeepOnMedia.value =
+                            settingsRepository.getBoolean(key)
+
+                    SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_INFO ->
+                        isAodWallpaperExtendedInfo.value =
+                            settingsRepository.getBoolean(key)
+
+                    SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_MEDIA ->
+                        isAodWallpaperExtendedMedia.value =
                             settingsRepository.getBoolean(key)
 
                     SettingsRepository.KEY_POCKET_MODE_ENABLED ->
@@ -2687,6 +2697,10 @@ class MainViewModel : ViewModel() {
             )
         isAodWallpaperKeepOnMedia.value =
             settingsRepository.isAodWallpaperKeepOnMediaEnabled()
+        isAodWallpaperExtendedInfo.value =
+            settingsRepository.isAodWallpaperExtendedInfoEnabled()
+        isAodWallpaperExtendedMedia.value =
+            settingsRepository.isAodWallpaperExtendedMediaEnabled()
         pixelSearchResultApps.value = settingsRepository.isPixelSearchResultAppsEnabled()
         pixelSearchResultMedia.value = settingsRepository.isPixelSearchResultMediaEnabled()
         pixelSearchResultFiles.value = settingsRepository.isPixelSearchResultFilesEnabled()
@@ -9106,6 +9120,16 @@ class MainViewModel : ViewModel() {
     fun setAodWallpaperKeepOnMedia(enabled: Boolean) {
         settingsRepository.setAodWallpaperKeepOnMedia(enabled)
         isAodWallpaperKeepOnMedia.value = enabled
+    }
+
+    fun setAodWallpaperExtendedInfo(enabled: Boolean) {
+        settingsRepository.setAodWallpaperExtendedInfo(enabled)
+        isAodWallpaperExtendedInfo.value = enabled
+    }
+
+    fun setAodWallpaperExtendedMedia(enabled: Boolean) {
+        settingsRepository.setAodWallpaperExtendedMedia(enabled)
+        isAodWallpaperExtendedMedia.value = enabled
     }
 
     fun loadAodWallpaperMediaApps(context: Context): List<AppSelection> = settingsRepository.loadAodWallpaperMediaExcludedApps()
