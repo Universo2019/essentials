@@ -572,7 +572,7 @@ class AodWallpaperOverlayHandler(
     private fun buildExtendedLayer(): FrameLayout {
         val density = service.resources.displayMetrics.density
         val screenHeight = service.resources.displayMetrics.heightPixels
-        val typeface = ResourcesCompat.getFont(service, R.font.google_sans_flex)
+        val typeface = ResourcesCompat.getFont(service, R.font.google_sans_flex_round)
 
         fun label(
             sizeSp: Float,
@@ -582,7 +582,13 @@ class AodWallpaperOverlayHandler(
             setTextColor(Color.WHITE)
             alpha = alphaValue
             textSize = sizeSp
-            setTypeface(typeface, if (bold) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
+            setTypeface(
+                if (typeface != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    android.graphics.Typeface.create(typeface, if (bold) 700 else 400, false)
+                } else {
+                    typeface
+                },
+            )
             gravity = Gravity.CENTER
             textAlignment = View.TEXT_ALIGNMENT_CENTER
             setSingleLine(true)
