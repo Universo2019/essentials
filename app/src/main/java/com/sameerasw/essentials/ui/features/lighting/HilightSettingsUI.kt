@@ -9,6 +9,7 @@
 
 package com.sameerasw.essentials.ui.features.system
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -51,6 +52,7 @@ import com.sameerasw.essentials.R
 import com.sameerasw.essentials.domain.controller.HilightController
 import com.sameerasw.essentials.domain.model.HilightEffect
 import com.sameerasw.essentials.domain.model.HilightPattern
+import com.sameerasw.essentials.ui.components.sliders.ConfigSliderItem
 import com.sameerasw.essentials.ui.core.cards.IconToggleItem
 import com.sameerasw.essentials.ui.core.containers.RoundedCardContainer
 import com.sameerasw.essentials.ui.core.sheets.HilightEffectSheet
@@ -119,6 +121,18 @@ fun HilightSettingsUI(
                 isChecked = viewModel.isHilightOnlyWhenScreenOff.value,
                 onCheckedChange = { viewModel.setHilightOnlyWhenScreenOff(it) },
             )
+            ConfigSliderItem(
+                title = stringResource(R.string.hilight_cooldown_title),
+                description = stringResource(R.string.hilight_cooldown_desc),
+                value = viewModel.hilightCooldownSeconds.intValue.toFloat(),
+                onValueChange = { viewModel.setHilightCooldownSeconds(it.toInt()) },
+                valueRange = 0f..300f,
+                steps = 19,
+                increment = 15f,
+                valueFormatter = { formatCooldown(context, it.toInt()) },
+                iconRes = R.drawable.rounded_timer_24,
+                modifier = Modifier.highlight(highlightSetting == "hilight_cooldown"),
+            )
         }
 
         Text(
@@ -184,6 +198,16 @@ fun HilightSettingsUI(
         )
     }
 }
+
+private fun formatCooldown(
+    context: Context,
+    seconds: Int,
+): String =
+    when {
+        seconds == 0 -> context.getString(R.string.hilight_cooldown_off)
+        seconds % 60 == 0 -> context.getString(R.string.hilight_cooldown_minutes, seconds / 60)
+        else -> context.getString(R.string.hilight_duration_value, seconds)
+    }
 
 @Composable
 private fun StatusText(

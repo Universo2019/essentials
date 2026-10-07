@@ -134,6 +134,7 @@ class MainViewModel : ViewModel() {
     val remapActions = mutableStateMapOf<RemapSlot, List<Action>>()
     val isHilightNotificationsEnabled = mutableStateOf(false)
     val isHilightOnlyWhenScreenOff = mutableStateOf(true)
+    val hilightCooldownSeconds = mutableIntStateOf(60)
     val hilightAppEffects = mutableStateMapOf<String, HilightEffect>()
     val remapHapticType = mutableStateOf(HapticFeedbackType.DOUBLE)
     val isDynamicNightLightEnabled = mutableStateOf(false)
@@ -2246,6 +2247,7 @@ class MainViewModel : ViewModel() {
 
         isHilightNotificationsEnabled.value = settingsRepository.isHilightNotificationsEnabled()
         isHilightOnlyWhenScreenOff.value = settingsRepository.isHilightOnlyWhenScreenOff()
+        hilightCooldownSeconds.intValue = settingsRepository.getHilightCooldownSeconds()
         hilightAppEffects.clear()
         hilightAppEffects.putAll(settingsRepository.getHilightAppEffects())
 
@@ -8011,6 +8013,11 @@ class MainViewModel : ViewModel() {
     fun setHilightOnlyWhenScreenOff(enabled: Boolean) {
         isHilightOnlyWhenScreenOff.value = enabled
         settingsRepository.setHilightOnlyWhenScreenOff(enabled)
+    }
+
+    fun setHilightCooldownSeconds(seconds: Int) {
+        hilightCooldownSeconds.intValue = seconds
+        settingsRepository.setHilightCooldownSeconds(seconds)
     }
 
     fun setHilightAppEffect(

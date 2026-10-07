@@ -31,6 +31,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
+import android.os.SystemClock
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
@@ -1329,8 +1330,13 @@ class NotificationListener : NotificationListenerService() {
         if (currentRanking.getRanking(sbn.key, ranking) && ranking.importance <= NotificationManager.IMPORTANCE_LOW) return
         if (settings.isHilightOnlyWhenScreenOff() && getSystemService(PowerManager::class.java)?.isInteractive == true) return
         val effect = settings.getHilightEffectForApp(sbn.packageName) ?: return
-        HilightController.play(effect)
+        val now = SystemClock.elapsedRealtime()
+        val last = lastHilightTime[sbn.packageName]
+        if (last != null && now - last < settings.getHilightCooldownSeconds() * 1000L) return
+        if (HilightController.play(effect)) lastHilightTime[sbn.packageName] = now
     }
+
+    private val lastHilightTime = mutableMapOf<String, Long>()
 
     private fun handleCallVibrations(sbn: StatusBarNotification) {
         try {

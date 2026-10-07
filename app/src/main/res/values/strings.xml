@@ -261,6 +261,10 @@
     <string name="hilight_no_apps">No apps yet. Add an app to give its notifications their own Hilight.</string>
     <string name="hilight_app_effect_summary">%1$s · %2$d s</string>
     <string name="hilight_only_screen_off_title">Only when the screen is off</string>
+    <string name="hilight_cooldown_title">Cooldown</string>
+    <string name="hilight_cooldown_desc">Wait this long before lighting up again for the same app</string>
+    <string name="hilight_cooldown_off">Off</string>
+    <string name="hilight_cooldown_minutes">%1$d min</string>
     <string name="hilight_hint">Effects stop on their own after the chosen duration, up to 30 seconds. While an effect is playing, Pixel\'s own Hilight effects such as calls and Gemini are paused.</string>
     <string name="search_hilight_notifications_title">Hilight notifications</string>
     <string name="search_hilight_notifications_desc">Light the rear LEDs when notifications arrive</string>
