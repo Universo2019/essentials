@@ -29,8 +29,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -64,6 +66,7 @@ import com.sameerasw.essentials.utils.hardware.HilightLights
 import com.sameerasw.essentials.viewmodels.MainViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import rikka.shizuku.Shizuku
 
 @Composable
 fun HilightSettingsUI(
@@ -79,8 +82,17 @@ fun HilightSettingsUI(
     // Package whose effect sheet is open; a new app goes straight from the picker to its sheet
     var editingPackage by remember { mutableStateOf<String?>(null) }
 
+    var shizukuBinderEvents by remember { mutableIntStateOf(0) }
+
+    // Shizuku's binder can arrive after the screen opens, so check again once it does
+    DisposableEffect(Unit) {
+        val listener = Shizuku.OnBinderReceivedListener { shizukuBinderEvents++ }
+        Shizuku.addBinderReceivedListenerSticky(listener)
+        onDispose { Shizuku.removeBinderReceivedListener(listener) }
+    }
+
     // Binder calls through Shizuku, so keep them off the main thread
-    LaunchedEffect(Unit) {
+    LaunchedEffect(shizukuBinderEvents) {
         if (!isHilightDevice) return@LaunchedEffect
         hasShizukuAccess = HilightLights.isAccessGranted()
         isArrayAvailable = withContext(Dispatchers.IO) { HilightController.isAvailable() }
@@ -270,6 +282,7 @@ private fun HilightAppItem(
             Text(
                 text = appLabel(packageName),
                 style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
