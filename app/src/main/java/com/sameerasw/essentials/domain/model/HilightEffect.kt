@@ -46,6 +46,10 @@ data class HilightEffect(
     @SerializedName("color") val color: Int = DEFAULT_COLOR,
     @SerializedName("durationMs") val durationMs: Long = DEFAULT_DURATION_MS,
 ) {
+    // Gson sets an unknown pattern name to null despite the non-null type
+    @Suppress("USELESS_ELVIS")
+    fun withValidPattern() = copy(pattern = pattern ?: HilightPattern.GLOW)
+
     companion object {
         const val DEFAULT_COLOR = 0xFF4285F4.toInt()
         const val DEFAULT_DURATION_MS = 3_000L

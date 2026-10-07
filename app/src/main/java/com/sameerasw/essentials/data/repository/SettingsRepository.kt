@@ -1256,7 +1256,9 @@ class SettingsRepository(
     fun getHilightAppEffects(): Map<String, HilightEffect> =
         getString(KEY_HILIGHT_APP_EFFECTS)?.let {
             try {
-                gson.fromJson<Map<String, HilightEffect>>(it, object : TypeToken<Map<String, HilightEffect>>() {}.type)
+                gson
+                    .fromJson<Map<String, HilightEffect>>(it, object : TypeToken<Map<String, HilightEffect>>() {}.type)
+                    ?.mapValues { (_, effect) -> effect.withValidPattern() }
             } catch (_: Exception) {
                 null
             }

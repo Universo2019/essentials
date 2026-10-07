@@ -1,5 +1,6 @@
 package com.sameerasw.essentials.domain
 
+import com.google.gson.Gson
 import com.sameerasw.essentials.domain.diy.Action
 import com.sameerasw.essentials.domain.diy.ActionGsonAdapter
 import com.sameerasw.essentials.domain.model.HilightEffect
@@ -76,5 +77,14 @@ class HilightFramesTest {
     fun hilightActionRoundTrips() {
         val action = Action.Hilight(HilightPattern.SWEEP, red, 5_000)
         assertEquals(action, ActionGsonAdapter.fromJson(ActionGsonAdapter.toJson(action)))
+    }
+
+    @Test
+    fun unknownPatternNamesFallBackToGlow() {
+        val gson = Gson()
+        val effect = gson.fromJson("""{"pattern":"BREATHE","color":-1,"durationMs":3000}""", HilightEffect::class.java)
+        assertEquals(HilightPattern.GLOW, effect.withValidPattern().pattern)
+        val action = gson.fromJson("""{"pattern":"CHASE","color":-1,"durationMs":3000}""", Action.Hilight::class.java)
+        assertEquals(HilightPattern.GLOW, action.toEffect().pattern)
     }
 }

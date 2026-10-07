@@ -53,7 +53,9 @@ sealed interface Action {
         override val isConfigurable: Boolean get() = true
         override val permissions: List<String> get() = listOf("SHIZUKU")
 
-        fun toEffect() = HilightEffect(pattern, color, durationMs)
+        // Gson sets an unknown pattern name to null despite the non-null type
+        @Suppress("USELESS_ELVIS")
+        fun toEffect() = HilightEffect(pattern ?: HilightPattern.GLOW, color, durationMs)
     }
 
     @Keep
