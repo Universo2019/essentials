@@ -27,14 +27,14 @@ enum class HilightPattern(
     @SerializedName("BLINK")
     BLINK(R.string.hilight_pattern_blink),
 
-    @SerializedName("BREATHE")
-    BREATHE(R.string.hilight_pattern_breathe),
+    @SerializedName("GLOW")
+    GLOW(R.string.hilight_pattern_glow),
 
-    @SerializedName("PULSE")
-    PULSE(R.string.hilight_pattern_pulse),
+    @SerializedName("FLASH")
+    FLASH(R.string.hilight_pattern_flash),
 
-    @SerializedName("CHASE")
-    CHASE(R.string.hilight_pattern_chase),
+    @SerializedName("SWEEP")
+    SWEEP(R.string.hilight_pattern_sweep),
 
     @SerializedName("RAINBOW")
     RAINBOW(R.string.hilight_pattern_rainbow),
@@ -42,7 +42,7 @@ enum class HilightPattern(
 
 @Keep
 data class HilightEffect(
-    @SerializedName("pattern") val pattern: HilightPattern = HilightPattern.BREATHE,
+    @SerializedName("pattern") val pattern: HilightPattern = HilightPattern.GLOW,
     @SerializedName("color") val color: Int = DEFAULT_COLOR,
     @SerializedName("durationMs") val durationMs: Long = DEFAULT_DURATION_MS,
 ) {
@@ -69,21 +69,21 @@ object HilightFrames {
         return when (effect.pattern) {
             HilightPattern.SOLID -> IntArray(ledCount) { opaque(effect.color) }
             HilightPattern.BLINK -> uniform(ledCount, effect.color, if ((t / BLINK_HALF_MS) % 2 == 0L) 1f else 0f)
-            HilightPattern.BREATHE -> {
-                val phase = (t % BREATHE_PERIOD_MS).toDouble() / BREATHE_PERIOD_MS
+            HilightPattern.GLOW -> {
+                val phase = (t % GLOW_PERIOD_MS).toDouble() / GLOW_PERIOD_MS
                 uniform(ledCount, effect.color, ((1 - cos(2 * PI * phase)) / 2).toFloat())
             }
-            HilightPattern.PULSE -> {
-                val inCycle = t % PULSE_PERIOD_MS
-                val lit = inCycle < PULSE_FLASH_MS || inCycle in (2 * PULSE_FLASH_MS) until (3 * PULSE_FLASH_MS)
+            HilightPattern.FLASH -> {
+                val inCycle = t % FLASH_PERIOD_MS
+                val lit = inCycle < FLASH_ON_MS || inCycle in (2 * FLASH_ON_MS) until (3 * FLASH_ON_MS)
                 uniform(ledCount, effect.color, if (lit) 1f else 0f)
             }
-            HilightPattern.CHASE -> {
-                val head = ((t / CHASE_STEP_MS) % ledCount.coerceAtLeast(1)).toInt()
+            HilightPattern.SWEEP -> {
+                val head = ((t / SWEEP_STEP_MS) % ledCount.coerceAtLeast(1)).toInt()
                 IntArray(ledCount) { i ->
                     when ((head - i + ledCount) % ledCount.coerceAtLeast(1)) {
                         0 -> scale(effect.color, 1f)
-                        1 -> scale(effect.color, CHASE_TAIL_LEVEL)
+                        1 -> scale(effect.color, SWEEP_TAIL_LEVEL)
                         else -> OFF
                     }
                 }
@@ -135,10 +135,10 @@ object HilightFrames {
     }
 
     private const val BLINK_HALF_MS = 500L
-    private const val BREATHE_PERIOD_MS = 2_000L
-    private const val PULSE_PERIOD_MS = 1_200L
-    private const val PULSE_FLASH_MS = 120L
-    private const val CHASE_STEP_MS = 90L
-    private const val CHASE_TAIL_LEVEL = 0.3f
+    private const val GLOW_PERIOD_MS = 2_000L
+    private const val FLASH_PERIOD_MS = 1_200L
+    private const val FLASH_ON_MS = 120L
+    private const val SWEEP_STEP_MS = 90L
+    private const val SWEEP_TAIL_LEVEL = 0.3f
     private const val RAINBOW_PERIOD_MS = 3_000L
 }

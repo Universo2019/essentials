@@ -274,9 +274,9 @@
     <string name="hilight_unavailable_toast">Hilight needs Shizuku access and a phone with the Hilight LEDs</string>
     <string name="hilight_pattern_solid">Solid</string>
     <string name="hilight_pattern_blink">Blink</string>
-    <string name="hilight_pattern_breathe">Breathe</string>
-    <string name="hilight_pattern_pulse">Pulse</string>
-    <string name="hilight_pattern_chase">Chase</string>
+    <string name="hilight_pattern_glow">Glow</string>
+    <string name="hilight_pattern_flash">Flash</string>
+    <string name="hilight_pattern_sweep">Sweep</string>
     <string name="hilight_pattern_rainbow">Rainbow</string>
     <string name="flashlight_intensity_title">Flashlight Intensity</string>
     <string name="flashlight_fade_title">Fade in and out</string>

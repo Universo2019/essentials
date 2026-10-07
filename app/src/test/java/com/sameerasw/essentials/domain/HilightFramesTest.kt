@@ -31,22 +31,22 @@ class HilightFramesTest {
     }
 
     @Test
-    fun breatheStartsDarkAndPeaksMidCycle() {
-        assertArrayEquals(IntArray(8) { HilightFrames.OFF }, frame(HilightPattern.BREATHE, 0))
-        assertArrayEquals(IntArray(8) { red }, frame(HilightPattern.BREATHE, 1000))
+    fun glowStartsDarkAndPeaksMidCycle() {
+        assertArrayEquals(IntArray(8) { HilightFrames.OFF }, frame(HilightPattern.GLOW, 0))
+        assertArrayEquals(IntArray(8) { red }, frame(HilightPattern.GLOW, 1000))
     }
 
     @Test
-    fun pulseFlashesTwiceThenRests() {
-        assertEquals(red, frame(HilightPattern.PULSE, 50)[0])
-        assertEquals(HilightFrames.OFF, frame(HilightPattern.PULSE, 180)[0])
-        assertEquals(red, frame(HilightPattern.PULSE, 300)[0])
-        assertEquals(HilightFrames.OFF, frame(HilightPattern.PULSE, 800)[0])
+    fun flashBlinksTwiceThenRests() {
+        assertEquals(red, frame(HilightPattern.FLASH, 50)[0])
+        assertEquals(HilightFrames.OFF, frame(HilightPattern.FLASH, 180)[0])
+        assertEquals(red, frame(HilightPattern.FLASH, 300)[0])
+        assertEquals(HilightFrames.OFF, frame(HilightPattern.FLASH, 800)[0])
     }
 
     @Test
-    fun chaseHasOneHeadAndADimTail() {
-        val colors = frame(HilightPattern.CHASE, 3 * 90L)
+    fun sweepHasOneHeadAndADimTail() {
+        val colors = frame(HilightPattern.SWEEP, 3 * 90L)
         assertEquals(red, colors[3])
         assertEquals(HilightFrames.scale(red, 0.3f), colors[2])
         assertEquals(6, colors.count { it == HilightFrames.OFF })
@@ -74,7 +74,7 @@ class HilightFramesTest {
 
     @Test
     fun hilightActionRoundTrips() {
-        val action = Action.Hilight(HilightPattern.CHASE, red, 5_000)
+        val action = Action.Hilight(HilightPattern.SWEEP, red, 5_000)
         assertEquals(action, ActionGsonAdapter.fromJson(ActionGsonAdapter.toJson(action)))
     }
 }

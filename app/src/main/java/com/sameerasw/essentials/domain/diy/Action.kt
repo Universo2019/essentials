@@ -44,7 +44,7 @@ sealed interface Action {
 
     @Keep
     data class Hilight(
-        @SerializedName("pattern") val pattern: HilightPattern = HilightPattern.BREATHE,
+        @SerializedName("pattern") val pattern: HilightPattern = HilightPattern.GLOW,
         @SerializedName("color") val color: Int = HilightEffect.DEFAULT_COLOR,
         @SerializedName("durationMs") val durationMs: Long = HilightEffect.DEFAULT_DURATION_MS,
     ) : Action {
