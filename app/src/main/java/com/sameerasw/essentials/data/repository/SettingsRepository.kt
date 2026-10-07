@@ -392,7 +392,6 @@ class SettingsRepository(
         const val KEY_AOD_WALLPAPER_DISABLE_ON_DND = "aod_wallpaper_disable_on_dnd"
         const val KEY_AOD_WALLPAPER_KEEP_ON_MEDIA = "aod_wallpaper_keep_on_media"
         const val KEY_AOD_WALLPAPER_MEDIA_EXCLUDED_APPS = "aod_wallpaper_media_excluded_apps"
-        const val KEY_AOD_WALLPAPER_EXTENDED_INFO = "aod_wallpaper_extended_info"
         const val KEY_AOD_WALLPAPER_EXTENDED_MEDIA = "aod_wallpaper_extended_media"
         const val KEY_PIXEL_SEARCH_RESULT_APPS = "pixel_search_result_apps"
         const val KEY_PIXEL_SEARCH_RESULT_CONTACTS = "pixel_search_result_contacts"
@@ -3421,10 +3420,6 @@ class SettingsRepository(
     fun isAodWallpaperKeepOnMediaEnabled(): Boolean = getBoolean(KEY_AOD_WALLPAPER_KEEP_ON_MEDIA, false)
 
     fun setAodWallpaperKeepOnMedia(enabled: Boolean) = putBoolean(KEY_AOD_WALLPAPER_KEEP_ON_MEDIA, enabled)
-
-    fun isAodWallpaperExtendedInfoEnabled(): Boolean = getBoolean(KEY_AOD_WALLPAPER_EXTENDED_INFO, false)
-
-    fun setAodWallpaperExtendedInfo(enabled: Boolean) = putBoolean(KEY_AOD_WALLPAPER_EXTENDED_INFO, enabled)
 
     fun isAodWallpaperExtendedMediaEnabled(): Boolean = getBoolean(KEY_AOD_WALLPAPER_EXTENDED_MEDIA, false)
 

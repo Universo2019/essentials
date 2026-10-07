@@ -10,7 +10,6 @@
 package com.sameerasw.essentials.services.handlers
 
 import android.accessibilityservice.AccessibilityService
-import android.animation.LayoutTransition
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.NotificationManager
@@ -28,20 +27,19 @@ import android.graphics.RadialGradient
 import android.graphics.Shader
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.GradientDrawable
 import android.hardware.display.DisplayManager
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSession
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
-import android.os.BatteryManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
+import android.util.TypedValue
 import android.view.Display
 import android.view.Gravity
 import android.view.View
@@ -76,11 +74,8 @@ class AodWallpaperOverlayHandler(
     private var wallpaperImageView: ImageView? = null
     private var extendedLayer: FrameLayout? = null
     private var extendedInfoColumn: LinearLayout? = null
-    private var batteryText: TextView? = null
-    private var batteryIcon: ImageView? = null
     private var mediaTitleText: TextView? = null
     private var mediaSubtitleText: TextView? = null
-    private var isBatteryReceiverRegistered = false
     private var isOverlayAdded = false
     private var isScreenOff = false
     private var cachedWallpaperBitmap: Bitmap? = null
@@ -520,118 +515,39 @@ class AodWallpaperOverlayHandler(
         }
     }
 
-    private val batteryReceiver =
-        object : BroadcastReceiver() {
-            override fun onReceive(
-                context: Context?,
-                intent: Intent?,
-            ) {
-                updateBatteryInfo(intent)
-            }
-        }
-
-    private fun updateBatteryInfo(intent: Intent?) {
-        val batteryIntent =
-            intent ?: service.registerReceiver(null, android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED)) ?: return
-        val level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
-        val scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 100)
-        if (level < 0 || scale <= 0) return
-        val status = batteryIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
-        val charging =
-            status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
-        batteryText?.text = "${level * 100 / scale}%"
-        batteryIcon?.setImageResource(
-            if (charging) R.drawable.rounded_bolt_24 else R.drawable.rounded_battery_android_frame_6_24,
-        )
-    }
-
-    private fun registerBatteryReceiver() {
-        if (isBatteryReceiverRegistered) return
-        try {
-            val filter = android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                service.registerReceiver(batteryReceiver, filter, AccessibilityService.RECEIVER_NOT_EXPORTED)
-            } else {
-                service.registerReceiver(batteryReceiver, filter)
-            }
-            isBatteryReceiverRegistered = true
-        } catch (e: Exception) {
-            Log.e("AodWallpaperOverlay", "Failed to register battery receiver", e)
-        }
-    }
-
-    private fun unregisterBatteryReceiver() {
-        if (!isBatteryReceiverRegistered) return
-        try {
-            service.unregisterReceiver(batteryReceiver)
-        } catch (_: Exception) {
-        }
-        isBatteryReceiverRegistered = false
-    }
-
     private fun buildExtendedLayer(): FrameLayout {
         val density = service.resources.displayMetrics.density
-        val screenHeight = service.resources.displayMetrics.heightPixels
-        val typeface = ResourcesCompat.getFont(service, R.font.google_sans_flex_round)
+        val typeface = ResourcesCompat.getFont(service, R.font.google_sans_flex)
 
         fun label(
             sizeSp: Float,
             alphaValue: Float,
-            bold: Boolean,
+            weight: Int,
         ) = TextView(service).apply {
             setTextColor(Color.WHITE)
             alpha = alphaValue
-            textSize = sizeSp
-            setTypeface(
-                if (typeface != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    android.graphics.Typeface.create(typeface, if (bold) 700 else 400, false)
-                } else {
-                    typeface
-                },
-            )
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
+            setTypeface(typeface)
+            fontVariationSettings = "'wght' $weight, 'ROND' 100"
             gravity = Gravity.CENTER
             textAlignment = View.TEXT_ALIGNMENT_CENTER
             setSingleLine(true)
             ellipsize = android.text.TextUtils.TruncateAt.END
         }
 
-        val gradient =
-            View(service).apply {
-                background =
-                    GradientDrawable(
-                        GradientDrawable.Orientation.BOTTOM_TOP,
-                        intArrayOf(Color.BLACK, Color.BLACK, Color.TRANSPARENT),
-                    )
-                layoutParams =
-                    FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        (screenHeight * 0.3f).toInt(),
-                        Gravity.BOTTOM,
-                    )
-            }
-
-        val icon =
+        val iconSizePx =
+            TypedValue
+                .applyDimension(TypedValue.COMPLEX_UNIT_SP, 24f, service.resources.displayMetrics)
+                .toInt()
+        val noteIcon =
             ImageView(service).apply {
+                setImageResource(R.drawable.rounded_music_note_24)
                 setColorFilter(Color.WHITE)
-                layoutParams = LinearLayout.LayoutParams((20 * density).toInt(), (20 * density).toInt())
-            }
-        val battery = label(16f, 0.8f, false)
-        val batteryRow =
-            LinearLayout(service).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = Gravity.CENTER
-                addView(icon)
-                addView(
-                    battery,
-                    LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                    ).apply { marginStart = (6 * density).toInt() },
-                )
+                alpha = 0.8f
             }
 
-        val title = label(16f, 0.9f, true)
-        val subtitle = label(14f, 0.6f, false)
+        val title = label(16f, 0.95f, 800)
+        val subtitle = label(14f, 0.7f, 550)
 
         val column =
             LinearLayout(service).apply {
@@ -639,87 +555,65 @@ class AodWallpaperOverlayHandler(
                 gravity = Gravity.CENTER_HORIZONTAL
                 val pad = (32 * density).toInt()
                 setPadding(pad, 0, pad, 0)
-                layoutTransition = LayoutTransition()
                 addView(
-                    batteryRow,
-                    LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                    ).apply { gravity = Gravity.CENTER_HORIZONTAL },
+                    noteIcon,
+                    LinearLayout.LayoutParams(iconSizePx, iconSizePx).apply {
+                        gravity = Gravity.CENTER_HORIZONTAL
+                        bottomMargin = (8 * density).toInt()
+                    },
                 )
                 addView(
                     title,
                     LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT,
-                    ).apply { topMargin = (12 * density).toInt() },
+                    ),
                 )
                 addView(
                     subtitle,
                     LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT,
-                    ),
+                    ).apply { topMargin = (4 * density).toInt() },
                 )
                 layoutParams =
                     FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.WRAP_CONTENT,
                         Gravity.BOTTOM,
-                    ).apply { bottomMargin = (56 * density).toInt() }
+                    ).apply { bottomMargin = (96 * density).toInt() }
             }
 
-        batteryIcon = icon
-        batteryText = battery
         mediaTitleText = title
         mediaSubtitleText = subtitle
         extendedInfoColumn = column
 
-        return FrameLayout(service).apply {
-            addView(gradient)
-            addView(column)
-        }
+        return FrameLayout(service).apply { addView(column) }
     }
 
     private fun updateExtendedInfo() {
         val layer = extendedLayer ?: return
-        val enabled = prefs.getBoolean(SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_INFO, false)
-        layer.visibility = if (enabled) View.VISIBLE else View.GONE
-        setLockScreenMediaSuppressed(
-            enabled &&
-                isScreenOff &&
-                prefs.getBoolean(SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_MEDIA, false),
-        )
-        if (!enabled) {
-            unregisterBatteryReceiver()
-            return
-        }
-        registerBatteryReceiver()
-        updateBatteryInfo(null)
+        val enabled = prefs.getBoolean(SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_MEDIA, false)
+        setLockScreenMediaSuppressed(enabled && isScreenOff)
 
-        val showMedia = prefs.getBoolean(SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_MEDIA, false)
         val metadata = activeMediaController?.metadata
         val trackTitle = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE)
-        if (showMedia && isMediaPlaying && !trackTitle.isNullOrBlank()) {
+        if (enabled && isMediaPlaying && !trackTitle.isNullOrBlank()) {
             val artist = metadata?.getString(MediaMetadata.METADATA_KEY_ARTIST)
             val album = metadata?.getString(MediaMetadata.METADATA_KEY_ALBUM)
             val subtitle = listOf(artist, album).filter { !it.isNullOrBlank() }.joinToString(" · ")
             mediaTitleText?.text = trackTitle
             mediaSubtitleText?.text = subtitle
-            mediaTitleText?.visibility = View.VISIBLE
             mediaSubtitleText?.visibility = if (subtitle.isBlank()) View.GONE else View.VISIBLE
+            layer.visibility = View.VISIBLE
         } else {
-            mediaTitleText?.visibility = View.GONE
-            mediaSubtitleText?.visibility = View.GONE
+            layer.visibility = View.GONE
         }
     }
 
     private fun needsMediaSession(): Boolean =
         prefs.getBoolean(SettingsRepository.KEY_AOD_WALLPAPER_USE_ALBUM_ART, false) ||
-            (
-                prefs.getBoolean(SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_INFO, false) &&
-                    prefs.getBoolean(SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_MEDIA, false)
-            )
+            prefs.getBoolean(SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_MEDIA, false)
 
     private fun buildMaskedContainer(): FrameLayout {
         return object : FrameLayout(service) {
@@ -1236,7 +1130,6 @@ class AodWallpaperOverlayHandler(
         fadeInAnimator?.cancel()
         fadeInAnimator = null
         unregisterDisplayListener()
-        unregisterBatteryReceiver()
         setLockScreenMediaSuppressed(false)
         currentDisplayedBitmap = null
         handler.removeCallbacks(burnInShiftRunnable)
@@ -1289,9 +1182,7 @@ class AodWallpaperOverlayHandler(
                         wallpaperImageView = null
                         extendedLayer = null
                         extendedInfoColumn = null
-                        batteryText = null
-                        batteryIcon = null
-                        mediaTitleText = null
+                                                        mediaTitleText = null
                         mediaSubtitleText = null
                     }
                 })
@@ -1305,7 +1196,6 @@ class AodWallpaperOverlayHandler(
         handler.removeCallbacks(burnInShiftRunnable)
         handler.removeCallbacks(timeoutRunnable)
         hideOverlay()
-        unregisterBatteryReceiver()
         setLockScreenMediaSuppressed(false)
         overlayContainer = null
         maskedContainer = null
