@@ -366,6 +366,22 @@ fun AodWallpaperSettingsUI(
                     modifier = Modifier.highlight(highlightSetting == "aod_wallpaper_extended_app_icon"),
                 )
             }
+
+            AnimatedVisibility(
+                visible = isExtendedMedia,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                ConfigSliderItem(
+                    title = stringResource(R.string.status_glance_font_size_title),
+                    value = (viewModel.aodWallpaperExtendedTextScale.floatValue * 100f).coerceIn(70f, 200f),
+                    onValueChange = { viewModel.setAodWallpaperExtendedTextScale(it / 100f) },
+                    valueRange = 70f..200f,
+                    increment = 5f,
+                    valueFormatter = { "${it.toInt()}%" },
+                    iconRes = R.drawable.rounded_format_size_24,
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(80.dp))

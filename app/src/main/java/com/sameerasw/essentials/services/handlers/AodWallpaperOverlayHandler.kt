@@ -540,7 +540,7 @@ class AodWallpaperOverlayHandler(
 
         val iconSizePx =
             TypedValue
-                .applyDimension(TypedValue.COMPLEX_UNIT_SP, 24f, service.resources.displayMetrics)
+                .applyDimension(TypedValue.COMPLEX_UNIT_SP, 34f, service.resources.displayMetrics)
                 .toInt()
         val noteIcon =
             ImageView(service).apply {
@@ -562,7 +562,7 @@ class AodWallpaperOverlayHandler(
                     noteIcon,
                     LinearLayout.LayoutParams(iconSizePx, iconSizePx).apply {
                         gravity = Gravity.CENTER_HORIZONTAL
-                        bottomMargin = (8 * density).toInt()
+                        bottomMargin = (2 * density).toInt()
                     },
                 )
                 addView(
@@ -577,7 +577,7 @@ class AodWallpaperOverlayHandler(
                     LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT,
-                    ).apply { topMargin = (4 * density).toInt() },
+                    ).apply { topMargin = (1 * density).toInt() },
                 )
                 layoutParams =
                     FrameLayout.LayoutParams(
@@ -595,8 +595,31 @@ class AodWallpaperOverlayHandler(
         return FrameLayout(service).apply { addView(column) }
     }
 
+    private fun applyExtendedTextScale() {
+        val scale = prefs.getFloat(SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_TEXT_SCALE, 1f).coerceIn(0.7f, 2f)
+        mediaTitleText?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f * scale)
+        mediaSubtitleText?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f * scale)
+        val useAppIcon = prefs.getBoolean(SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_APP_ICON, false)
+        val iconSizePx =
+            TypedValue
+                .applyDimension(
+                    TypedValue.COMPLEX_UNIT_SP,
+                    (if (useAppIcon) 44f else 34f) * scale,
+                    service.resources.displayMetrics,
+                ).toInt()
+        mediaNoteIcon?.let { icon ->
+            val params = icon.layoutParams
+            if (params != null && (params.width != iconSizePx || params.height != iconSizePx)) {
+                params.width = iconSizePx
+                params.height = iconSizePx
+                icon.layoutParams = params
+            }
+        }
+    }
+
     private fun updateExtendedInfo() {
         val layer = extendedLayer ?: return
+        applyExtendedTextScale()
         val enabled = prefs.getBoolean(SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_MEDIA, false)
         setLockScreenMediaSuppressed(enabled && isScreenOff)
 
