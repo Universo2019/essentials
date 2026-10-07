@@ -30,7 +30,7 @@ object ActivityLauncherUtil {
         val pm = context.packageManager
         val info =
             try {
-                pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES or PackageManager.MATCH_DISABLED_COMPONENTS)
+                pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES)
             } catch (_: Exception) {
                 return emptyList()
             }
