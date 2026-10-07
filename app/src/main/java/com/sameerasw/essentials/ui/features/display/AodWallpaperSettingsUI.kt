@@ -349,6 +349,23 @@ fun AodWallpaperSettingsUI(
                 },
                 modifier = Modifier.highlight(highlightSetting == "aod_wallpaper_extended_media"),
             )
+
+            AnimatedVisibility(
+                visible = isExtendedMedia,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                IconToggleItem(
+                    iconRes = R.drawable.rounded_apps_24,
+                    title = stringResource(R.string.feat_aod_wallpaper_extended_app_icon),
+                    isChecked = viewModel.isAodWallpaperExtendedAppIcon.value,
+                    onCheckedChange = { checked ->
+                        HapticUtil.performVirtualKeyHaptic(view)
+                        viewModel.setAodWallpaperExtendedAppIcon(checked)
+                    },
+                    modifier = Modifier.highlight(highlightSetting == "aod_wallpaper_extended_app_icon"),
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(80.dp))

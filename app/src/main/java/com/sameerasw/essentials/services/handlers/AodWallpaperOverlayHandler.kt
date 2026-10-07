@@ -26,6 +26,7 @@ import android.graphics.PixelFormat
 import android.graphics.RadialGradient
 import android.graphics.Shader
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.Drawable
 import android.hardware.display.DisplayManager
 import android.media.MediaMetadata
@@ -75,6 +76,8 @@ class AodWallpaperOverlayHandler(
     private var extendedLayer: FrameLayout? = null
     private var extendedInfoColumn: LinearLayout? = null
     private var mediaTitleText: TextView? = null
+    private var mediaNoteIcon: ImageView? = null
+    private var appIconCachePackage: String? = null
     private var mediaSubtitleText: TextView? = null
     private var isOverlayAdded = false
     private var isScreenOff = false
@@ -585,6 +588,7 @@ class AodWallpaperOverlayHandler(
             }
 
         mediaTitleText = title
+        mediaNoteIcon = noteIcon
         mediaSubtitleText = subtitle
         extendedInfoColumn = column
 
@@ -602,12 +606,48 @@ class AodWallpaperOverlayHandler(
             val artist = metadata?.getString(MediaMetadata.METADATA_KEY_ARTIST)
             val album = metadata?.getString(MediaMetadata.METADATA_KEY_ALBUM)
             val subtitle = listOf(artist, album).filter { !it.isNullOrBlank() }.joinToString(" · ")
+            updateNoteIcon()
             mediaTitleText?.text = trackTitle
             mediaSubtitleText?.text = subtitle
             mediaSubtitleText?.visibility = if (subtitle.isBlank()) View.GONE else View.VISIBLE
             layer.visibility = View.VISIBLE
         } else {
             layer.visibility = View.GONE
+        }
+    }
+
+    // Prefers the themed monochrome layer on Android 13+, otherwise falls back to a grayscale icon.
+    private fun updateNoteIcon() {
+        val icon = mediaNoteIcon ?: return
+        val packageName = activeMediaController?.packageName
+        if (!prefs.getBoolean(SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_APP_ICON, false) || packageName == null) {
+            appIconCachePackage = null
+            icon.colorFilter = null
+            icon.setImageResource(R.drawable.rounded_music_note_24)
+            icon.setColorFilter(Color.WHITE)
+            return
+        }
+        if (appIconCachePackage == packageName) return
+        try {
+            val drawable = service.packageManager.getApplicationIcon(packageName)
+            val monochrome =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && drawable is AdaptiveIconDrawable) {
+                    drawable.monochrome
+                } else {
+                    null
+                }
+            if (monochrome != null) {
+                icon.setImageDrawable(monochrome)
+                icon.setColorFilter(Color.WHITE)
+            } else {
+                icon.setImageDrawable(drawable)
+                icon.colorFilter = android.graphics.ColorMatrixColorFilter(android.graphics.ColorMatrix().apply { setSaturation(0f) })
+            }
+            appIconCachePackage = packageName
+        } catch (_: Exception) {
+            appIconCachePackage = null
+            icon.setImageResource(R.drawable.rounded_music_note_24)
+            icon.setColorFilter(Color.WHITE)
         }
     }
 
@@ -1183,6 +1223,8 @@ class AodWallpaperOverlayHandler(
                         extendedLayer = null
                         extendedInfoColumn = null
                                                         mediaTitleText = null
+                        mediaNoteIcon = null
+                        appIconCachePackage = null
                         mediaSubtitleText = null
                     }
                 })
