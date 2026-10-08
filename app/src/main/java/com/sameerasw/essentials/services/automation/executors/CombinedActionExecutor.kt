@@ -23,6 +23,8 @@ import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import android.net.wifi.WifiManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
 import android.telephony.SubscriptionManager
@@ -564,6 +566,8 @@ object CombinedActionExecutor {
                         e.printStackTrace()
                     }
                 }
+
+                is Action.OpenActivity -> openActivity(context, action)
 
                 is Action.TurnOnHotspot -> setHotspotEnabled(context, true)
                 is Action.TurnOffHotspot -> setHotspotEnabled(context, false)
@@ -1174,6 +1178,36 @@ object CombinedActionExecutor {
                 }
             }
         } catch (_: Exception) {
+        }
+    }
+
+    private fun openActivity(
+        context: Context,
+        action: Action.OpenActivity,
+    ) {
+        if (action.packageName.isBlank() || action.className.isBlank()) return
+        val component = ComponentName(action.packageName, action.className)
+        // Single quotes keep the shell from expanding the $ in nested class names
+        val startCommand = "am start -n '${component.flattenToShortString()}'"
+        if (action.requiresRoot) {
+            if (ShellUtils.isRootEnabled(context)) {
+                ShellUtils.runCommand(context, startCommand, featureName = context.getString(action.title))
+            } else {
+                Handler(Looper.getMainLooper()).post {
+                    Toast.makeText(context, R.string.activity_picker_root_required_toast, Toast.LENGTH_SHORT).show()
+                }
+            }
+            return
+        }
+        try {
+            context.startActivity(Intent().setComponent(component).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        } catch (e: Exception) {
+            // Exported activities can still require a permission we lack
+            if (ShellUtils.isRootEnabled(context)) {
+                ShellUtils.runCommand(context, startCommand)
+            } else {
+                e.printStackTrace()
+            }
         }
     }
 

@@ -313,6 +313,7 @@ class LockscreenShortcutsHandler(
     // These would open behind the keyguard without unlocking first
     private fun opensUi(action: Action): Boolean =
         action is Action.OpenApp ||
+            action is Action.OpenActivity ||
             action is Action.AIAssistant ||
             action is Action.EssentialSearch ||
             action is Action.OpenNowPlayingApp ||
