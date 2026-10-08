@@ -2165,8 +2165,9 @@ class NotificationListener : NotificationListenerService() {
         )
     }
 
+    // Ranking.getConversationShortcutInfo is missing from Android 11 framework builds
     private fun conversationShortcutIcon(sbn: StatusBarNotification): Bitmap? {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return null
         return try {
             val ranking = Ranking()
             if (!currentRanking.getRanking(sbn.key, ranking)) return null
@@ -2174,7 +2175,7 @@ class NotificationListener : NotificationListenerService() {
             val launcherApps = getSystemService(LauncherApps::class.java) ?: return null
             launcherApps.getShortcutIconDrawable(shortcut, resources.displayMetrics.densityDpi)
                 ?.let { AppUtil.drawableToBitmap(it) }
-        } catch (_: Exception) {
+        } catch (_: Throwable) {
             null
         }
     }

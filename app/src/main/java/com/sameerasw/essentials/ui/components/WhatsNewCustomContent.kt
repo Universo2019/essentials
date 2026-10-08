@@ -129,6 +129,7 @@ fun WhatsNewCustomContent(
             )
         }
 
+        /*
         WhatsNewSectionCard(
             title = stringResource(R.string.whats_new_watchface_title),
             summary = stringResource(R.string.whats_new_watchface_summary),
@@ -143,6 +144,7 @@ fun WhatsNewCustomContent(
             )
             EssentialsWatchfacePromoContent()
         }
+        */
 
         WhatsNewSectionCard(
             title = stringResource(R.string.setting_hidden_debugging_title),

@@ -19,6 +19,7 @@ import com.sameerasw.essentials.EssentialsApp
 import com.sameerasw.essentials.FeatureSettingsActivity
 import com.sameerasw.essentials.R
 import com.sameerasw.essentials.data.repository.SettingsRepository
+import com.sameerasw.essentials.domain.controller.CaffeinateController
 import com.sameerasw.essentials.domain.model.Feature
 import com.sameerasw.essentials.domain.model.SearchSetting
 import com.sameerasw.essentials.domain.model.SystemShortcutsState
@@ -1032,7 +1033,10 @@ object FeatureRegistry {
                 parentFeatureId = "Display",
                 animationRes = R.raw.caffeinate_animation,
             ) {
-                override fun isEnabled(viewModel: MainViewModel) = viewModel.isCaffeinateActive.value
+                override fun isEnabled(viewModel: MainViewModel) =
+                    viewModel.isCaffeinateActive.value ||
+                        CaffeinateController.isActive.value ||
+                        CaffeinateController.isStarting.value
 
                 override fun onToggle(
                     viewModel: MainViewModel,
