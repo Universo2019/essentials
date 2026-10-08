@@ -268,6 +268,7 @@ class SettingsRepository(
             "flashlight_overheat_prevention_enabled"
 
         const val KEY_SCREEN_LOCKED_SECURITY_ENABLED = "screen_locked_security_enabled"
+        const val KEY_SCREEN_LOCKED_DISABLE_ON_EXTENDED_UNLOCK = "screen_locked_disable_on_extended_unlock"
         const val KEY_SCREEN_LOCKED_DISABLE_NOTIFICATION_INTERACTIONS =
             "screen_locked_disable_notification_interactions"
         const val KEY_HIDE_SYSTEM_ICONS = "hide_system_icons"

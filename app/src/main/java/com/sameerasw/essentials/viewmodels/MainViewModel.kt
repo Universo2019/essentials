@@ -458,6 +458,7 @@ class MainViewModel : ViewModel() {
 
     val isScreenLockedSecurityEnabled = mutableStateOf(false)
     val isDisableNotificationInteractions = mutableStateOf(false)
+    val isScreenLockedDisableOnExtendedUnlock = mutableStateOf(false)
     val isDeviceAdminEnabled = mutableStateOf(false)
     val isDeveloperModeEnabled = mutableStateOf(false)
     val isNotificationPolicyAccessGranted = mutableStateOf(false)
@@ -1014,6 +1015,10 @@ class MainViewModel : ViewModel() {
 
                     SettingsRepository.KEY_SCREEN_LOCKED_SECURITY_ENABLED ->
                         isScreenLockedSecurityEnabled.value =
+                            settingsRepository.getBoolean(key)
+
+                    SettingsRepository.KEY_SCREEN_LOCKED_DISABLE_ON_EXTENDED_UNLOCK ->
+                        isScreenLockedDisableOnExtendedUnlock.value =
                             settingsRepository.getBoolean(key)
 
                     SettingsRepository.KEY_MAPS_POWER_SAVING_ENABLED -> {
@@ -2597,6 +2602,8 @@ class MainViewModel : ViewModel() {
                 SettingsRepository.KEY_SCREEN_LOCKED_DISABLE_NOTIFICATION_INTERACTIONS,
                 false,
             )
+        isScreenLockedDisableOnExtendedUnlock.value =
+            settingsRepository.getBoolean(SettingsRepository.KEY_SCREEN_LOCKED_DISABLE_ON_EXTENDED_UNLOCK, false)
         isDeviceAdminEnabled.value = isDeviceAdminActive(context)
 
         isAutoUpdateEnabled.value =
@@ -8839,6 +8846,11 @@ class MainViewModel : ViewModel() {
                 "DisableQsWhenLocked",
             )
         }
+    }
+
+    fun setScreenLockedDisableOnExtendedUnlock(enabled: Boolean) {
+        isScreenLockedDisableOnExtendedUnlock.value = enabled
+        settingsRepository.putBoolean(SettingsRepository.KEY_SCREEN_LOCKED_DISABLE_ON_EXTENDED_UNLOCK, enabled)
     }
 
     fun setDisableNotificationInteractions(
