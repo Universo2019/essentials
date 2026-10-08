@@ -250,6 +250,9 @@ class ScreenOffAccessibilityService :
                 key == SettingsRepository.KEY_AOD_WALLPAPER_CUSTOM_IMAGE ||
                 key == SettingsRepository.KEY_AOD_WALLPAPER_USE_ALBUM_ART ||
                 key == SettingsRepository.KEY_AOD_WALLPAPER_KEEP_ON_MEDIA ||
+                key == SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_MEDIA ||
+                key == SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_APP_ICON ||
+                key == SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_TEXT_SCALE ||
                 key == SettingsRepository.KEY_AOD_WALLPAPER_MEDIA_EXCLUDED_APPS
             ) {
                 if (key == SettingsRepository.KEY_AOD_WALLPAPER_CUSTOM_IMAGE) {

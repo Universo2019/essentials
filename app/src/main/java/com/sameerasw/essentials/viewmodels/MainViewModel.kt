@@ -359,6 +359,9 @@ class MainViewModel : ViewModel() {
     val isAodWallpaperUseAlbumArt = mutableStateOf(false)
     val isAodWallpaperDisableOnDnd = mutableStateOf(false)
     val isAodWallpaperKeepOnMedia = mutableStateOf(false)
+    val isAodWallpaperExtendedMedia = mutableStateOf(false)
+    val isAodWallpaperExtendedAppIcon = mutableStateOf(false)
+    val aodWallpaperExtendedTextScale = mutableFloatStateOf(1f)
     val currentWallpaperBitmap = mutableStateOf<Bitmap?>(null)
     val isPocketModeEnabled = mutableStateOf(false)
     val isFaceUnlockBrightnessEnabled = mutableStateOf(false)
@@ -1300,6 +1303,18 @@ class MainViewModel : ViewModel() {
                     SettingsRepository.KEY_AOD_WALLPAPER_KEEP_ON_MEDIA ->
                         isAodWallpaperKeepOnMedia.value =
                             settingsRepository.getBoolean(key)
+
+                    SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_MEDIA ->
+                        isAodWallpaperExtendedMedia.value =
+                            settingsRepository.getBoolean(key)
+
+                    SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_APP_ICON ->
+                        isAodWallpaperExtendedAppIcon.value =
+                            settingsRepository.getBoolean(key)
+
+                    SettingsRepository.KEY_AOD_WALLPAPER_EXTENDED_TEXT_SCALE ->
+                        aodWallpaperExtendedTextScale.floatValue =
+                            settingsRepository.getAodWallpaperExtendedTextScale()
 
                     SettingsRepository.KEY_POCKET_MODE_ENABLED ->
                         isPocketModeEnabled.value =
@@ -2687,6 +2702,12 @@ class MainViewModel : ViewModel() {
             )
         isAodWallpaperKeepOnMedia.value =
             settingsRepository.isAodWallpaperKeepOnMediaEnabled()
+        isAodWallpaperExtendedMedia.value =
+            settingsRepository.isAodWallpaperExtendedMediaEnabled()
+        isAodWallpaperExtendedAppIcon.value =
+            settingsRepository.isAodWallpaperExtendedAppIconEnabled()
+        aodWallpaperExtendedTextScale.floatValue =
+            settingsRepository.getAodWallpaperExtendedTextScale()
         pixelSearchResultApps.value = settingsRepository.isPixelSearchResultAppsEnabled()
         pixelSearchResultMedia.value = settingsRepository.isPixelSearchResultMediaEnabled()
         pixelSearchResultFiles.value = settingsRepository.isPixelSearchResultFilesEnabled()
@@ -9106,6 +9127,21 @@ class MainViewModel : ViewModel() {
     fun setAodWallpaperKeepOnMedia(enabled: Boolean) {
         settingsRepository.setAodWallpaperKeepOnMedia(enabled)
         isAodWallpaperKeepOnMedia.value = enabled
+    }
+
+    fun setAodWallpaperExtendedMedia(enabled: Boolean) {
+        settingsRepository.setAodWallpaperExtendedMedia(enabled)
+        isAodWallpaperExtendedMedia.value = enabled
+    }
+
+    fun setAodWallpaperExtendedTextScale(value: Float) {
+        settingsRepository.setAodWallpaperExtendedTextScale(value)
+        aodWallpaperExtendedTextScale.floatValue = value
+    }
+
+    fun setAodWallpaperExtendedAppIcon(enabled: Boolean) {
+        settingsRepository.setAodWallpaperExtendedAppIcon(enabled)
+        isAodWallpaperExtendedAppIcon.value = enabled
     }
 
     fun loadAodWallpaperMediaApps(context: Context): List<AppSelection> = settingsRepository.loadAodWallpaperMediaExcludedApps()
