@@ -27,12 +27,14 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
+import android.util.Log
 import android.view.KeyEvent
 import android.widget.Toast
 import com.sameerasw.essentials.R
 import com.sameerasw.essentials.data.repository.SettingsRepository
 import com.sameerasw.essentials.domain.HapticFeedbackType
 import com.sameerasw.essentials.domain.controller.HilightController
+import com.sameerasw.essentials.domain.controller.HotspotController
 import com.sameerasw.essentials.domain.diy.Action
 import com.sameerasw.essentials.domain.model.DashConfig
 import com.sameerasw.essentials.domain.model.NotificationLightingStyle
@@ -45,6 +47,7 @@ import com.sameerasw.essentials.utils.DeviceLockUtils
 import com.sameerasw.essentials.utils.HapticUtil
 import com.sameerasw.essentials.utils.PermissionUtils
 import com.sameerasw.essentials.utils.ShellUtils
+import com.sameerasw.essentials.utils.ShizukuUtils
 import com.sameerasw.essentials.utils.overlay.fromPrefs
 import com.sameerasw.essentials.utils.overlay.writeTo
 import com.sameerasw.essentials.utils.performHapticFeedback
@@ -1009,6 +1012,14 @@ object CombinedActionExecutor {
         context: Context,
         enabled: Boolean,
     ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && ShellUtils.usesShizukuBinder(context) && ShizukuUtils.hasPermission()) {
+            try {
+                HotspotController.setEnabled(context, enabled)
+                return
+            } catch (e: Exception) {
+                Log.e("CombinedActionExecutor", "Tethering via Shizuku failed, falling back to shell", e)
+            }
+        }
         val command = if (enabled) "cmd wifi start-softap" else "cmd wifi stop-softap"
         ShellUtils.runCommand(
             context,
