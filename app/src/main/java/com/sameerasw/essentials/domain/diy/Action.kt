@@ -17,6 +17,8 @@ import com.google.gson.annotations.SerializedName
 import com.sameerasw.essentials.R
 import com.sameerasw.essentials.domain.HapticFeedbackType
 import com.sameerasw.essentials.domain.ScreenOffMethod
+import com.sameerasw.essentials.domain.model.HilightEffect
+import com.sameerasw.essentials.domain.model.HilightPattern
 import com.sameerasw.essentials.domain.model.NotificationLightingColorMode
 import com.sameerasw.essentials.domain.model.NotificationLightingSide
 import com.sameerasw.essentials.domain.model.NotificationLightingStyle
@@ -38,6 +40,22 @@ sealed interface Action {
     data object HapticVibration : Action {
         override val title: Int = R.string.diy_action_haptic
         override val icon: Int = R.drawable.rounded_mobile_vibrate_24
+    }
+
+    @Keep
+    data class Hilight(
+        @SerializedName("pattern") val pattern: HilightPattern = HilightPattern.GLOW,
+        @SerializedName("color") val color: Int = HilightEffect.DEFAULT_COLOR,
+        @SerializedName("durationMs") val durationMs: Long = HilightEffect.DEFAULT_DURATION_MS,
+    ) : Action {
+        override val title: Int get() = R.string.diy_action_hilight
+        override val icon: Int get() = R.drawable.rounded_auto_awesome_24
+        override val isConfigurable: Boolean get() = true
+        override val permissions: List<String> get() = listOf("SHIZUKU")
+
+        // Gson sets an unknown pattern name to null despite the non-null type
+        @Suppress("USELESS_ELVIS")
+        fun toEffect() = HilightEffect(pattern ?: HilightPattern.GLOW, color, durationMs)
     }
 
     @Keep
@@ -199,6 +217,32 @@ sealed interface Action {
         override val title: Int = R.string.diy_action_toggle_mute
         override val icon: Int = R.drawable.rounded_volume_off_24
         override val permissions: List<String> = listOf("NOTIFICATION_POLICY")
+    }
+
+    @Keep
+    data object ToggleDoNotDisturb : Action {
+        override val title: Int = R.string.diy_action_toggle_dnd
+        override val icon: Int = R.drawable.rounded_do_not_disturb_on_24
+        override val permissions: List<String> = listOf("NOTIFICATION_POLICY")
+    }
+
+    @Keep
+    data object OpenCamera : Action {
+        override val title: Int = R.string.diy_action_open_camera
+        override val icon: Int = R.drawable.rounded_photo_camera_24
+    }
+
+    @Keep
+    data object OpenQrScanner : Action {
+        override val title: Int = R.string.diy_action_open_qr_scanner
+        override val icon: Int = R.drawable.rounded_qr_code_24
+        override val permissions: List<String> = listOf("SHIZUKU")
+    }
+
+    @Keep
+    data object OpenVideoCamera : Action {
+        override val title: Int = R.string.diy_action_open_video_camera
+        override val icon: Int = R.drawable.rounded_videocam_24
     }
 
     @Keep
