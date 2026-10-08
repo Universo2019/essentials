@@ -53,6 +53,7 @@ import com.sameerasw.essentials.data.repository.UpdateRepository
 import com.sameerasw.essentials.utils.LogManager
 import com.sameerasw.essentials.domain.HapticFeedbackType
 import com.sameerasw.essentials.domain.MapsState
+import com.sameerasw.essentials.domain.controller.CaffeinateController
 import com.sameerasw.essentials.domain.diy.Action
 import com.sameerasw.essentials.domain.model.AppIcon
 import com.sameerasw.essentials.domain.model.AppSelection
@@ -7996,6 +7997,7 @@ class MainViewModel : ViewModel() {
     fun startCaffeinate(context: Context) {
         context.startService(Intent(context, CaffeinateWakeLockService::class.java))
         isCaffeinateActive.value = true
+        CaffeinateController.isActive.value = true
     }
 
     /**
@@ -8004,7 +8006,7 @@ class MainViewModel : ViewModel() {
      * @param context [Context] Target context.
      */
     fun stopCaffeinate(context: Context) {
-        context.stopService(Intent(context, CaffeinateWakeLockService::class.java))
+        CaffeinateController.cancelAll(context)
         isCaffeinateActive.value = false
     }
 
