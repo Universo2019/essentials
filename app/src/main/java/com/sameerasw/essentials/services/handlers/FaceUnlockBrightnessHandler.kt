@@ -170,9 +170,11 @@ class FaceUnlockBrightnessHandler(
 
     fun onDestroy() = resetState()
 
+    // isDeviceLocked is false while a trust agent such as a watch keeps the device unlocked behind the lock screen
     private fun canRun() =
         settings.isFaceUnlockBrightnessEnabled() &&
             keyguardManager?.isKeyguardLocked == true &&
+            keyguardManager.isDeviceLocked &&
             powerManager?.isInteractive == true
 
     private fun resetState() {
