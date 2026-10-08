@@ -14,6 +14,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -74,6 +75,8 @@ fun ActionSequenceEditor(
     listKey: Any,
     emptyText: String,
     modifier: Modifier = Modifier,
+    maxActions: Int = Int.MAX_VALUE,
+    categories: List<ActionRegistry.ActionCategory>? = null,
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -224,6 +227,21 @@ fun ActionSequenceEditor(
                                 shape = RoundedCornerShape(MaterialTheme.shapes.extraSmall.bottomEnd),
                             ).padding(16.dp),
                 )
+            } else if (maxActions == 1) {
+                val action = actions.first()
+                RemapSequenceItem(
+                    position = 1,
+                    action = action,
+                    isDragging = false,
+                    hasSettings = hasActionSettings(action),
+                    dragHandleModifier = Modifier,
+                    showOrder = false,
+                    onSettingsClick = { openActionSettings(0, action) },
+                    onRemove = {
+                        rowIds.clear()
+                        updateActions(emptyList())
+                    },
+                )
             } else {
                 ReorderableColumn(
                     list = actions,
@@ -244,6 +262,7 @@ fun ActionSequenceEditor(
                                 isDragging = isDragging,
                                 hasSettings = hasActionSettings(action),
                                 dragHandleModifier = Modifier.draggableHandle(),
+                                showOrder = true,
                                 onSettingsClick = { openActionSettings(index, action) },
                                 onRemove = {
                                     if (index in rowIds.indices) rowIds.removeAt(index)
@@ -255,7 +274,9 @@ fun ActionSequenceEditor(
                 }
             }
 
-            RemapAddActionItem(onClick = { showAddActionSheet = true })
+            if (actions.size < maxActions) {
+                RemapAddActionItem(onClick = { showAddActionSheet = true })
+            }
         }
 
         if (actions.size > 1) {
@@ -271,6 +292,7 @@ fun ActionSequenceEditor(
     if (showAddActionSheet) {
         RemapAddActionSheet(
             screenOnOnly = screenOnOnly,
+            categories = categories,
             onDismiss = { showAddActionSheet = false },
             onActionPicked = { action ->
                 showAddActionSheet = false
@@ -568,6 +590,7 @@ private fun RemapSequenceItem(
     isDragging: Boolean,
     hasSettings: Boolean,
     dragHandleModifier: Modifier,
+    showOrder: Boolean,
     onSettingsClick: () -> Unit,
     onRemove: () -> Unit,
 ) {
@@ -589,21 +612,25 @@ private fun RemapSequenceItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Icon(
-            painter = painterResource(id = R.drawable.rounded_drag_handle_24),
-            contentDescription = stringResource(R.string.content_desc_drag_reorder),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier =
-                dragHandleModifier
-                    .padding(8.dp)
-                    .size(24.dp),
-        )
+        if (showOrder) {
+            Icon(
+                painter = painterResource(id = R.drawable.rounded_drag_handle_24),
+                contentDescription = stringResource(R.string.content_desc_drag_reorder),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier =
+                    dragHandleModifier
+                        .padding(8.dp)
+                        .size(24.dp),
+            )
 
-        Text(
-            text = position.toString(),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-        )
+            Text(
+                text = position.toString(),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        } else {
+            Spacer(modifier = Modifier.size(8.dp))
+        }
 
         Icon(
             painter = painterResource(id = action.icon),
@@ -686,12 +713,13 @@ private fun RemapAddActionItem(
 @Composable
 private fun RemapAddActionSheet(
     screenOnOnly: Boolean,
+    categories: List<ActionRegistry.ActionCategory>?,
     onDismiss: () -> Unit,
     onActionPicked: (Action) -> Unit,
 ) {
     val view = LocalView.current
     val actionCategories =
-        remember(screenOnOnly) { ActionRegistry.getCategories(screenOnOnly = screenOnOnly) }
+        remember(screenOnOnly, categories) { categories ?: ActionRegistry.getCategories(screenOnOnly = screenOnOnly) }
     var expandedActionCategory by remember(screenOnOnly) {
         mutableStateOf(actionCategories.firstOrNull()?.titleRes)
     }

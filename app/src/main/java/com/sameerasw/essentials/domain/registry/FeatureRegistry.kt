@@ -21,6 +21,7 @@ import com.sameerasw.essentials.R
 import com.sameerasw.essentials.data.repository.SettingsRepository
 import com.sameerasw.essentials.domain.model.Feature
 import com.sameerasw.essentials.domain.model.SearchSetting
+import com.sameerasw.essentials.domain.model.SystemShortcutsState
 import com.sameerasw.essentials.ui.activities.PixelSearchbarSettingsActivity
 import com.sameerasw.essentials.ui.activities.WatermarkActivity
 import com.sameerasw.essentials.ui.features.consciousgate.CONSCIOUS_GATE_FEATURE_ID
@@ -1569,6 +1570,43 @@ object FeatureRegistry {
                     context: Context,
                     enabled: Boolean,
                 ) = viewModel.setButtonRemapEnabled(enabled, context)
+            },
+            object : Feature(
+                id = "Lock screen shortcuts",
+                title = R.string.feat_lockscreen_shortcuts_title,
+                iconRes = R.drawable.rounded_mobile_lock_portrait_24,
+                category = R.string.cat_interaction,
+                description = R.string.feat_lockscreen_shortcuts_desc,
+                aboutDescription = R.string.about_desc_lockscreen_shortcuts,
+                permissionKeys = listOf("ACCESSIBILITY"),
+                searchableSettings =
+                    listOf(
+                        SearchSetting(
+                            R.string.search_lockscreen_shortcuts_enable_title,
+                            R.string.search_lockscreen_shortcuts_enable_desc,
+                            "enable_lockscreen_shortcuts",
+                            R.array.keywords_switch_master,
+                        ),
+                    ),
+                parentFeatureId = "Input",
+            ) {
+                override fun isEnabled(viewModel: MainViewModel) = viewModel.isLockscreenShortcutsEnabled.value
+
+                // Can always be turned off; turning on needs a lock screen without system shortcuts
+                override fun isToggleEnabled(
+                    viewModel: MainViewModel,
+                    context: Context,
+                ) = viewModel.isAccessibilityEnabled.value &&
+                    (
+                        viewModel.isLockscreenShortcutsEnabled.value ||
+                            viewModel.lockscreenSystemShortcutsState.value == SystemShortcutsState.NONE
+                    )
+
+                override fun onToggle(
+                    viewModel: MainViewModel,
+                    context: Context,
+                    enabled: Boolean,
+                ) = viewModel.setLockscreenShortcutsEnabled(enabled)
             },
             object : Feature(
                 id = "Dynamic night light",

@@ -10,9 +10,12 @@
 package com.sameerasw.essentials.services.automation.executors
 
 import android.app.ActivityManager
+import android.app.KeyguardManager
+import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.hardware.camera2.CameraManager
 import android.media.AudioManager
 import android.media.session.MediaController
@@ -20,6 +23,7 @@ import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import android.net.wifi.WifiManager
 import android.os.Build
+import android.provider.MediaStore
 import android.provider.Settings
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
@@ -33,8 +37,6 @@ import com.sameerasw.essentials.domain.model.DashConfig
 import com.sameerasw.essentials.domain.model.NotificationLightingStyle
 import com.sameerasw.essentials.domain.model.RippleConfig
 import com.sameerasw.essentials.services.NotificationLightingService
-import com.sameerasw.essentials.utils.overlay.fromPrefs
-import com.sameerasw.essentials.utils.overlay.writeTo
 import com.sameerasw.essentials.services.NotificationListener
 import com.sameerasw.essentials.services.tiles.ScreenOffAccessibilityService
 import com.sameerasw.essentials.ui.activities.PixelSearchResultsActivity
@@ -42,6 +44,8 @@ import com.sameerasw.essentials.utils.DeviceLockUtils
 import com.sameerasw.essentials.utils.HapticUtil
 import com.sameerasw.essentials.utils.PermissionUtils
 import com.sameerasw.essentials.utils.ShellUtils
+import com.sameerasw.essentials.utils.overlay.fromPrefs
+import com.sameerasw.essentials.utils.overlay.writeTo
 import com.sameerasw.essentials.utils.performHapticFeedback
 import rikka.shizuku.ShizukuBinderWrapper
 import rikka.shizuku.SystemServiceHelper
@@ -437,6 +441,50 @@ object CombinedActionExecutor {
                     com.sameerasw.essentials.services.handlers
                         .SoundModeHandler(context)
                         .cycleNextMode()
+                }
+
+                is Action.ToggleDoNotDisturb -> {
+                    val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    if (nm.isNotificationPolicyAccessGranted) {
+                        nm.setInterruptionFilter(
+                            if (nm.currentInterruptionFilter == NotificationManager.INTERRUPTION_FILTER_ALL) {
+                                NotificationManager.INTERRUPTION_FILTER_PRIORITY
+                            } else {
+                                NotificationManager.INTERRUPTION_FILTER_ALL
+                            },
+                        )
+                    }
+                }
+
+                is Action.OpenCamera -> {
+                    // The secure camera opens over the lock screen without unlocking, like the Pixel shortcut
+                    val isLocked =
+                        (context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager)
+                            .isKeyguardLocked
+                    val cameraAction =
+                        if (isLocked) {
+                            MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE
+                        } else {
+                            MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA
+                        }
+                    try {
+                        context.startActivity(Intent(cameraAction).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+
+                is Action.OpenQrScanner -> openQrScanner(context)
+
+                is Action.OpenVideoCamera -> {
+                    try {
+                        context.startActivity(
+                            Intent(MediaStore.INTENT_ACTION_VIDEO_CAMERA)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        )
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
 
                 is Action.ToggleMute -> {
@@ -1113,6 +1161,44 @@ object CombinedActionExecutor {
                 }
             }
         } catch (_: Exception) {
+        }
+    }
+
+    // Same scanner System UI uses for its lock screen and Quick Settings QR shortcuts
+    private fun openQrScanner(context: Context) {
+        val configId =
+            Resources
+                .getSystem()
+                .getIdentifier("config_defaultQrCodeComponent", "string", "android")
+        val component =
+            if (configId != 0) {
+                Resources
+                    .getSystem()
+                    .getString(configId)
+                    .takeIf { it.isNotBlank() }
+                    ?.let { ComponentName.unflattenFromString(it) }
+            } else {
+                null
+            }
+        // Google's platform scanner closes itself for ordinary app callers, so start it as the shell user
+        if (component != null && ShellUtils.isAvailable(context) && ShellUtils.hasPermission(context)) {
+            ShellUtils.runCommand(
+                context,
+                "am start -n ${component.flattenToShortString()}",
+                featureName = context.getString(Action.OpenQrScanner.title),
+            )
+            return
+        }
+        val intent =
+            if (component != null) {
+                Intent().setComponent(component)
+            } else {
+                Intent("com.google.android.gms.mlkit_barcode_ui.SCAN_QR_CODE")
+            }
+        try {
+            context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

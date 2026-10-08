@@ -58,6 +58,7 @@ import com.sameerasw.essentials.domain.model.AppIcon
 import com.sameerasw.essentials.domain.model.AppSelection
 import com.sameerasw.essentials.domain.model.AppStandbyInfo
 import com.sameerasw.essentials.domain.model.DnsPreset
+import com.sameerasw.essentials.domain.model.LockscreenShortcutSide
 import com.sameerasw.essentials.domain.model.NotificationApp
 import com.sameerasw.essentials.domain.model.NotificationLightingColorMode
 import com.sameerasw.essentials.domain.model.NotificationLightingSide
@@ -66,6 +67,7 @@ import com.sameerasw.essentials.domain.model.NotificationLightingSweepPosition
 import com.sameerasw.essentials.domain.model.RemapSlot
 import com.sameerasw.essentials.domain.model.ScaleAnimationsProfile
 import com.sameerasw.essentials.domain.model.SearchableItem
+import com.sameerasw.essentials.domain.model.SystemShortcutsState
 import com.sameerasw.essentials.domain.model.UpdateInfo
 import com.sameerasw.essentials.domain.registry.SearchRegistry
 import com.sameerasw.essentials.services.AppUpdateWorker
@@ -131,6 +133,9 @@ class MainViewModel : ViewModel() {
     val isButtonRemapPauseOnVolumeDialog = mutableStateOf(true)
     val shizukuDetectedDevicePath = mutableStateOf<String?>(null)
     val remapActions = mutableStateMapOf<RemapSlot, List<Action>>()
+    val isLockscreenShortcutsEnabled = mutableStateOf(false)
+    val lockscreenShortcutActions = mutableStateMapOf<LockscreenShortcutSide, List<Action>>()
+    val lockscreenSystemShortcutsState = mutableStateOf(SystemShortcutsState.UNKNOWN)
     val remapHapticType = mutableStateOf(HapticFeedbackType.DOUBLE)
     val isDynamicNightLightEnabled = mutableStateOf(false)
     val isSmartPixelsEnabled = mutableStateOf(false)
@@ -1015,6 +1020,10 @@ class MainViewModel : ViewModel() {
                     SettingsRepository.KEY_BUTTON_REMAP_ENABLED ->
                         isButtonRemapEnabled.value =
                             settingsRepository.getBoolean(key)
+
+                    SettingsRepository.KEY_LOCKSCREEN_SYSTEM_SHORTCUTS_STATE ->
+                        lockscreenSystemShortcutsState.value =
+                            settingsRepository.getLockscreenSystemShortcutsState()
 
                     SettingsRepository.KEY_APP_LOCK_ENABLED -> {
                         isAppLockEnabled.value = settingsRepository.getBoolean(key)
@@ -2239,6 +2248,12 @@ class MainViewModel : ViewModel() {
         RemapSlot.ALL.forEach { slot ->
             remapActions[slot] = settingsRepository.getRemapActions(slot.prefKey)
         }
+
+        isLockscreenShortcutsEnabled.value = settingsRepository.isLockscreenShortcutsEnabled()
+        LockscreenShortcutSide.entries.forEach { side ->
+            lockscreenShortcutActions[side] = settingsRepository.getRemapActions(side.prefKey)
+        }
+        lockscreenSystemShortcutsState.value = settingsRepository.getLockscreenSystemShortcutsState()
 
         val hapticName =
             settingsRepository.getString(
@@ -4971,6 +4986,19 @@ class MainViewModel : ViewModel() {
     ) {
         remapActions[slot] = actions
         settingsRepository.setRemapActions(slot.prefKey, actions)
+    }
+
+    fun setLockscreenShortcutsEnabled(enabled: Boolean) {
+        isLockscreenShortcutsEnabled.value = enabled
+        settingsRepository.setLockscreenShortcutsEnabled(enabled)
+    }
+
+    fun setLockscreenShortcutActions(
+        side: LockscreenShortcutSide,
+        actions: List<Action>,
+    ) {
+        lockscreenShortcutActions[side] = actions
+        settingsRepository.setRemapActions(side.prefKey, actions)
     }
 
     /**
