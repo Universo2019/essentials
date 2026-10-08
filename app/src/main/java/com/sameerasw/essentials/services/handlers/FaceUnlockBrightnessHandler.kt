@@ -12,6 +12,7 @@ package com.sameerasw.essentials.services.handlers
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
 import android.app.KeyguardManager
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.PixelFormat
@@ -19,6 +20,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.hardware.biometrics.BiometricManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -102,6 +104,7 @@ class FaceUnlockBrightnessHandler(
     private var isProximityCovered: Boolean? = null
     private var wakeTime = 0L
     private var autoHandled = false
+    private var biometricsBlocked = false
 
     private val scanRunnable = Runnable { update() }
     private val endBumpRunnable = Runnable { endBump() }
@@ -143,8 +146,10 @@ class FaceUnlockBrightnessHandler(
 
     fun onScreenOn() {
         resetState()
+        biometricsBlocked = !isFaceUnlockAvailable()
         if (!canRun()) return
         wakeTime = SystemClock.elapsedRealtime()
+        checkStrongAuthRequired(wakeTime)
         if (settings.isFaceUnlockAutoIlluminateEnabled()) {
             proximitySensor?.let {
                 isListeningProximity =
@@ -175,7 +180,43 @@ class FaceUnlockBrightnessHandler(
         settings.isFaceUnlockBrightnessEnabled() &&
             keyguardManager?.isKeyguardLocked == true &&
             keyguardManager.isDeviceLocked &&
+            !biometricsBlocked &&
             powerManager?.isInteractive == true
+
+    private fun isFaceUnlockAvailable(): Boolean {
+        if (!service.packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)) return false
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return true
+        val result =
+            service
+                .getSystemService(BiometricManager::class.java)
+                ?.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        return result == BiometricManager.BIOMETRIC_SUCCESS
+    }
+
+    private fun checkStrongAuthRequired(token: Long) {
+        if (!ShellUtils.isAvailable(service) || !ShellUtils.hasPermission(service)) return
+        thread {
+            val output =
+                ShellUtils.runCommandWithOutput(
+                    service,
+                    "settings get secure face_keyguard_enabled; dumpsys trust",
+                    notifyOnError = false,
+                ).orEmpty()
+            val faceDisabled = output.lineSequence().firstOrNull()?.trim() == "0"
+            val strongAuth =
+                output
+                    .lineSequence()
+                    .firstOrNull { "(current)" in it }
+                    ?.let { Regex("strongAuthRequired=0x([0-9a-fA-F]+)").find(it)?.groupValues?.get(1)?.toLongOrNull(16) }
+                    ?: 0L
+            if (!faceDisabled && strongAuth == 0L) return@thread
+            handler.post {
+                if (token != wakeTime) return@post
+                resetState()
+                biometricsBlocked = true
+            }
+        }
+    }
 
     private fun resetState() {
         handler.removeCallbacks(scanRunnable)
