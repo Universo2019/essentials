@@ -377,7 +377,9 @@ class MainViewModel : ViewModel() {
     val isPocketModeEnabled = mutableStateOf(false)
     val isFaceUnlockBrightnessEnabled = mutableStateOf(false)
     val faceUnlockMaxBrightness = mutableIntStateOf(100)
+    val faceUnlockAmbientThreshold = mutableIntStateOf(10)
     val isFaceUnlockTriggerUnlock = mutableStateOf(true)
+    val isFaceUnlockAutoIlluminate = mutableStateOf(false)
     val isFaceUnlockLightTint = mutableStateOf(false)
     val isPocketModeUseLightSensor = mutableStateOf(false)
     val pocketModeTriggerDelay = mutableFloatStateOf(3f) // seconds
@@ -1341,8 +1343,14 @@ class MainViewModel : ViewModel() {
                     SettingsRepository.KEY_FACE_UNLOCK_MAX_BRIGHTNESS ->
                         faceUnlockMaxBrightness.intValue = settingsRepository.getFaceUnlockMaxBrightness()
 
+                    SettingsRepository.KEY_FACE_UNLOCK_AMBIENT_THRESHOLD ->
+                        faceUnlockAmbientThreshold.intValue = settingsRepository.getFaceUnlockAmbientThreshold()
+
                     SettingsRepository.KEY_FACE_UNLOCK_TRIGGER_UNLOCK ->
                         isFaceUnlockTriggerUnlock.value = settingsRepository.isFaceUnlockTriggerUnlockEnabled()
+
+                    SettingsRepository.KEY_FACE_UNLOCK_AUTO_ILLUMINATE ->
+                        isFaceUnlockAutoIlluminate.value = settingsRepository.isFaceUnlockAutoIlluminateEnabled()
 
                     SettingsRepository.KEY_FACE_UNLOCK_LIGHT_TINT ->
                         isFaceUnlockLightTint.value = settingsRepository.isFaceUnlockLightTintEnabled()
@@ -2748,7 +2756,9 @@ class MainViewModel : ViewModel() {
             settingsRepository.getBoolean(SettingsRepository.KEY_POCKET_MODE_ENABLED)
         isFaceUnlockBrightnessEnabled.value = settingsRepository.isFaceUnlockBrightnessEnabled()
         faceUnlockMaxBrightness.intValue = settingsRepository.getFaceUnlockMaxBrightness()
+        faceUnlockAmbientThreshold.intValue = settingsRepository.getFaceUnlockAmbientThreshold()
         isFaceUnlockTriggerUnlock.value = settingsRepository.isFaceUnlockTriggerUnlockEnabled()
+        isFaceUnlockAutoIlluminate.value = settingsRepository.isFaceUnlockAutoIlluminateEnabled()
         isFaceUnlockLightTint.value = settingsRepository.isFaceUnlockLightTintEnabled()
         isPocketModeUseLightSensor.value =
             settingsRepository.getBoolean(SettingsRepository.KEY_POCKET_MODE_USE_LIGHT_SENSOR)
@@ -9336,9 +9346,19 @@ class MainViewModel : ViewModel() {
         isFaceUnlockBrightnessEnabled.value = enabled
     }
 
+    fun setFaceUnlockAmbientThreshold(value: Int) {
+        settingsRepository.setFaceUnlockAmbientThreshold(value)
+        faceUnlockAmbientThreshold.intValue = value
+    }
+
     fun setFaceUnlockMaxBrightness(value: Int) {
         settingsRepository.setFaceUnlockMaxBrightness(value)
         faceUnlockMaxBrightness.intValue = value
+    }
+
+    fun setFaceUnlockAutoIlluminate(enabled: Boolean) {
+        settingsRepository.setFaceUnlockAutoIlluminateEnabled(enabled)
+        isFaceUnlockAutoIlluminate.value = enabled
     }
 
     fun setFaceUnlockTriggerUnlock(enabled: Boolean) {

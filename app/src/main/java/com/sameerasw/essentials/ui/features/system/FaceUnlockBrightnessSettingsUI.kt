@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sameerasw.essentials.R
+import com.sameerasw.essentials.ui.components.sliders.ConfigSliderItem
 import com.sameerasw.essentials.ui.core.cards.IconToggleItem
 import com.sameerasw.essentials.ui.core.containers.RoundedCardContainer
 import com.sameerasw.essentials.ui.core.pickers.SegmentedPicker
@@ -127,6 +128,28 @@ fun FaceUnlockBrightnessSettingsUI(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
+
+                ConfigSliderItem(
+                    title = stringResource(R.string.face_unlock_ambient_threshold_title),
+                    value = viewModel.faceUnlockAmbientThreshold.intValue.toFloat(),
+                    onValueChange = { viewModel.setFaceUnlockAmbientThreshold(it.toInt()) },
+                    valueRange = 1f..50f,
+                    increment = 1f,
+                    valueFormatter = { "${it.toInt()} lx" },
+                    iconRes = R.drawable.rounded_brightness_auto_24,
+                    modifier = Modifier.highlight(highlightSetting == "face_unlock_ambient_threshold"),
+                )
+
+                IconToggleItem(
+                    iconRes = R.drawable.rounded_brightness_auto_24,
+                    title = stringResource(R.string.face_unlock_auto_illuminate_title),
+                    isChecked = viewModel.isFaceUnlockAutoIlluminate.value,
+                    onCheckedChange = { checked ->
+                        HapticUtil.performVirtualKeyHaptic(view)
+                        viewModel.setFaceUnlockAutoIlluminate(checked)
+                    },
+                    modifier = Modifier.highlight(highlightSetting == "face_unlock_auto_illuminate"),
+                )
 
                 IconToggleItem(
                     iconRes = R.drawable.rounded_lock_24,
