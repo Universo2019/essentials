@@ -104,6 +104,12 @@ fun ActivityPickerSheet(
     val context = LocalContext.current
     val view = LocalView.current
     val canUseRoot = remember { ShellUtils.isRootEnabled(context) }
+    val appLabel =
+        remember(packageName) {
+            runCatching {
+                context.packageManager.getApplicationLabel(context.packageManager.getApplicationInfo(packageName, 0)).toString()
+            }.getOrDefault(packageName)
+        }
     val canPin =
         remember {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
@@ -142,6 +148,11 @@ fun ActivityPickerSheet(
                 Text(
                     text = stringResource(R.string.activity_picker_title),
                     style = MaterialTheme.typography.headlineSmall,
+                )
+                Text(
+                    text = appLabel,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = packageName,
@@ -304,8 +315,8 @@ private fun ActivityRow(
             if (canPin) {
                 IconButton(onClick = { icon?.let(onPin) }, enabled = icon != null) {
                     Icon(
-                        painter = painterResource(id = R.drawable.rounded_home_24),
-                        contentDescription = stringResource(R.string.action_add_to_home_screen),
+                        painter = painterResource(id = R.drawable.rounded_add_24),
+                        contentDescription = stringResource(R.string.action_create_shortcut),
                         tint = MaterialTheme.colorScheme.primary,
                     )
                 }

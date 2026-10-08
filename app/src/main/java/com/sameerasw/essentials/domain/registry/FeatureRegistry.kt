@@ -1176,20 +1176,13 @@ object FeatureRegistry {
             },
             object : Feature(
                 id = "Activity launcher",
+                contributors = listOf("jawzf"),
                 title = R.string.feat_activity_launcher_title,
                 iconRes = R.drawable.rounded_app_registration_24,
                 category = R.string.cat_interaction,
                 description = R.string.feat_activity_launcher_desc,
                 aboutDescription = R.string.about_desc_activity_launcher,
                 showToggle = false,
-                searchableSettings =
-                    listOf(
-                        SearchSetting(
-                            R.string.search_activity_launcher_title,
-                            R.string.search_activity_launcher_desc,
-                            "browse_activities",
-                        ),
-                    ),
                 parentFeatureId = "Input",
             ) {
                 override fun isEnabled(viewModel: MainViewModel) = false

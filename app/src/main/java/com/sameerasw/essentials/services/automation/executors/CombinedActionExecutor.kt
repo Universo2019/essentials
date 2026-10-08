@@ -23,6 +23,8 @@ import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import android.net.wifi.WifiManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
 import android.telephony.SubscriptionManager
@@ -1185,13 +1187,15 @@ object CombinedActionExecutor {
     ) {
         if (action.packageName.isBlank() || action.className.isBlank()) return
         val component = ComponentName(action.packageName, action.className)
+        // Single quotes keep the shell from expanding the $ in nested class names
+        val startCommand = "am start -n '${component.flattenToShortString()}'"
         if (action.requiresRoot) {
             if (ShellUtils.isRootEnabled(context)) {
-                ShellUtils.runCommand(
-                    context,
-                    "am start -n ${component.flattenToShortString()}",
-                    featureName = context.getString(action.title),
-                )
+                ShellUtils.runCommand(context, startCommand, featureName = context.getString(action.title))
+            } else {
+                Handler(Looper.getMainLooper()).post {
+                    Toast.makeText(context, R.string.activity_picker_root_required_toast, Toast.LENGTH_SHORT).show()
+                }
             }
             return
         }
@@ -1200,7 +1204,7 @@ object CombinedActionExecutor {
         } catch (e: Exception) {
             // Exported activities can still require a permission we lack
             if (ShellUtils.isRootEnabled(context)) {
-                ShellUtils.runCommand(context, "am start -n ${component.flattenToShortString()}")
+                ShellUtils.runCommand(context, startCommand)
             } else {
                 e.printStackTrace()
             }

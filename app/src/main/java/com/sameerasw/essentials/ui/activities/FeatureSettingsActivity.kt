@@ -69,6 +69,7 @@ import com.sameerasw.essentials.ui.features.consciousgate.CONSCIOUS_GATE_FEATURE
 import com.sameerasw.essentials.ui.features.security.AppLockSettingsUI
 import com.sameerasw.essentials.ui.features.system.AlwaysOnDisplaySettingsUI
 import com.sameerasw.essentials.ui.features.system.BatteryNotificationSettingsUI
+import com.sameerasw.essentials.ui.features.system.ActivityLauncherSearchBar
 import com.sameerasw.essentials.ui.features.system.ActivityLauncherSettingsUI
 import com.sameerasw.essentials.ui.features.system.ButtonRemapSettingsUI
 import com.sameerasw.essentials.ui.features.system.LockscreenShortcutsSettingsUI
@@ -265,6 +266,7 @@ class FeatureSettingsActivity : AppCompatActivity() {
                     var showPermissionSheet by remember { mutableStateOf(false) }
                     var childFeatureForPermissions by remember { mutableStateOf<String?>(null) }
                     var standbyAppsSelectedPackages by remember { mutableStateOf(setOf<String>()) }
+                    var activityLauncherQuery by remember { mutableStateOf("") }
                     var isStandbyMoveSheetVisible by remember { mutableStateOf(false) }
 
                     val isAccessibilityEnabled by viewModel.isAccessibilityEnabled
@@ -561,6 +563,7 @@ class FeatureSettingsActivity : AppCompatActivity() {
                     val isMotionBlurEnabled by viewModel.isMotionBlurEnabled
                     val scrollState = rememberScrollState()
 
+                    Box(modifier = Modifier.fillMaxSize()) {
                     Box(
                         modifier =
                             Modifier
@@ -574,6 +577,7 @@ class FeatureSettingsActivity : AppCompatActivity() {
                     ) {
                         val hasScroll =
                             featureId != "Sound mode tile" &&
+                                featureId != "Activity launcher" &&
                                 featureId != "Quick settings tiles" &&
                                 featureId != "Location reached" &&
                                 featureId != "Watch Controls"
@@ -597,7 +601,7 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                     ),
                         ) {
                             // Top padding for status bar
-                            if (featureId != "Quick settings tiles" && featureId != "Location reached") {
+                            if (featureId != "Quick settings tiles" && featureId != "Location reached" && featureId != "Activity launcher") {
                                 androidx.compose.foundation.layout.Spacer(
                                     modifier =
                                         Modifier.height(
@@ -1045,8 +1049,8 @@ class FeatureSettingsActivity : AppCompatActivity() {
 
                                     "Activity launcher" -> {
                                         ActivityLauncherSettingsUI(
-                                            modifier = Modifier.padding(top = 16.dp),
-                                            highlightSetting = highlightSetting,
+                                            query = activityLauncherQuery,
+                                            modifier = Modifier.nestedScroll(nestedScrollConnection),
                                         )
                                     }
 
@@ -1486,6 +1490,18 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                     }
                                 },
                         )
+                    }
+
+                    if (featureId == "Activity launcher") {
+                        ActivityLauncherSearchBar(
+                            query = activityLauncherQuery,
+                            onQueryChange = { activityLauncherQuery = it },
+                            modifier =
+                                Modifier
+                                    .align(Alignment.TopCenter)
+                                    .padding(start = 16.dp, end = 16.dp, top = statusBarHeight + 8.dp),
+                        )
+                    }
                     }
                 }
             }
