@@ -377,7 +377,7 @@ class MainViewModel : ViewModel() {
     val isPocketModeEnabled = mutableStateOf(false)
     val isFaceUnlockBrightnessEnabled = mutableStateOf(false)
     val faceUnlockMaxBrightness = mutableIntStateOf(100)
-    val faceUnlockAmbientThreshold = mutableIntStateOf(10)
+    val faceUnlockAmbientThreshold = mutableFloatStateOf(10f)
     val isFaceUnlockTriggerUnlock = mutableStateOf(true)
     val isFaceUnlockAutoIlluminate = mutableStateOf(false)
     val isFaceUnlockLightTint = mutableStateOf(false)
@@ -1344,7 +1344,7 @@ class MainViewModel : ViewModel() {
                         faceUnlockMaxBrightness.intValue = settingsRepository.getFaceUnlockMaxBrightness()
 
                     SettingsRepository.KEY_FACE_UNLOCK_AMBIENT_THRESHOLD ->
-                        faceUnlockAmbientThreshold.intValue = settingsRepository.getFaceUnlockAmbientThreshold()
+                        faceUnlockAmbientThreshold.floatValue = settingsRepository.getFaceUnlockAmbientThreshold()
 
                     SettingsRepository.KEY_FACE_UNLOCK_TRIGGER_UNLOCK ->
                         isFaceUnlockTriggerUnlock.value = settingsRepository.isFaceUnlockTriggerUnlockEnabled()
@@ -2756,7 +2756,7 @@ class MainViewModel : ViewModel() {
             settingsRepository.getBoolean(SettingsRepository.KEY_POCKET_MODE_ENABLED)
         isFaceUnlockBrightnessEnabled.value = settingsRepository.isFaceUnlockBrightnessEnabled()
         faceUnlockMaxBrightness.intValue = settingsRepository.getFaceUnlockMaxBrightness()
-        faceUnlockAmbientThreshold.intValue = settingsRepository.getFaceUnlockAmbientThreshold()
+        faceUnlockAmbientThreshold.floatValue = settingsRepository.getFaceUnlockAmbientThreshold()
         isFaceUnlockTriggerUnlock.value = settingsRepository.isFaceUnlockTriggerUnlockEnabled()
         isFaceUnlockAutoIlluminate.value = settingsRepository.isFaceUnlockAutoIlluminateEnabled()
         isFaceUnlockLightTint.value = settingsRepository.isFaceUnlockLightTintEnabled()
@@ -9346,9 +9346,9 @@ class MainViewModel : ViewModel() {
         isFaceUnlockBrightnessEnabled.value = enabled
     }
 
-    fun setFaceUnlockAmbientThreshold(value: Int) {
+    fun setFaceUnlockAmbientThreshold(value: Float) {
         settingsRepository.setFaceUnlockAmbientThreshold(value)
-        faceUnlockAmbientThreshold.intValue = value
+        faceUnlockAmbientThreshold.floatValue = value
     }
 
     fun setFaceUnlockMaxBrightness(value: Int) {

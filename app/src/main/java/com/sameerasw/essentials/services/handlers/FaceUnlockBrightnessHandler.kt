@@ -113,7 +113,7 @@ class FaceUnlockBrightnessHandler(
             override fun onSensorChanged(event: SensorEvent) {
                 if (!canRun()) return
                 val lux = event.values[0]
-                val threshold = settings.getFaceUnlockAmbientThreshold().toFloat()
+                val threshold = settings.getFaceUnlockAmbientThreshold()
                 val low = if (isLowLight) lux < threshold * ENOUGH_LUX_RATIO else lux < threshold
                 if (low == isLowLight) return
                 isLowLight = low

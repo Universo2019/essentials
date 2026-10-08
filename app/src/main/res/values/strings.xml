@@ -3163,6 +3163,9 @@
     <string name="feat_face_unlock_brightness_desc">Bump brightness in low light</string>
     <string name="face_unlock_illuminate">Illuminate</string>
     <string name="face_unlock_ambient_threshold_title">Ambient threshold</string>
+    <string name="face_unlock_ambient_now">Now: %1$s</string>
+    <string name="face_unlock_ambient_would_trigger">Would trigger</string>
+    <string name="face_unlock_ambient_too_bright">Too bright</string>
     <string name="face_unlock_auto_illuminate_title">Auto illuminate on wake-up</string>
     <string name="face_unlock_trigger_unlock_title">Trigger unlock</string>
     <string name="face_unlock_light_tint_title">Light tint</string>
