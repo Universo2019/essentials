@@ -388,6 +388,7 @@ object FeatureRegistry {
             },
             object : Feature(
                 id = "Screen refresh rate",
+                contributors = listOf("DDOneApps"),
                 title = R.string.feat_screen_refresh_rate_title,
                 iconRes = R.drawable.rounded_shutter_speed_24,
                 category = R.string.cat_interface,
@@ -1097,6 +1098,7 @@ object FeatureRegistry {
             },
             object : Feature(
                 id = "Hilight",
+                contributors = listOf("jawzf"),
                 title = R.string.feat_hilight_title,
                 iconRes = R.drawable.rounded_auto_awesome_24,
                 category = R.string.cat_interface,
@@ -1549,6 +1551,7 @@ object FeatureRegistry {
             },
             object : Feature(
                 id = "Button remap",
+                contributors = listOf("jawzf"),
                 title = R.string.feat_button_remap_title,
                 iconRes = R.drawable.rounded_switch_access_3_24,
                 category = R.string.cat_interaction,
@@ -1609,6 +1612,7 @@ object FeatureRegistry {
             },
             object : Feature(
                 id = "Lock screen shortcuts",
+                contributors = listOf("jawzf"),
                 title = R.string.feat_lockscreen_shortcuts_title,
                 iconRes = R.drawable.rounded_mobile_lock_portrait_24,
                 category = R.string.cat_interaction,
@@ -1873,6 +1877,7 @@ object FeatureRegistry {
             },
             object : Feature(
                 id = CONSCIOUS_GATE_FEATURE_ID,
+                contributors = listOf("thomasborgogno"),
                 title = R.string.feat_conscious_gate_title,
                 iconRes = R.drawable.rounded_pause_24,
                 category = R.string.cat_interaction,
