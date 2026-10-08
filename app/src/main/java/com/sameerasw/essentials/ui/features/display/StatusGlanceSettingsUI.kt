@@ -56,6 +56,7 @@ import com.sameerasw.essentials.ui.core.sheets.DeviceEffectsSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.DimWallpaperSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.EssentialsBottomSheet
 import com.sameerasw.essentials.ui.core.sheets.FreezeTagSettingsSheet
+import com.sameerasw.essentials.ui.core.sheets.HilightEffectSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.PermissionsBottomSheet
 import com.sameerasw.essentials.ui.core.sheets.ScreenOffSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.SingleAppSelectionSheet
@@ -111,6 +112,7 @@ fun StatusGlanceSettingsUI(
     var showSetKeyboardSheet by remember { mutableStateOf(false) }
     var showCustomSettingsSettings by remember { mutableStateOf(false) }
     var showSetVolumeSettings by remember { mutableStateOf(false) }
+    var showHilightSettings by remember { mutableStateOf(false) }
     var configAction by remember { mutableStateOf<Action?>(null) }
 
     var showPermissionSheet by remember { mutableStateOf(false) }
@@ -684,6 +686,7 @@ fun StatusGlanceSettingsUI(
                                         }
                                         is Action.Keyboard -> showSetKeyboardSheet = true
                                         is Action.SetVolume -> showSetVolumeSettings = true
+                                        is Action.Hilight -> showHilightSettings = true
                                         is Action.CustomSettings -> showCustomSettingsSettings = true
                                         else -> {}
                                     }
@@ -810,6 +813,18 @@ fun StatusGlanceSettingsUI(
             onDismiss = { showSetVolumeSettings = false },
             onSave = { newAction ->
                 showSetVolumeSettings = false
+                applyActionForGesture(activeConfigGesture, newAction)
+                configAction = null
+            },
+        )
+    }
+
+    if (showHilightSettings && configAction is Action.Hilight) {
+        HilightEffectSettingsSheet(
+            initialAction = configAction as Action.Hilight,
+            onDismiss = { showHilightSettings = false },
+            onSave = { newAction ->
+                showHilightSettings = false
                 applyActionForGesture(activeConfigGesture, newAction)
                 configAction = null
             },

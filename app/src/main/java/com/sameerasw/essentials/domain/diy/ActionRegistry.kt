@@ -11,6 +11,7 @@ package com.sameerasw.essentials.domain.diy
 
 import android.os.Build
 import com.sameerasw.essentials.R
+import com.sameerasw.essentials.utils.DeviceUtils
 
 object ActionRegistry {
     data class ActionCategory(
@@ -71,6 +72,7 @@ object ActionRegistry {
                 add(Action.TurnOnFlashlight)
                 add(Action.TurnOffFlashlight)
                 add(Action.ToggleFlashlight)
+                if (DeviceUtils.isHilightDevice()) add(Action.Hilight())
                 add(Action.TurnOnLowPower)
                 add(Action.TurnOffLowPower)
                 add(Action.SetChargingMode())

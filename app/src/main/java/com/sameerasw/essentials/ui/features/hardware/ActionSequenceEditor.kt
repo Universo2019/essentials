@@ -52,6 +52,7 @@ import com.sameerasw.essentials.ui.core.sheets.AppSelectionSheet
 import com.sameerasw.essentials.ui.core.sheets.CustomSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.DimWallpaperSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.EssentialsBottomSheet
+import com.sameerasw.essentials.ui.core.sheets.HilightEffectSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.ScreenOffSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.SingleAppSelectionSheet
 import com.sameerasw.essentials.ui.core.sheets.ChargingModeSettingsSheet
@@ -100,6 +101,7 @@ fun ActionSequenceEditor(
     var showSetKeyboardSheet by remember { mutableStateOf(false) }
     var showCustomSettingsSettings by remember { mutableStateOf(false) }
     var showSetVolumeSettings by remember { mutableStateOf(false) }
+    var showHilightSettings by remember { mutableStateOf(false) }
     var configAction by remember { mutableStateOf<Action?>(null) }
     var configIndex by remember { mutableStateOf<Int?>(null) }
     var showAddActionSheet by remember { mutableStateOf(false) }
@@ -207,6 +209,7 @@ fun ActionSequenceEditor(
             }
             is Action.Keyboard -> showSetKeyboardSheet = true
             is Action.SetVolume -> showSetVolumeSettings = true
+            is Action.Hilight -> showHilightSettings = true
             is Action.CustomSettings -> showCustomSettingsSettings = true
             else -> {}
         }
@@ -464,6 +467,18 @@ fun ActionSequenceEditor(
             onDismiss = { showSetVolumeSettings = false },
             onSave = { newAction ->
                 showSetVolumeSettings = false
+                onActionSelected(newAction)
+                configAction = null
+            },
+        )
+    }
+
+    if (showHilightSettings && configAction is Action.Hilight) {
+        HilightEffectSettingsSheet(
+            initialAction = configAction as Action.Hilight,
+            onDismiss = { showHilightSettings = false },
+            onSave = { newAction ->
+                showHilightSettings = false
                 onActionSelected(newAction)
                 configAction = null
             },

@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.widget.Toast
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -91,6 +92,7 @@ import com.sameerasw.essentials.ui.features.system.EssentialsOnDisplaySettingsUI
 import com.sameerasw.essentials.ui.features.system.FlashlightPulseSettingsUI
 import com.sameerasw.essentials.ui.features.system.FlashlightSettingsUI
 import com.sameerasw.essentials.ui.features.system.FreezeSettingsUI
+import com.sameerasw.essentials.ui.features.system.HilightSettingsUI
 import com.sameerasw.essentials.ui.features.system.KeyboardSettingsUI
 import com.sameerasw.essentials.ui.features.system.LiveWallpaperSettingsUI
 import com.sameerasw.essentials.ui.features.system.LocationReachedSettingsUI
@@ -127,6 +129,7 @@ import com.sameerasw.essentials.ui.modifiers.progressiveBlur
 import com.sameerasw.essentials.ui.modifiers.scrollMotionBlur
 import com.sameerasw.essentials.ui.theme.EssentialsTheme
 import com.sameerasw.essentials.utils.BiometricSecurityHelper
+import com.sameerasw.essentials.utils.DeviceUtils
 import com.sameerasw.essentials.utils.HapticUtil
 import com.sameerasw.essentials.viewmodels.CaffeinateViewModel
 import com.sameerasw.essentials.viewmodels.MainViewModel
@@ -359,6 +362,7 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                         !isNotificationLightingAccessibilityEnabled ||
                                         !isNotificationListenerEnabled
                                 "Flashlight pulse" -> !isNotificationListenerEnabled
+                                "Hilight" -> !isNotificationListenerEnabled || !isShizukuPermissionGranted
                                 "Notification Sync" -> !isNotificationListenerEnabled
                                 "Button remap" -> !isAccessibilityEnabled
                                 "Face unlock brightness" -> !isAccessibilityEnabled
@@ -676,6 +680,7 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                                         listOf(
                                                             "Notification lighting",
                                                             "Flashlight pulse",
+                                                            "Hilight",
                                                         ),
                                                         listOf(
                                                             "Notification snoozing",
@@ -799,6 +804,7 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                                                     !isNotificationLightingAccessibilityEnabled ||
                                                                     !isNotificationListenerEnabled
                                                             "Flashlight pulse" -> !isNotificationListenerEnabled
+                                                            "Hilight" -> !isNotificationListenerEnabled || !isShizukuPermissionGranted
                                                             "Button remap" -> !isAccessibilityEnabled
                                                             "Face unlock brightness" -> !isAccessibilityEnabled
                                                             "Lock screen shortcuts" -> !isAccessibilityEnabled
@@ -928,7 +934,13 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                                         context,
                                                     ),
                                                 showToggle = child.showToggle,
-                                                onDisabledToggleClick = { permissionAwareToggle(true) },
+                                                onDisabledToggleClick = {
+                                                    if (child.id == "Hilight" && !DeviceUtils.isHilightDevice()) {
+                                                        Toast.makeText(context, R.string.hilight_not_supported_toast, Toast.LENGTH_SHORT).show()
+                                                    } else {
+                                                        permissionAwareToggle(true)
+                                                    }
+                                                },
                                                 hasMoreSettings = child.hasMoreSettings,
                                                 isBeta = child.isBeta,
                                                 isLegacy = child.isLegacy,
@@ -990,6 +1002,14 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                     "Caffeinate" -> {
                                         CaffeinateSettingsUI(
                                             viewModel = caffeinateViewModel,
+                                            modifier = Modifier.padding(top = 16.dp),
+                                            highlightSetting = highlightSetting,
+                                        )
+                                    }
+
+                                    "Hilight" -> {
+                                        HilightSettingsUI(
+                                            viewModel = viewModel,
                                             modifier = Modifier.padding(top = 16.dp),
                                             highlightSetting = highlightSetting,
                                         )

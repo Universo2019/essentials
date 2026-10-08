@@ -26,6 +26,7 @@ import com.sameerasw.essentials.ui.activities.PixelSearchbarSettingsActivity
 import com.sameerasw.essentials.ui.activities.WatermarkActivity
 import com.sameerasw.essentials.ui.features.consciousgate.CONSCIOUS_GATE_FEATURE_ID
 import com.sameerasw.essentials.utils.DeviceUtils
+import com.sameerasw.essentials.utils.hardware.HilightLights
 import com.sameerasw.essentials.utils.ShellUtils
 import com.sameerasw.essentials.viewmodels.MainViewModel
 
@@ -1093,6 +1094,41 @@ object FeatureRegistry {
                     context: Context,
                     enabled: Boolean,
                 ) = viewModel.setNotificationLightingEnabled(enabled, context)
+            },
+            object : Feature(
+                id = "Hilight",
+                title = R.string.feat_hilight_title,
+                iconRes = R.drawable.rounded_auto_awesome_24,
+                category = R.string.cat_interface,
+                description = R.string.feat_hilight_desc,
+                permissionKeys = listOf("SHIZUKU", "NOTIFICATION_LISTENER"),
+                aboutDescription = R.string.about_desc_hilight,
+                searchableSettings =
+                    listOf(
+                        SearchSetting(
+                            R.string.search_hilight_notifications_title,
+                            R.string.search_hilight_notifications_desc,
+                            "hilight_notifications",
+                        ),
+                    ),
+                parentFeatureId = "Notifications",
+            ) {
+                override fun isEnabled(viewModel: MainViewModel) = viewModel.isHilightNotificationsEnabled.value
+
+                override fun isDeviceSupported(context: Context) = DeviceUtils.isHilightDevice()
+
+                override fun isToggleEnabled(
+                    viewModel: MainViewModel,
+                    context: Context,
+                ) = HilightLights.isModeSupported(context) &&
+                    viewModel.isShizukuPermissionGranted.value &&
+                    viewModel.isNotificationListenerEnabled.value
+
+                override fun onToggle(
+                    viewModel: MainViewModel,
+                    context: Context,
+                    enabled: Boolean,
+                ) = viewModel.setHilightNotificationsEnabled(enabled)
             },
             object : Feature(
                 id = "Flashlight pulse",

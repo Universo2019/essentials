@@ -58,6 +58,7 @@ import com.sameerasw.essentials.domain.model.AppIcon
 import com.sameerasw.essentials.domain.model.AppSelection
 import com.sameerasw.essentials.domain.model.AppStandbyInfo
 import com.sameerasw.essentials.domain.model.DnsPreset
+import com.sameerasw.essentials.domain.model.HilightEffect
 import com.sameerasw.essentials.domain.model.LockscreenShortcutSide
 import com.sameerasw.essentials.domain.model.NotificationApp
 import com.sameerasw.essentials.domain.model.NotificationLightingColorMode
@@ -133,6 +134,11 @@ class MainViewModel : ViewModel() {
     val isButtonRemapPauseOnVolumeDialog = mutableStateOf(true)
     val shizukuDetectedDevicePath = mutableStateOf<String?>(null)
     val remapActions = mutableStateMapOf<RemapSlot, List<Action>>()
+    val isHilightNotificationsEnabled = mutableStateOf(false)
+    val isHilightOnlyWhenScreenOff = mutableStateOf(true)
+    val isHilightSkipDnd = mutableStateOf(true)
+    val hilightCooldownSeconds = mutableIntStateOf(60)
+    val hilightAppEffects = mutableStateMapOf<String, HilightEffect>()
     val isLockscreenShortcutsEnabled = mutableStateOf(false)
     val lockscreenShortcutActions = mutableStateMapOf<LockscreenShortcutSide, List<Action>>()
     val lockscreenSystemShortcutsState = mutableStateOf(SystemShortcutsState.UNKNOWN)
@@ -2249,6 +2255,12 @@ class MainViewModel : ViewModel() {
             remapActions[slot] = settingsRepository.getRemapActions(slot.prefKey)
         }
 
+        isHilightNotificationsEnabled.value = settingsRepository.isHilightNotificationsEnabled()
+        isHilightOnlyWhenScreenOff.value = settingsRepository.isHilightOnlyWhenScreenOff()
+        isHilightSkipDnd.value = settingsRepository.isHilightSkipDnd()
+        hilightCooldownSeconds.intValue = settingsRepository.getHilightCooldownSeconds()
+        hilightAppEffects.clear()
+        hilightAppEffects.putAll(settingsRepository.getHilightAppEffects())
         isLockscreenShortcutsEnabled.value = settingsRepository.isLockscreenShortcutsEnabled()
         LockscreenShortcutSide.entries.forEach { side ->
             lockscreenShortcutActions[side] = settingsRepository.getRemapActions(side.prefKey)
@@ -8020,6 +8032,39 @@ class MainViewModel : ViewModel() {
         enabled: Boolean,
     ) {
         settingsRepository.updateNotificationLightingAppSelection(packageName, enabled)
+    }
+
+    fun setHilightNotificationsEnabled(enabled: Boolean) {
+        isHilightNotificationsEnabled.value = enabled
+        settingsRepository.setHilightNotificationsEnabled(enabled)
+    }
+
+    fun setHilightSkipDnd(enabled: Boolean) {
+        isHilightSkipDnd.value = enabled
+        settingsRepository.setHilightSkipDnd(enabled)
+    }
+
+    fun setHilightOnlyWhenScreenOff(enabled: Boolean) {
+        isHilightOnlyWhenScreenOff.value = enabled
+        settingsRepository.setHilightOnlyWhenScreenOff(enabled)
+    }
+
+    fun setHilightCooldownSeconds(seconds: Int) {
+        hilightCooldownSeconds.intValue = seconds
+        settingsRepository.setHilightCooldownSeconds(seconds)
+    }
+
+    fun setHilightAppEffect(
+        packageName: String,
+        effect: HilightEffect,
+    ) {
+        hilightAppEffects[packageName] = effect
+        settingsRepository.setHilightAppEffect(packageName, effect)
+    }
+
+    fun removeHilightApp(packageName: String) {
+        hilightAppEffects.remove(packageName)
+        settingsRepository.setHilightAppEffect(packageName, null)
     }
 
     /**
