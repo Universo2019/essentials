@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 sameerasw.com
+ * License: MIT License
+ *
+ * Feature Module: Domain Controllers
+ * File: HotspotController.kt
+ * Description: Starts and stops Wi-Fi tethering through the tethering service over Shizuku.
+ */
+
 package com.sameerasw.essentials.domain.controller
 
 import android.content.Context
@@ -17,19 +26,14 @@ import rikka.shizuku.SystemServiceHelper
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Proxy
 
-/**
- * Starts/stops Wi-Fi tethering through the tethering service over a Shizuku binder.
- * `cmd wifi start-softap` only brings up a bare access point without internet sharing,
- * whereas this goes through the same path as the Settings hotspot toggle.
- */
+// Same path as the Settings hotspot toggle; cmd wifi start-softap doesn't share internet
 internal object HotspotController {
     private const val TAG = "HotspotController"
     private const val CONNECTOR = "android.net.ITetheringConnector"
     private const val LISTENER = "android.net.IIntResultListener"
     private const val TETHERING_WIFI = 0
 
-    // Shizuku runs as shell or root, both of which hold TETHER_PRIVILEGED. TetheringService
-    // checks the caller package against the uid, and AppOps resolves "root" to uid 0.
+    // Shell and root both hold TETHER_PRIVILEGED, and the caller package must match the uid
     private fun callerPkg() = if (Shizuku.getUid() == 0) "root" else "com.android.shell"
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -76,7 +80,7 @@ internal object HotspotController {
         }
     }
 
-    /** An IIntResultListener whose binder reports the tethering result code (0 = success). */
+    // Reports the tethering result code, where 0 is success
     private fun resultListener(context: Context, enabled: Boolean, listenerClass: Class<*>): Any {
         val verb = if (enabled) "start" else "stop"
         val binder =

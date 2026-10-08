@@ -1012,7 +1012,7 @@ object CombinedActionExecutor {
         context: Context,
         enabled: Boolean,
     ) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && ShizukuUtils.hasPermission()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && ShellUtils.usesShizukuBinder(context) && ShizukuUtils.hasPermission()) {
             try {
                 HotspotController.setEnabled(context, enabled)
                 return
