@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.widget.Toast
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -69,6 +70,7 @@ import com.sameerasw.essentials.ui.features.security.AppLockSettingsUI
 import com.sameerasw.essentials.ui.features.system.AlwaysOnDisplaySettingsUI
 import com.sameerasw.essentials.ui.features.system.BatteryNotificationSettingsUI
 import com.sameerasw.essentials.ui.features.system.ButtonRemapSettingsUI
+import com.sameerasw.essentials.ui.features.system.LockscreenShortcutsSettingsUI
 import com.sameerasw.essentials.ui.features.system.CaffeinateSettingsUI
 import com.sameerasw.essentials.ui.features.system.CalendarSyncSettingsUI
 import com.sameerasw.essentials.ui.features.display.AodWallpaperPreviewCard
@@ -90,6 +92,7 @@ import com.sameerasw.essentials.ui.features.system.EssentialsOnDisplaySettingsUI
 import com.sameerasw.essentials.ui.features.system.FlashlightPulseSettingsUI
 import com.sameerasw.essentials.ui.features.system.FlashlightSettingsUI
 import com.sameerasw.essentials.ui.features.system.FreezeSettingsUI
+import com.sameerasw.essentials.ui.features.system.HilightSettingsUI
 import com.sameerasw.essentials.ui.features.system.KeyboardSettingsUI
 import com.sameerasw.essentials.ui.features.system.LiveWallpaperSettingsUI
 import com.sameerasw.essentials.ui.features.system.LocationReachedSettingsUI
@@ -126,6 +129,7 @@ import com.sameerasw.essentials.ui.modifiers.progressiveBlur
 import com.sameerasw.essentials.ui.modifiers.scrollMotionBlur
 import com.sameerasw.essentials.ui.theme.EssentialsTheme
 import com.sameerasw.essentials.utils.BiometricSecurityHelper
+import com.sameerasw.essentials.utils.DeviceUtils
 import com.sameerasw.essentials.utils.HapticUtil
 import com.sameerasw.essentials.viewmodels.CaffeinateViewModel
 import com.sameerasw.essentials.viewmodels.MainViewModel
@@ -358,9 +362,11 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                         !isNotificationLightingAccessibilityEnabled ||
                                         !isNotificationListenerEnabled
                                 "Flashlight pulse" -> !isNotificationListenerEnabled
+                                "Hilight" -> !isNotificationListenerEnabled || !isShizukuPermissionGranted
                                 "Notification Sync" -> !isNotificationListenerEnabled
                                 "Button remap" -> !isAccessibilityEnabled
                                 "Face unlock brightness" -> !isAccessibilityEnabled
+                                "Lock screen shortcuts" -> !isAccessibilityEnabled
                                 "Pocket mode" -> !isAccessibilityEnabled
                                 "Dynamic night light" ->
                                     (if (viewModel.isUseUsageAccess.value) !viewModel.isUsageStatsPermissionGranted.value else !isAccessibilityEnabled) ||
@@ -674,6 +680,7 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                                         listOf(
                                                             "Notification lighting",
                                                             "Flashlight pulse",
+                                                            "Hilight",
                                                         ),
                                                         listOf(
                                                             "Notification snoozing",
@@ -697,6 +704,7 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                                         listOf(
                                                             "Button remap",
                                                             "Flashlight",
+                                                            "Lock screen shortcuts",
                                                         ),
                                                         listOf(
                                                             "Link actions",
@@ -796,8 +804,10 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                                                     !isNotificationLightingAccessibilityEnabled ||
                                                                     !isNotificationListenerEnabled
                                                             "Flashlight pulse" -> !isNotificationListenerEnabled
+                                                            "Hilight" -> !isNotificationListenerEnabled || !isShizukuPermissionGranted
                                                             "Button remap" -> !isAccessibilityEnabled
                                                             "Face unlock brightness" -> !isAccessibilityEnabled
+                                                            "Lock screen shortcuts" -> !isAccessibilityEnabled
                                                             "Dynamic night light" ->
                                                                 (if (viewModel.isUseUsageAccess.value) !viewModel.isUsageStatsPermissionGranted.value else !isAccessibilityEnabled) ||
                                                                     !isWriteSecureSettingsEnabled
@@ -924,7 +934,13 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                                         context,
                                                     ),
                                                 showToggle = child.showToggle,
-                                                onDisabledToggleClick = { permissionAwareToggle(true) },
+                                                onDisabledToggleClick = {
+                                                    if (child.id == "Hilight" && !DeviceUtils.isHilightDevice()) {
+                                                        Toast.makeText(context, R.string.hilight_not_supported_toast, Toast.LENGTH_SHORT).show()
+                                                    } else {
+                                                        permissionAwareToggle(true)
+                                                    }
+                                                },
                                                 hasMoreSettings = child.hasMoreSettings,
                                                 isBeta = child.isBeta,
                                                 isLegacy = child.isLegacy,
@@ -991,6 +1007,14 @@ class FeatureSettingsActivity : AppCompatActivity() {
                                         )
                                     }
 
+                                    "Hilight" -> {
+                                        HilightSettingsUI(
+                                            viewModel = viewModel,
+                                            modifier = Modifier.padding(top = 16.dp),
+                                            highlightSetting = highlightSetting,
+                                        )
+                                    }
+
                                     "Notification lighting" -> {
                                         NotificationLightingSettingsUI(
                                             viewModel = viewModel,
@@ -1011,6 +1035,14 @@ class FeatureSettingsActivity : AppCompatActivity() {
 
                                     "Button remap" -> {
                                         ButtonRemapSettingsUI(
+                                            viewModel = viewModel,
+                                            modifier = Modifier.padding(top = 16.dp),
+                                            highlightSetting = highlightSetting,
+                                        )
+                                    }
+
+                                    "Lock screen shortcuts" -> {
+                                        LockscreenShortcutsSettingsUI(
                                             viewModel = viewModel,
                                             modifier = Modifier.padding(top = 16.dp),
                                             highlightSetting = highlightSetting,
