@@ -107,6 +107,8 @@ fun HilightSettingsUI(
     ) {
         if (!isHilightDevice) {
             StatusText(stringResource(R.string.hilight_status_no_device), isError = false)
+        } else if (!HilightLights.isModeSupported(context)) {
+            StatusText(stringResource(R.string.hilight_status_unsupported_mode), isError = true)
         } else if (isArrayAvailable == false) {
             StatusText(
                 stringResource(if (hasShizukuAccess) R.string.hilight_status_no_leds else R.string.hilight_status_no_access),
@@ -132,6 +134,13 @@ fun HilightSettingsUI(
                 title = stringResource(R.string.hilight_only_screen_off_title),
                 isChecked = viewModel.isHilightOnlyWhenScreenOff.value,
                 onCheckedChange = { viewModel.setHilightOnlyWhenScreenOff(it) },
+            )
+            IconToggleItem(
+                iconRes = R.drawable.rounded_do_not_disturb_on_24,
+                title = stringResource(R.string.flashlight_pulse_disable_on_dnd_title),
+                isChecked = viewModel.isHilightSkipDnd.value,
+                onCheckedChange = { viewModel.setHilightSkipDnd(it) },
+                modifier = Modifier.highlight(highlightSetting == "hilight_skip_dnd"),
             )
             ConfigSliderItem(
                 title = stringResource(R.string.hilight_cooldown_title),

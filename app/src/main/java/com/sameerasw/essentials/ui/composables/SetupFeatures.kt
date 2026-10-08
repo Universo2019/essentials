@@ -15,7 +15,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -1494,8 +1493,6 @@ fun SetupFeatures(
                                     onDisabledToggleClick = {
                                         if (feature.id == "Screen locked security") {
                                             feature.onClick(context, viewModel)
-                                        } else if (feature.id == "Hilight" && !DeviceUtils.isHilightDevice()) {
-                                            Toast.makeText(context, R.string.hilight_not_supported_toast, Toast.LENGTH_SHORT).show()
                                         } else {
                                             currentFeature = feature.title
                                             showSheet = true

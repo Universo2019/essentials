@@ -13,6 +13,10 @@ import android.hardware.lights.Light
 import android.hardware.lights.LightState
 import android.os.Binder
 import android.os.IBinder
+import com.sameerasw.essentials.EssentialsApp
+import android.content.Context
+import com.sameerasw.essentials.utils.PrivilegedMode
+import com.sameerasw.essentials.utils.ShellUtils
 import com.sameerasw.essentials.utils.ShizukuUtils
 import rikka.shizuku.ShizukuBinderWrapper
 import rikka.shizuku.SystemServiceHelper
@@ -40,9 +44,15 @@ object HilightLights {
 
     @Volatile private var cachedArray: LedArray? = null
 
+    @Volatile private var cachedService: Service? = null
+
+    // Root can't hand out the lights binder, only Shizuku and Porter (through its Shizuku bridge) can
+    fun isModeSupported(context: Context): Boolean =
+        ShellUtils.resolveMode(context).let { it == PrivilegedMode.SHIZUKU || it == PrivilegedMode.PORTER }
+
     fun isAccessGranted(): Boolean =
         try {
-            ShizukuUtils.isShizukuAvailable() && ShizukuUtils.hasPermission()
+            isModeSupported(EssentialsApp.context) && ShizukuUtils.isShizukuAvailable() && ShizukuUtils.hasPermission()
         } catch (_: Exception) {
             false
         }
@@ -73,6 +83,7 @@ object HilightLights {
             service.openSession.invoke(service.instance, token, priority)
             token
         } catch (_: Exception) {
+            cachedService = null
             null
         }
     }
@@ -88,6 +99,7 @@ object HilightLights {
             service.setLightStates.invoke(service.instance, token, ids, states)
             true
         } catch (_: Exception) {
+            cachedService = null
             false
         }
     }
@@ -97,10 +109,13 @@ object HilightLights {
         try {
             service.closeSession.invoke(service.instance, token)
         } catch (_: Exception) {
+            cachedService = null
         }
     }
 
+    // Cached until a call fails, since the lookup is reflection plus a binder round trip per frame otherwise
     private fun service(): Service? {
+        cachedService?.let { return it }
         if (!isAccessGranted()) return null
         return try {
             val binder = SystemServiceHelper.getSystemService("lights") ?: return null
@@ -122,7 +137,7 @@ object HilightLights {
                         IntArray::class.java,
                         Array<LightState>::class.java,
                     ),
-            )
+            ).also { cachedService = it }
         } catch (_: Exception) {
             null
         }

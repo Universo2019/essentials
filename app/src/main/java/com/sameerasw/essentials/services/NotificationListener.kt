@@ -12,6 +12,7 @@ package com.sameerasw.essentials.services
 import android.graphics.drawable.Icon
 import android.content.pm.LauncherApps
 import com.sameerasw.essentials.domain.controller.HilightController
+import com.sameerasw.essentials.utils.PriorityModeUtil
 import com.sameerasw.essentials.utils.DeviceUtils
 import com.sameerasw.essentials.utils.notification.NotificationRepostFilter
 import com.sameerasw.essentials.utils.chronometer.ChronometerRepository
@@ -57,6 +58,7 @@ import com.sameerasw.essentials.utils.PermissionUtils
 import com.sameerasw.essentials.utils.overlay.fromPrefs
 import com.sameerasw.essentials.utils.overlay.writeTo
 import kotlinx.coroutines.launch
+import java.util.concurrent.ConcurrentHashMap
 import java.io.File
 import java.io.FileOutputStream
 
@@ -1329,14 +1331,15 @@ class NotificationListener : NotificationListenerService() {
         val ranking = Ranking()
         if (currentRanking.getRanking(sbn.key, ranking) && ranking.importance <= NotificationManager.IMPORTANCE_LOW) return
         if (settings.isHilightOnlyWhenScreenOff() && getSystemService(PowerManager::class.java)?.isInteractive == true) return
+        if (settings.isHilightSkipDnd() && PriorityModeUtil.isActive(applicationContext)) return
         val effect = settings.getHilightEffectForApp(sbn.packageName) ?: return
         val now = SystemClock.elapsedRealtime()
         val last = lastHilightTime[sbn.packageName]
         if (last != null && now - last < settings.getHilightCooldownSeconds() * 1000L) return
-        if (HilightController.play(effect)) lastHilightTime[sbn.packageName] = now
+        HilightController.play(effect) { lastHilightTime[sbn.packageName] = SystemClock.elapsedRealtime() }
     }
 
-    private val lastHilightTime = mutableMapOf<String, Long>()
+    private val lastHilightTime = ConcurrentHashMap<String, Long>()
 
     private fun handleCallVibrations(sbn: StatusBarNotification) {
         try {

@@ -136,6 +136,7 @@ class MainViewModel : ViewModel() {
     val remapActions = mutableStateMapOf<RemapSlot, List<Action>>()
     val isHilightNotificationsEnabled = mutableStateOf(false)
     val isHilightOnlyWhenScreenOff = mutableStateOf(true)
+    val isHilightSkipDnd = mutableStateOf(true)
     val hilightCooldownSeconds = mutableIntStateOf(60)
     val hilightAppEffects = mutableStateMapOf<String, HilightEffect>()
     val isLockscreenShortcutsEnabled = mutableStateOf(false)
@@ -2256,6 +2257,7 @@ class MainViewModel : ViewModel() {
 
         isHilightNotificationsEnabled.value = settingsRepository.isHilightNotificationsEnabled()
         isHilightOnlyWhenScreenOff.value = settingsRepository.isHilightOnlyWhenScreenOff()
+        isHilightSkipDnd.value = settingsRepository.isHilightSkipDnd()
         hilightCooldownSeconds.intValue = settingsRepository.getHilightCooldownSeconds()
         hilightAppEffects.clear()
         hilightAppEffects.putAll(settingsRepository.getHilightAppEffects())
@@ -8035,6 +8037,11 @@ class MainViewModel : ViewModel() {
     fun setHilightNotificationsEnabled(enabled: Boolean) {
         isHilightNotificationsEnabled.value = enabled
         settingsRepository.setHilightNotificationsEnabled(enabled)
+    }
+
+    fun setHilightSkipDnd(enabled: Boolean) {
+        isHilightSkipDnd.value = enabled
+        settingsRepository.setHilightSkipDnd(enabled)
     }
 
     fun setHilightOnlyWhenScreenOff(enabled: Boolean) {

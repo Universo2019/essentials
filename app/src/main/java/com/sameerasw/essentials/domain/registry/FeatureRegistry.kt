@@ -26,6 +26,7 @@ import com.sameerasw.essentials.ui.activities.PixelSearchbarSettingsActivity
 import com.sameerasw.essentials.ui.activities.WatermarkActivity
 import com.sameerasw.essentials.ui.features.consciousgate.CONSCIOUS_GATE_FEATURE_ID
 import com.sameerasw.essentials.utils.DeviceUtils
+import com.sameerasw.essentials.utils.hardware.HilightLights
 import com.sameerasw.essentials.utils.ShellUtils
 import com.sameerasw.essentials.viewmodels.MainViewModel
 
@@ -1114,11 +1115,12 @@ object FeatureRegistry {
             ) {
                 override fun isEnabled(viewModel: MainViewModel) = viewModel.isHilightNotificationsEnabled.value
 
-                // Disabled rather than marked unsupported, so the list shows no unsupported badge
+                override fun isDeviceSupported(context: Context) = DeviceUtils.isHilightDevice()
+
                 override fun isToggleEnabled(
                     viewModel: MainViewModel,
                     context: Context,
-                ) = DeviceUtils.isHilightDevice() &&
+                ) = HilightLights.isModeSupported(context) &&
                     viewModel.isShizukuPermissionGranted.value &&
                     viewModel.isNotificationListenerEnabled.value
 

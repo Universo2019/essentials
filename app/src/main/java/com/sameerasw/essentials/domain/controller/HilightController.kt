@@ -37,7 +37,10 @@ object HilightController {
     fun isAvailable(): Boolean = HilightLights.array() != null
 
     @Synchronized
-    fun play(effect: HilightEffect): Boolean {
+    fun play(
+        effect: HilightEffect,
+        onStarted: (() -> Unit)? = null,
+    ): Boolean {
         if (!HilightLights.isAccessGranted()) return false
         val previous = job
         job =
@@ -46,7 +49,7 @@ object HilightController {
                     it.cancel()
                     it.join()
                 }
-                render(effect)
+                render(effect, onStarted)
             }
         return true
     }
@@ -56,12 +59,16 @@ object HilightController {
         job?.cancel()
     }
 
-    private suspend fun render(effect: HilightEffect) {
+    private suspend fun render(
+        effect: HilightEffect,
+        onStarted: (() -> Unit)?,
+    ) {
         val leds = HilightLights.array() ?: return
         val frameMs = leds.minUpdatePeriodMs.coerceIn(MIN_FRAME_MS, MAX_FRAME_MS)
         val durationMs = effect.durationMs.coerceIn(HilightEffect.MIN_DURATION_MS, HilightEffect.MAX_DURATION_MS)
         // The session is held only while lit, since an open session hides Pixel's own Hilight effects
         val token = HilightLights.openSession() ?: return
+        onStarted?.invoke()
         try {
             val start = SystemClock.elapsedRealtime()
             var last: IntArray? = null

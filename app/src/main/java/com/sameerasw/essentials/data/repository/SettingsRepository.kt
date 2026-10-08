@@ -179,6 +179,7 @@ class SettingsRepository(
         const val KEY_HILIGHT_APP_EFFECTS = "hilight_app_effects"
         const val KEY_HILIGHT_ONLY_SCREEN_OFF = "hilight_only_screen_off"
         const val KEY_HILIGHT_COOLDOWN_SECONDS = "hilight_cooldown_seconds"
+        const val KEY_HILIGHT_SKIP_DND = "hilight_skip_dnd"
         const val KEY_EDGE_LIGHTING_ONLY_SCREEN_OFF = "edge_lighting_only_screen_off"
         const val KEY_EDGE_LIGHTING_AMBIENT_DISPLAY = "edge_lighting_ambient_display"
         const val KEY_EDGE_LIGHTING_AMBIENT_SHOW_LOCK_SCREEN =
@@ -1287,6 +1288,10 @@ class SettingsRepository(
     fun isHilightOnlyWhenScreenOff(): Boolean = getBoolean(KEY_HILIGHT_ONLY_SCREEN_OFF, true)
 
     fun setHilightOnlyWhenScreenOff(enabled: Boolean) = putBoolean(KEY_HILIGHT_ONLY_SCREEN_OFF, enabled)
+
+    fun isHilightSkipDnd(): Boolean = getBoolean(KEY_HILIGHT_SKIP_DND, true)
+
+    fun setHilightSkipDnd(enabled: Boolean) = putBoolean(KEY_HILIGHT_SKIP_DND, enabled)
 
     fun getHilightCooldownSeconds(): Int = getInt(KEY_HILIGHT_COOLDOWN_SECONDS, 60)
 
