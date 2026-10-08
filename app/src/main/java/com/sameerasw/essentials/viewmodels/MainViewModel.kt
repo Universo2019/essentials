@@ -377,7 +377,9 @@ class MainViewModel : ViewModel() {
     val isPocketModeEnabled = mutableStateOf(false)
     val isFaceUnlockBrightnessEnabled = mutableStateOf(false)
     val faceUnlockMaxBrightness = mutableIntStateOf(100)
+    val faceUnlockAmbientThreshold = mutableFloatStateOf(10f)
     val isFaceUnlockTriggerUnlock = mutableStateOf(true)
+    val isFaceUnlockAutoIlluminate = mutableStateOf(false)
     val isFaceUnlockLightTint = mutableStateOf(false)
     val isPocketModeUseLightSensor = mutableStateOf(false)
     val pocketModeTriggerDelay = mutableFloatStateOf(3f) // seconds
@@ -456,6 +458,7 @@ class MainViewModel : ViewModel() {
 
     val isScreenLockedSecurityEnabled = mutableStateOf(false)
     val isDisableNotificationInteractions = mutableStateOf(false)
+    val isScreenLockedDisableOnExtendedUnlock = mutableStateOf(false)
     val isDeviceAdminEnabled = mutableStateOf(false)
     val isDeveloperModeEnabled = mutableStateOf(false)
     val isNotificationPolicyAccessGranted = mutableStateOf(false)
@@ -1014,6 +1017,10 @@ class MainViewModel : ViewModel() {
                         isScreenLockedSecurityEnabled.value =
                             settingsRepository.getBoolean(key)
 
+                    SettingsRepository.KEY_SCREEN_LOCKED_DISABLE_ON_EXTENDED_UNLOCK ->
+                        isScreenLockedDisableOnExtendedUnlock.value =
+                            settingsRepository.getBoolean(key)
+
                     SettingsRepository.KEY_MAPS_POWER_SAVING_ENABLED -> {
                         isMapsPowerSavingEnabled.value = settingsRepository.getBoolean(key)
                         MapsState.isEnabled = isMapsPowerSavingEnabled.value
@@ -1341,8 +1348,14 @@ class MainViewModel : ViewModel() {
                     SettingsRepository.KEY_FACE_UNLOCK_MAX_BRIGHTNESS ->
                         faceUnlockMaxBrightness.intValue = settingsRepository.getFaceUnlockMaxBrightness()
 
+                    SettingsRepository.KEY_FACE_UNLOCK_AMBIENT_THRESHOLD ->
+                        faceUnlockAmbientThreshold.floatValue = settingsRepository.getFaceUnlockAmbientThreshold()
+
                     SettingsRepository.KEY_FACE_UNLOCK_TRIGGER_UNLOCK ->
                         isFaceUnlockTriggerUnlock.value = settingsRepository.isFaceUnlockTriggerUnlockEnabled()
+
+                    SettingsRepository.KEY_FACE_UNLOCK_AUTO_ILLUMINATE ->
+                        isFaceUnlockAutoIlluminate.value = settingsRepository.isFaceUnlockAutoIlluminateEnabled()
 
                     SettingsRepository.KEY_FACE_UNLOCK_LIGHT_TINT ->
                         isFaceUnlockLightTint.value = settingsRepository.isFaceUnlockLightTintEnabled()
@@ -2589,6 +2602,8 @@ class MainViewModel : ViewModel() {
                 SettingsRepository.KEY_SCREEN_LOCKED_DISABLE_NOTIFICATION_INTERACTIONS,
                 false,
             )
+        isScreenLockedDisableOnExtendedUnlock.value =
+            settingsRepository.getBoolean(SettingsRepository.KEY_SCREEN_LOCKED_DISABLE_ON_EXTENDED_UNLOCK, false)
         isDeviceAdminEnabled.value = isDeviceAdminActive(context)
 
         isAutoUpdateEnabled.value =
@@ -2748,7 +2763,9 @@ class MainViewModel : ViewModel() {
             settingsRepository.getBoolean(SettingsRepository.KEY_POCKET_MODE_ENABLED)
         isFaceUnlockBrightnessEnabled.value = settingsRepository.isFaceUnlockBrightnessEnabled()
         faceUnlockMaxBrightness.intValue = settingsRepository.getFaceUnlockMaxBrightness()
+        faceUnlockAmbientThreshold.floatValue = settingsRepository.getFaceUnlockAmbientThreshold()
         isFaceUnlockTriggerUnlock.value = settingsRepository.isFaceUnlockTriggerUnlockEnabled()
+        isFaceUnlockAutoIlluminate.value = settingsRepository.isFaceUnlockAutoIlluminateEnabled()
         isFaceUnlockLightTint.value = settingsRepository.isFaceUnlockLightTintEnabled()
         isPocketModeUseLightSensor.value =
             settingsRepository.getBoolean(SettingsRepository.KEY_POCKET_MODE_USE_LIGHT_SENSOR)
@@ -8831,6 +8848,11 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    fun setScreenLockedDisableOnExtendedUnlock(enabled: Boolean) {
+        isScreenLockedDisableOnExtendedUnlock.value = enabled
+        settingsRepository.putBoolean(SettingsRepository.KEY_SCREEN_LOCKED_DISABLE_ON_EXTENDED_UNLOCK, enabled)
+    }
+
     fun setDisableNotificationInteractions(
         enabled: Boolean,
         context: Context,
@@ -9336,9 +9358,19 @@ class MainViewModel : ViewModel() {
         isFaceUnlockBrightnessEnabled.value = enabled
     }
 
+    fun setFaceUnlockAmbientThreshold(value: Float) {
+        settingsRepository.setFaceUnlockAmbientThreshold(value)
+        faceUnlockAmbientThreshold.floatValue = value
+    }
+
     fun setFaceUnlockMaxBrightness(value: Int) {
         settingsRepository.setFaceUnlockMaxBrightness(value)
         faceUnlockMaxBrightness.intValue = value
+    }
+
+    fun setFaceUnlockAutoIlluminate(enabled: Boolean) {
+        settingsRepository.setFaceUnlockAutoIlluminateEnabled(enabled)
+        isFaceUnlockAutoIlluminate.value = enabled
     }
 
     fun setFaceUnlockTriggerUnlock(enabled: Boolean) {

@@ -2636,6 +2636,16 @@ object FeatureRegistry {
                             "face_unlock_max_brightness",
                         ),
                         SearchSetting(
+                            R.string.face_unlock_ambient_threshold_title,
+                            R.string.feat_face_unlock_brightness_title,
+                            "face_unlock_ambient_threshold",
+                        ),
+                        SearchSetting(
+                            R.string.face_unlock_auto_illuminate_title,
+                            R.string.feat_face_unlock_brightness_title,
+                            "face_unlock_auto_illuminate",
+                        ),
+                        SearchSetting(
                             R.string.face_unlock_trigger_unlock_title,
                             R.string.feat_face_unlock_brightness_title,
                             "face_unlock_trigger_unlock",

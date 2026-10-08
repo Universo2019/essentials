@@ -268,6 +268,7 @@ class SettingsRepository(
             "flashlight_overheat_prevention_enabled"
 
         const val KEY_SCREEN_LOCKED_SECURITY_ENABLED = "screen_locked_security_enabled"
+        const val KEY_SCREEN_LOCKED_DISABLE_ON_EXTENDED_UNLOCK = "screen_locked_disable_on_extended_unlock"
         const val KEY_SCREEN_LOCKED_DISABLE_NOTIFICATION_INTERACTIONS =
             "screen_locked_disable_notification_interactions"
         const val KEY_HIDE_SYSTEM_ICONS = "hide_system_icons"
@@ -725,6 +726,8 @@ class SettingsRepository(
         const val KEY_FACE_UNLOCK_BRIGHTNESS_ENABLED = "face_unlock_brightness_enabled"
         const val KEY_FACE_UNLOCK_MAX_BRIGHTNESS = "face_unlock_max_brightness"
         const val KEY_FACE_UNLOCK_TRIGGER_UNLOCK = "face_unlock_trigger_unlock"
+        const val KEY_FACE_UNLOCK_AUTO_ILLUMINATE = "face_unlock_auto_illuminate"
+        const val KEY_FACE_UNLOCK_AMBIENT_THRESHOLD = "face_unlock_ambient_threshold_lux"
         const val KEY_FACE_UNLOCK_LIGHT_TINT = "face_unlock_light_tint"
         const val KEY_POCKET_MODE_USE_LIGHT_SENSOR = "pocket_mode_use_light_sensor"
         const val KEY_POCKET_MODE_EXCLUDED_APPS = "pocket_mode_excluded_apps"
@@ -4107,7 +4110,11 @@ class SettingsRepository(
 
     fun getFaceUnlockMaxBrightness(): Int = getInt(KEY_FACE_UNLOCK_MAX_BRIGHTNESS, 100)
     fun setFaceUnlockMaxBrightness(value: Int) = putInt(KEY_FACE_UNLOCK_MAX_BRIGHTNESS, value)
+    fun getFaceUnlockAmbientThreshold(): Float = getFloat(KEY_FACE_UNLOCK_AMBIENT_THRESHOLD, 10f)
+    fun setFaceUnlockAmbientThreshold(value: Float) = putFloat(KEY_FACE_UNLOCK_AMBIENT_THRESHOLD, value)
 
+    fun isFaceUnlockAutoIlluminateEnabled(): Boolean = getBoolean(KEY_FACE_UNLOCK_AUTO_ILLUMINATE, false)
+    fun setFaceUnlockAutoIlluminateEnabled(enabled: Boolean) = putBoolean(KEY_FACE_UNLOCK_AUTO_ILLUMINATE, enabled)
     fun isFaceUnlockTriggerUnlockEnabled(): Boolean = getBoolean(KEY_FACE_UNLOCK_TRIGGER_UNLOCK, true)
     fun setFaceUnlockTriggerUnlockEnabled(enabled: Boolean) = putBoolean(KEY_FACE_UNLOCK_TRIGGER_UNLOCK, enabled)
 
