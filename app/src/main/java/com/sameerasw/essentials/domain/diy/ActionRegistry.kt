@@ -56,6 +56,7 @@ object ActionRegistry {
         val appsActions =
             listOf(
                 Action.OpenApp(),
+                Action.OpenActivity(),
                 Action.AIAssistant,
                 Action.FreezeApps(),
                 Action.UnfreezeApps(),

@@ -59,6 +59,7 @@ import com.sameerasw.essentials.ui.core.sheets.FreezeTagSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.HilightEffectSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.PermissionsBottomSheet
 import com.sameerasw.essentials.ui.core.sheets.ScreenOffSettingsSheet
+import com.sameerasw.essentials.ui.core.sheets.OpenActivityPicker
 import com.sameerasw.essentials.ui.core.sheets.SingleAppSelectionSheet
 import com.sameerasw.essentials.ui.core.sheets.SometimesEssentialsSettingsSheet
 import com.sameerasw.essentials.ui.core.sheets.SoundModeSettingsSheet
@@ -107,6 +108,7 @@ fun StatusGlanceSettingsUI(
     var showSometimesEssentialsSettings by remember { mutableStateOf(false) }
     var showFreezeTagSettings by remember { mutableStateOf(false) }
     var showOpenAppSettings by remember { mutableStateOf(false) }
+    var showOpenActivitySettings by remember { mutableStateOf(false) }
     var showFreezeAppsSettings by remember { mutableStateOf(false) }
     var temporarySelectedAppsForAction by remember { mutableStateOf<List<String>>(emptyList()) }
     var showSetKeyboardSheet by remember { mutableStateOf(false) }
@@ -676,6 +678,7 @@ fun StatusGlanceSettingsUI(
                                         is Action.SometimesEssentials -> showSometimesEssentialsSettings = true
                                         is Action.FreezeTag -> showFreezeTagSettings = true
                                         is Action.OpenApp -> showOpenAppSettings = true
+                                        is Action.OpenActivity -> showOpenActivitySettings = true
                                         is Action.FreezeApps -> {
                                             temporarySelectedAppsForAction = resolvedAction.packageNames
                                             showFreezeAppsSettings = true
@@ -865,6 +868,16 @@ fun StatusGlanceSettingsUI(
             onDismissRequest = { showOpenAppSettings = false },
             onAppSelected = { app ->
                 val newAction = Action.OpenApp(packageName = app.packageName)
+                applyActionForGesture(activeConfigGesture, newAction)
+                configAction = null
+            },
+        )
+    }
+
+    if (showOpenActivitySettings) {
+        OpenActivityPicker(
+            onDismiss = { showOpenActivitySettings = false },
+            onActivitySelected = { newAction ->
                 applyActionForGesture(activeConfigGesture, newAction)
                 configAction = null
             },

@@ -402,6 +402,21 @@ sealed interface Action {
     }
 
     @Keep
+    data class OpenActivity(
+        @SerializedName("packageName") val packageName: String = "",
+        @SerializedName("className") val className: String = "",
+        @SerializedName("label") val label: String = "",
+        @SerializedName("requiresRoot") val requiresRoot: Boolean = false,
+    ) : Action {
+        override val title: Int get() = R.string.diy_action_open_activity
+        override val icon: Int get() = R.drawable.rounded_app_registration_24
+        override val isConfigurable: Boolean get() = true
+
+        // Shizuku's shell user is refused for other apps' non-exported activities, root is not
+        override val permissions: List<String> get() = if (requiresRoot) listOf("ROOT") else emptyList()
+    }
+
+    @Keep
     data object TurnOnHotspot : Action {
         override val title: Int = R.string.diy_action_hotspot_on
         override val icon: Int = R.drawable.rounded_wifi_tethering_24
